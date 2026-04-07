@@ -3,6 +3,7 @@ import { supabase } from "./lib/supabaseClient";
 
 function App() {
   const [user, setUser] = useState<any>(null);
+  const role = user?.user_metadata?.role;
 
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
@@ -16,14 +17,18 @@ function App() {
 
   const [denuncias, setDenuncias] = useState<any[]>([]);
 
-  // 🔐 Cadastro
+  //  Cadastro
   const handleSignup = async () => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { nome },
-      },
+        data: {
+          nome: nome,
+          role: "user",
+        },
+
+      }
     });
 
     alert(error ? error.message : "Conta criada!");
@@ -66,6 +71,7 @@ function App() {
         user_id: user.id,
       },
     ]);
+    
 
     if (!error) {
       alert("Denúncia criada!");
@@ -73,21 +79,35 @@ function App() {
       setTitulo("");
       setDescricao("");
       setEndereco("");
-      carregarDenuncias(); // 🔥 atualiza lista
+      carregarDenuncias(); //  atualiza lista
     } else {
       alert(error.message);
     }
   };
+  const atualizarStatus = async (id: string) => {
+      const { error } = await supabase
+        .from("denuncias")
+        .update({ status: "resolvido" })
+        .eq("id", id);
+
+      if (!error) {
+        carregarDenuncias();
+      }
+    };
 
   //  LISTAR DENÚNCIAS
   const carregarDenuncias = async () => {
     if (!user) return;
 
-    const { data, error } = await supabase
-      .from("denuncias")
-      .select("*")
-      .eq("user_id", user.id) // FILTRO AQUI
-      .order("created_at", { ascending: false });
+    let query = supabase.from("denuncias").select("*");
+
+    if (user.user_metadata.role === "user") {
+      query = query.eq("user_id", user.id);
+    }
+
+    const { data, error } = await query.order("created_at", {
+      ascending: false,
+    });
 
     if (!error) setDenuncias(data || []);
   };
@@ -138,9 +158,11 @@ function App() {
             Sair
           </button>
 
-          <button onClick={() => setMostrarForm(true)}>
-            Nova denúncia 🚨
-          </button>
+          {role === "user" && (
+            <button onClick={() => setMostrarForm(true)}>
+              Nova denúncia 🚨
+            </button>
+          )}
 
           {/* FORM */}
           {mostrarForm && (
@@ -186,11 +208,20 @@ function App() {
                   padding: 10,
                   marginBottom: 10,
                   borderRadius: 5,
+                  backgroundColor: d.status === "aberto" ? "#ffe5e5" : "#e5ffe5"
                 }}
               >
                 <strong>{d.titulo}</strong>
                 <p>{d.descricao}</p>
                 <small>{d.endereco}</small>
+
+                <p>Status: {d.status}</p>
+
+                {role === "admin" && d.status !== "resolvido" && (
+                  <button onClick={() => atualizarStatus(d.id)}>
+                    Marcar como resolvido
+                  </button>
+                )}
               </div>
             ))}
           </div>
