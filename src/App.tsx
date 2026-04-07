@@ -36,10 +36,17 @@ function App() {
       password,
     });
 
+
     alert(error ? error.message : "Logado!");
     getUser();
     carregarDenuncias();
+
   };
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
+
 
   //  Usuário
   const getUser = async () => {
@@ -74,9 +81,12 @@ function App() {
 
   //  LISTAR DENÚNCIAS
   const carregarDenuncias = async () => {
+    if (!user) return;
+
     const { data, error } = await supabase
       .from("denuncias")
       .select("*")
+      .eq("user_id", user.id) // FILTRO AQUI
       .order("created_at", { ascending: false });
 
     if (!error) setDenuncias(data || []);
@@ -84,8 +94,13 @@ function App() {
 
   useEffect(() => {
     getUser();
-    carregarDenuncias();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      carregarDenuncias();
+    }
+  }, [user]);
 
   return (
     <div style={{
@@ -119,6 +134,9 @@ function App() {
       ) : (
         <>
           <h2>Bem-vindo, {user?.user_metadata?.nome} 👋</h2>
+          <button onClick={handleLogout}>
+            Sair
+          </button>
 
           <button onClick={() => setMostrarForm(true)}>
             Nova denúncia 🚨
