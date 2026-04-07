@@ -3,105 +3,86 @@ import { supabase } from "./lib/supabaseClient";
 
 function App() {
   const [user, setUser] = useState<any>(null);
-  const role = user?.user_metadata?.role;
 
-  const [nome, setNome] = useState("");
+  const [modo, setModo] = useState<"login" | "cadastro">("login");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [mostrarForm, setMostrarForm] = useState(false);
-
-  const [titulo, setTitulo] = useState("");
-  const [descricao, setDescricao] = useState("");
-  const [endereco, setEndereco] = useState("");
-
   const [denuncias, setDenuncias] = useState<any[]>([]);
+  const [mostrarTodos, setMostrarTodos] = useState(false);
 
-  //  Cadastro
+  const role = user?.user_metadata?.role;
+
+  // 🔎 validação simples de email
+  const validarEmail = (email: string) => {
+    return email.includes("@") && email.includes(".");
+  };
+
+  // 🔐 Cadastro
   const handleSignup = async () => {
+    if (!validarEmail(email)) {
+      alert("Email inválido");
+      return;
+    }
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
-          nome: nome,
           role: "user",
         },
-
-      }
+      },
     });
 
     alert(error ? error.message : "Conta criada!");
   };
 
-  //  Login
+  // 🔐 Login
   const handleLogin = async () => {
+    if (!validarEmail(email)) {
+      alert("Email inválido");
+      return;
+    }
+
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-
-    alert(error ? error.message : "Logado!");
-    getUser();
-    carregarDenuncias();
-
+    if (error) {
+      if (error.message.includes("Invalid login credentials")) {
+        alert("Usuário não cadastrado ou senha incorreta");
+      } else {
+        alert(error.message);
+      }
+    } else {
+      alert("Logado!");
+      getUser();
+    }
   };
+
+  // 🚪 Logout
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    setDenuncias([]);
   };
 
-
-  //  Usuário
+  // 👤 Usuário
   const getUser = async () => {
     const { data } = await supabase.auth.getUser();
     setUser(data.user);
   };
 
-  //  Criar denúncia
-  const criarDenuncia = async () => {
-    if (!user) return;
-
-    const { error } = await supabase.from("denuncias").insert([
-      {
-        titulo,
-        descricao,
-        endereco,
-        user_id: user.id,
-      },
-    ]);
-    
-
-    if (!error) {
-      alert("Denúncia criada!");
-      setMostrarForm(false);
-      setTitulo("");
-      setDescricao("");
-      setEndereco("");
-      carregarDenuncias(); //  atualiza lista
-    } else {
-      alert(error.message);
-    }
-  };
-  const atualizarStatus = async (id: string) => {
-      const { error } = await supabase
-        .from("denuncias")
-        .update({ status: "resolvido" })
-        .eq("id", id);
-
-      if (!error) {
-        carregarDenuncias();
-      }
-    };
-
-  //  LISTAR DENÚNCIAS
+  // 📋 Denúncias
   const carregarDenuncias = async () => {
     if (!user) return;
 
     let query = supabase.from("denuncias").select("*");
 
-    if (user.user_metadata.role === "user") {
+    if (role === "user") {
       query = query.eq("user_id", user.id);
     }
 
@@ -122,85 +103,87 @@ function App() {
     }
   }, [user]);
 
+  const denunciasExibidas = mostrarTodos
+    ? denuncias
+    : denuncias.slice(0, 1);
+
   return (
-    <div style={{
-      maxWidth: 600,
-      margin: "0 auto",
-      padding: 20,
-      fontFamily: "Arial"
-    }}>
+    <div
+      style={{
+        maxWidth: 600,
+        margin: "0 auto",
+        padding: 20,
+        fontFamily: "Arial",
+      }}
+    >
       <h1>SOS Bichos 🐾</h1>
 
       {!user ? (
         <>
-          <h2>Cadastro / Login</h2>
-
-          <input placeholder="Nome" onChange={(e) => setNome(e.target.value)} />
-          <br />
-
-          <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
-          <br />
-
-          <input
-            type="password"
-            placeholder="Senha"
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <br /><br />
-
-          <button onClick={handleSignup}>Cadastrar</button>
-          <button onClick={handleLogin}>Login</button>
-        </>
-      ) : (
-        <>
-          <h2>Bem-vindo, {user?.user_metadata?.nome} 👋</h2>
-          <button onClick={handleLogout}>
-            Sair
-          </button>
-
-          {role === "user" && (
-            <button onClick={() => setMostrarForm(true)}>
-              Nova denúncia 🚨
-            </button>
-          )}
-
-          {/* FORM */}
-          {mostrarForm && (
-            <div style={{ marginTop: 20 }}>
-              <h3>Criar denúncia</h3>
+          {modo === "login" ? (
+            <>
+              <h2>Login</h2>
 
               <input
-                placeholder="Título"
-                value={titulo}
-                onChange={(e) => setTitulo(e.target.value)}
+                placeholder="Email"
+                onChange={(e) => setEmail(e.target.value)}
               />
               <br />
 
               <input
-                placeholder="Descrição"
-                value={descricao}
-                onChange={(e) => setDescricao(e.target.value)}
-              />
-              <br />
-
-              <input
-                placeholder="Endereço"
-                value={endereco}
-                onChange={(e) => setEndereco(e.target.value)}
+                type="password"
+                placeholder="Senha"
+                onChange={(e) => setPassword(e.target.value)}
               />
               <br /><br />
 
-              <button onClick={criarDenuncia}>Salvar</button>
-            </div>
+              <button onClick={handleLogin}>Entrar</button>
+
+              <p>
+                Não tem conta?{" "}
+                <button onClick={() => setModo("cadastro")}>
+                  Cadastrar
+                </button>
+              </p>
+            </>
+          ) : (
+            <>
+              <h2>Cadastro</h2>
+
+              <input
+                placeholder="Email"
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <br />
+
+              <input
+                type="password"
+                placeholder="Senha"
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <br /><br />
+
+              <button onClick={handleSignup}>Cadastrar</button>
+
+              <p>
+                Já tem conta?{" "}
+                <button onClick={() => setModo("login")}>
+                  Login
+                </button>
+              </p>
+            </>
           )}
+        </>
+      ) : (
+        <>
+          <h2>Bem-vindo 👋</h2>
 
-          {/* LISTA */}
+          <button onClick={handleLogout}>Sair</button>
+
           <div style={{ marginTop: 30 }}>
-            <h3>Denúncias</h3>
+            <h3>Suas denúncias</h3>
 
-            {denuncias.length === 0 && <p>Nenhuma denúncia ainda.</p>}
-
-            {denuncias.map((d) => (
+            {denunciasExibidas.map((d) => (
               <div
                 key={d.id}
                 style={{
@@ -208,22 +191,21 @@ function App() {
                   padding: 10,
                   marginBottom: 10,
                   borderRadius: 5,
-                  backgroundColor: d.status === "aberto" ? "#ffe5e5" : "#e5ffe5"
+                   backgroundColor: d.status === "aberto" ? "#ffe5e5" : "#e5ffe5"
                 }}
               >
                 <strong>{d.titulo}</strong>
                 <p>{d.descricao}</p>
                 <small>{d.endereco}</small>
-
                 <p>Status: {d.status}</p>
-
-                {role === "admin" && d.status !== "resolvido" && (
-                  <button onClick={() => atualizarStatus(d.id)}>
-                    Marcar como resolvido
-                  </button>
-                )}
               </div>
             ))}
+
+            {denuncias.length > 1 && (
+              <button onClick={() => setMostrarTodos(!mostrarTodos)}>
+                {mostrarTodos ? "Mostrar menos" : "..."}
+              </button>
+            )}
           </div>
         </>
       )}
