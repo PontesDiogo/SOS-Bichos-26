@@ -12,8 +12,10 @@ L.Icon.Default.mergeOptions({
 
 function LocationSelector({
   setCoords,
+  setLocalizacaoConfirmada,
 }: {
   setCoords: (coords: { lat: number; lng: number }) => void;
+  setLocalizacaoConfirmada: (valor: boolean) => void;
 }) {
   useMapEvents({
     click(e) {
@@ -21,6 +23,7 @@ function LocationSelector({
         lat: e.latlng.lat,
         lng: e.latlng.lng,
       });
+      setLocalizacaoConfirmada(false);
     },
   });
 
@@ -42,13 +45,24 @@ function App() {
 
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
-  const [endereco, setEndereco] = useState("");
   const [anonimo, setAnonimo] = useState(false);
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   const [mostrarForm, setMostrarForm] = useState(false);
+  const [mostrarEnderecoModal, setMostrarEnderecoModal] = useState(false);
+
   const [denuncias, setDenuncias] = useState<any[]>([]);
   const [mostrarTodos, setMostrarTodos] = useState(false);
+
+  // Endereço
+  const [rua, setRua] = useState("");
+  const [numero, setNumero] = useState("");
+  const [cep, setCep] = useState("");
+  const [cidade, setCidade] = useState("");
+  const [estado, setEstado] = useState("");
+
+  // Mapa
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [localizacaoConfirmada, setLocalizacaoConfirmada] = useState(false);
 
   const role = user?.user_metadata?.role || "user";
 
@@ -60,8 +74,24 @@ function App() {
     "Cancelado",
   ];
 
+  const estadosBrasil = [
+    "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS",
+    "MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC",
+    "SP","SE","TO"
+  ];
+
   const validarEmail = (valor: string) => {
     return valor.includes("@") && valor.includes(".");
+  };
+
+  const formatarCEP = (valor: string) => {
+    const numeros = valor.replace(/\D/g, "").slice(0, 8);
+    return numeros.replace(/(\d{5})(\d{1,3})/, "$1-$2");
+  };
+
+  const validarCEP = (valor: string) => {
+    const limpo = valor.replace(/\D/g, "");
+    return limpo.length === 8;
   };
 
   const getStatusColor = (status: string) => {
@@ -81,6 +111,26 @@ function App() {
     }
   };
 
+  const montarEndereco = () => {
+    const partes = [
+      rua && `Rua ${rua}`,
+      numero && `Nº ${numero}`,
+      cidade && cidade,
+      estado && estado,
+      cep && `CEP ${cep}`,
+    ].filter(Boolean);
+
+    return partes.join(", ");
+  };
+
+  const resumoEndereco = useMemo(() => {
+    if (montarEndereco()) return montarEndereco();
+    if (localizacaoConfirmada && coords) {
+      return `Localização confirmada no mapa (${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)})`;
+    }
+    return "Nenhum endereço selecionado";
+  }, [rua, numero, cidade, estado, cep, localizacaoConfirmada, coords]);
+
   const regrasSenha = useMemo(() => {
     return {
       min8: password.length >= 8,
@@ -95,34 +145,15 @@ function App() {
 
   const forcaSenha = useMemo(() => {
     if (!password) {
-      return {
-        texto: "",
-        largura: "0%",
-        cor: "#ddd",
-      };
+      return { texto: "", largura: "0%", cor: "#ddd" };
     }
-
     if (pontuacaoSenha <= 2) {
-      return {
-        texto: "Senha fraca",
-        largura: "33%",
-        cor: "#dc3545",
-      };
+      return { texto: "Senha fraca", largura: "33%", cor: "#dc3545" };
     }
-
     if (pontuacaoSenha <= 4) {
-      return {
-        texto: "Senha média",
-        largura: "66%",
-        cor: "#ffc107",
-      };
+      return { texto: "Senha média", largura: "66%", cor: "#ffc107" };
     }
-
-    return {
-      texto: "Senha forte",
-      largura: "100%",
-      cor: "#28a745",
-    };
+    return { texto: "Senha forte", largura: "100%", cor: "#28a745" };
   }, [password, pontuacaoSenha]);
 
   const senhasCoincidem =
@@ -213,6 +244,7 @@ function App() {
     setDenuncias([]);
     setMostrarTodos(false);
     setMostrarForm(false);
+    setMostrarEnderecoModal(false);
   };
 
   const getUser = async () => {
@@ -241,19 +273,68 @@ function App() {
     setDenuncias(data || []);
   };
 
+  const buscarCEP = async () => {
+    const cepLimpo = cep.replace(/\D/g, "");
+
+    if (cepLimpo.length !== 8) {
+      alert("Digite um CEP válido com 8 números");
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+      const data = await response.json();
+
+      if (data.erro) {
+        alert("CEP não encontrado");
+        return;
+      }
+
+      setRua(data.logradouro || "");
+      setCidade(data.localidade || "");
+      setEstado(data.uf || "");
+      setCep(data.cep || formatarCEP(cep));
+    } catch {
+      alert("Não foi possível buscar o CEP agora");
+    }
+  };
+
+  const confirmarEndereco = () => {
+    const temEnderecoManual = rua.trim().length > 0;
+
+    if (!temEnderecoManual && !localizacaoConfirmada) {
+      alert("Informe pelo menos a rua ou confirme a localização no mapa");
+      return;
+    }
+
+    if (cep && !validarCEP(cep)) {
+      alert("CEP inválido");
+      return;
+    }
+
+    setMostrarEnderecoModal(false);
+  };
+
   const criarDenuncia = async () => {
     if (!user) {
       alert("Faça login primeiro");
       return;
     }
 
-    if (!titulo.trim() || !descricao.trim() || !endereco.trim()) {
-      alert("Preencha título, descrição e endereço");
+    if (!titulo.trim() || !descricao.trim()) {
+      alert("Preencha título e descrição");
       return;
     }
 
-    if (!coords) {
-      alert("Selecione o local da denúncia no mapa");
+    const temEnderecoManual = rua.trim().length > 0;
+
+    if (!temEnderecoManual && !localizacaoConfirmada) {
+      alert("Selecione um endereço antes de salvar a denúncia");
+      return;
+    }
+
+    if (cep && !validarCEP(cep)) {
+      alert("CEP inválido");
       return;
     }
 
@@ -265,13 +346,13 @@ function App() {
       {
         titulo,
         descricao,
-        endereco,
+        endereco: montarEndereco() || "Local informado apenas pelo mapa",
         user_id: user.id,
         nome_usuario: nomeAutor,
         anonimo,
         status: "Pendente",
-        latitude: coords.lat,
-        longitude: coords.lng,
+        latitude: localizacaoConfirmada ? coords?.lat : null,
+        longitude: localizacaoConfirmada ? coords?.lng : null,
       },
     ]);
 
@@ -283,9 +364,16 @@ function App() {
     alert("Denúncia criada!");
     setTitulo("");
     setDescricao("");
-    setEndereco("");
     setAnonimo(false);
+
+    setRua("");
+    setNumero("");
+    setCep("");
+    setCidade("");
+    setEstado("");
     setCoords(null);
+    setLocalizacaoConfirmada(false);
+
     setMostrarForm(false);
     carregarDenuncias();
   };
@@ -574,6 +662,7 @@ function App() {
                     padding: 15,
                     border: "1px solid #ccc",
                     borderRadius: 8,
+                    position: "relative",
                   }}
                 >
                   <h3>Criar denúncia</h3>
@@ -596,12 +685,30 @@ function App() {
                     }}
                   />
 
-                  <input
-                    placeholder="Endereço"
-                    value={endereco}
-                    onChange={(e) => setEndereco(e.target.value)}
-                    style={normalInputStyle}
-                  />
+                  <div
+                    style={{
+                      border: "1px solid #ccc",
+                      borderRadius: 8,
+                      padding: 12,
+                      marginBottom: 10,
+                      backgroundColor: "#fafafa",
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setMostrarEnderecoModal(true)}
+                      style={{ marginBottom: 8 }}
+                    >
+                      Selecionar endereço
+                    </button>
+
+                    <div style={{ fontSize: 14 }}>
+                      <strong>Endereço</strong>
+                      <p style={{ margin: "6px 0 0 0", color: "#666" }}>
+                        {resumoEndereco}
+                      </p>
+                    </div>
+                  </div>
 
                   <label style={{ display: "block", marginBottom: 10 }}>
                     <input
@@ -612,38 +719,195 @@ function App() {
                     Desejo fazer denúncia anônima
                   </label>
 
-                  <div style={{ marginBottom: 10 }}>
-                    <p style={{ marginBottom: 8 }}>
-                      <strong>Selecione o local no mapa:</strong>
-                    </p>
+                  <button onClick={criarDenuncia}>Salvar denúncia</button>
 
-                    <MapContainer
-                      center={[-23.2643, -47.2992]}
-                      zoom={13}
+                  {mostrarEnderecoModal && (
+                    <div
                       style={{
-                        height: "300px",
-                        width: "100%",
-                        borderRadius: 8,
-                        overflow: "hidden",
+                        position: "fixed",
+                        inset: 0,
+                        backgroundColor: "rgba(0,0,0,0.45)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        zIndex: 9999,
+                        padding: 16,
                       }}
                     >
-                      <TileLayer
-                        attribution='&copy; OpenStreetMap contributors'
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                      />
-                      <LocationSelector setCoords={setCoords} />
-                      {coords && <Marker position={[coords.lat, coords.lng]} />}
-                    </MapContainer>
+                      <div
+                        style={{
+                          backgroundColor: "#fff",
+                          width: "100%",
+                          maxWidth: 700,
+                          maxHeight: "90vh",
+                          overflowY: "auto",
+                          borderRadius: 12,
+                          padding: 16,
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            marginBottom: 12,
+                          }}
+                        >
+                          <h3 style={{ margin: 0 }}>Endereço da denúncia</h3>
+                          <button
+                            type="button"
+                            onClick={() => setMostrarEnderecoModal(false)}
+                          >
+                            Fechar
+                          </button>
+                        </div>
 
-                    {coords && (
-                      <p style={{ marginTop: 8, fontSize: 14 }}>
-                        Local selecionado: {coords.lat.toFixed(5)},{" "}
-                        {coords.lng.toFixed(5)}
-                      </p>
-                    )}
-                  </div>
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "1fr auto",
+                            gap: 8,
+                            marginBottom: 10,
+                          }}
+                        >
+                          <input
+                            placeholder="CEP"
+                            value={cep}
+                            onChange={(e) => setCep(formatarCEP(e.target.value))}
+                            style={{
+                              ...normalInputStyle,
+                              marginBottom: 0,
+                            }}
+                          />
+                          <button type="button" onClick={buscarCEP}>
+                            Buscar CEP
+                          </button>
+                        </div>
 
-                  <button onClick={criarDenuncia}>Salvar denúncia</button>
+                        <button
+                          type="button"
+                          onClick={() => window.open("https://viacep.com.br/", "_blank")}
+                          style={{ marginBottom: 12 }}
+                        >
+                          Não sei meu CEP
+                        </button>
+
+                        <input
+                          placeholder="Rua"
+                          value={rua}
+                          onChange={(e) => setRua(e.target.value)}
+                          style={normalInputStyle}
+                        />
+
+                        <input
+                          placeholder="Número"
+                          value={numero}
+                          onChange={(e) => setNumero(e.target.value)}
+                          style={normalInputStyle}
+                        />
+
+                        <input
+                          placeholder="Cidade"
+                          value={cidade}
+                          onChange={(e) => setCidade(e.target.value)}
+                          style={normalInputStyle}
+                        />
+
+                        <select
+                          value={estado}
+                          onChange={(e) => setEstado(e.target.value)}
+                          style={normalInputStyle}
+                        >
+                          <option value="">Selecione o estado</option>
+                          {estadosBrasil.map((uf) => (
+                            <option key={uf} value={uf}>
+                              {uf}
+                            </option>
+                          ))}
+                        </select>
+
+                        <div style={{ marginBottom: 10 }}>
+                          <p style={{ marginBottom: 8 }}>
+                            <strong>Ou selecione no mapa:</strong>
+                          </p>
+
+                          <MapContainer
+                            center={[-23.2643, -47.2992]}
+                            zoom={13}
+                            style={{
+                              height: "300px",
+                              width: "100%",
+                              borderRadius: 8,
+                              overflow: "hidden",
+                            }}
+                          >
+                            <TileLayer
+                              attribution='&copy; OpenStreetMap contributors'
+                              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            />
+                            <LocationSelector
+                              setCoords={setCoords}
+                              setLocalizacaoConfirmada={setLocalizacaoConfirmada}
+                            />
+                            {coords && (
+                              <Marker position={[coords.lat, coords.lng]} />
+                            )}
+                          </MapContainer>
+
+                          {coords && (
+                            <div style={{ marginTop: 8 }}>
+                              <p style={{ fontSize: 14, marginBottom: 8 }}>
+                                Local selecionado: {coords.lat.toFixed(5)},{" "}
+                                {coords.lng.toFixed(5)}
+                              </p>
+
+                              <button
+                                type="button"
+                                onClick={() => setLocalizacaoConfirmada(true)}
+                                style={{ marginRight: 8 }}
+                              >
+                                Confirmar localização
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setCoords(null);
+                                  setLocalizacaoConfirmada(false);
+                                }}
+                              >
+                                Limpar localização
+                              </button>
+
+                              {localizacaoConfirmada && (
+                                <p style={{ color: "#28a745", marginTop: 8 }}>
+                                  ✅ Localização confirmada
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: 8,
+                            justifyContent: "flex-end",
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setMostrarEnderecoModal(false)}
+                          >
+                            Cancelar
+                          </button>
+                          <button type="button" onClick={confirmarEndereco}>
+                            Confirmar endereço
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
