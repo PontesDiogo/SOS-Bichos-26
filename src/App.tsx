@@ -1,5 +1,31 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "./lib/supabaseClient";
+import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
+import L from "leaflet";
+
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
+
+function LocationSelector({
+  setCoords,
+}: {
+  setCoords: (coords: { lat: number; lng: number }) => void;
+}) {
+  useMapEvents({
+    click(e) {
+      setCoords({
+        lat: e.latlng.lat,
+        lng: e.latlng.lng,
+      });
+    },
+  });
+
+  return null;
+}
 
 function App() {
   const [user, setUser] = useState<any>(null);
@@ -18,6 +44,7 @@ function App() {
   const [descricao, setDescricao] = useState("");
   const [endereco, setEndereco] = useState("");
   const [anonimo, setAnonimo] = useState(false);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   const [mostrarForm, setMostrarForm] = useState(false);
   const [denuncias, setDenuncias] = useState<any[]>([]);
@@ -225,6 +252,11 @@ function App() {
       return;
     }
 
+    if (!coords) {
+      alert("Selecione o local da denúncia no mapa");
+      return;
+    }
+
     const nomeAutor = anonimo
       ? "Anônimo"
       : user?.user_metadata?.nome || user?.email || "Usuário";
@@ -238,6 +270,8 @@ function App() {
         nome_usuario: nomeAutor,
         anonimo,
         status: "Pendente",
+        latitude: coords.lat,
+        longitude: coords.lng,
       },
     ]);
 
@@ -251,6 +285,7 @@ function App() {
     setDescricao("");
     setEndereco("");
     setAnonimo(false);
+    setCoords(null);
     setMostrarForm(false);
     carregarDenuncias();
   };
@@ -577,6 +612,37 @@ function App() {
                     Desejo fazer denúncia anônima
                   </label>
 
+                  <div style={{ marginBottom: 10 }}>
+                    <p style={{ marginBottom: 8 }}>
+                      <strong>Selecione o local no mapa:</strong>
+                    </p>
+
+                    <MapContainer
+                      center={[-23.2643, -47.2992]}
+                      zoom={13}
+                      style={{
+                        height: "300px",
+                        width: "100%",
+                        borderRadius: 8,
+                        overflow: "hidden",
+                      }}
+                    >
+                      <TileLayer
+                        attribution='&copy; OpenStreetMap contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      />
+                      <LocationSelector setCoords={setCoords} />
+                      {coords && <Marker position={[coords.lat, coords.lng]} />}
+                    </MapContainer>
+
+                    {coords && (
+                      <p style={{ marginTop: 8, fontSize: 14 }}>
+                        Local selecionado: {coords.lat.toFixed(5)},{" "}
+                        {coords.lng.toFixed(5)}
+                      </p>
+                    )}
+                  </div>
+
                   <button onClick={criarDenuncia}>Salvar denúncia</button>
                 </div>
               )}
@@ -592,14 +658,14 @@ function App() {
                   role === "admin"
                     ? "420px"
                     : mostrarTodos
-                      ? "320px"
-                      : "unset",
+                    ? "320px"
+                    : "unset",
                 overflowY:
                   role === "admin"
                     ? "auto"
                     : mostrarTodos
-                      ? "auto"
-                      : "visible",
+                    ? "auto"
+                    : "visible",
                 paddingRight:
                   role === "admin" || mostrarTodos ? "8px" : "0",
               }}
@@ -634,6 +700,13 @@ function App() {
                         : "Sem data"}
                     </small>
                   </p>
+
+                  {d.latitude && d.longitude && (
+                    <p style={{ fontSize: 13 }}>
+                      📍 {Number(d.latitude).toFixed(5)},{" "}
+                      {Number(d.longitude).toFixed(5)}
+                    </p>
+                  )}
 
                   {role === "admin" ? (
                     <div style={{ marginTop: 10 }}>
