@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "./lib/supabaseClient";
 
 function App() {
@@ -54,6 +54,56 @@ function App() {
     }
   };
 
+  const regrasSenha = useMemo(() => {
+    return {
+      min8: password.length >= 8,
+      minuscula: /[a-z]/.test(password),
+      maiuscula: /[A-Z]/.test(password),
+      numero: /\d/.test(password),
+      especial: /[^A-Za-z0-9]/.test(password),
+    };
+  }, [password]);
+
+  const pontuacaoSenha = Object.values(regrasSenha).filter(Boolean).length;
+
+  const forcaSenha = useMemo(() => {
+    if (!password) {
+      return {
+        texto: "",
+        largura: "0%",
+        cor: "#ddd",
+      };
+    }
+
+    if (pontuacaoSenha <= 2) {
+      return {
+        texto: "Senha fraca",
+        largura: "33%",
+        cor: "#dc3545",
+      };
+    }
+
+    if (pontuacaoSenha <= 4) {
+      return {
+        texto: "Senha média",
+        largura: "66%",
+        cor: "#ffc107",
+      };
+    }
+
+    return {
+      texto: "Senha forte",
+      largura: "100%",
+      cor: "#28a745",
+    };
+  }, [password, pontuacaoSenha]);
+
+  const senhasCoincidem =
+    confirmarSenha.length > 0 && password === confirmarSenha;
+
+  const senhasDiferentes =
+    confirmarSenha.length > 0 && password !== confirmarSenha;
+
   const handleSignup = async () => {
     if (!nome.trim()) {
       alert("Informe seu nome");
@@ -67,6 +117,13 @@ function App() {
 
     if (!password.trim()) {
       alert("Informe uma senha");
+      return;
+    }
+
+    if (pontuacaoSenha < 5) {
+      alert(
+        "A senha deve ter no mínimo 8 caracteres, letra maiúscula, minúscula, número e símbolo especial."
+      );
       return;
     }
 
@@ -225,6 +282,43 @@ function App() {
   const denunciasExibidas =
     role === "user" && !mostrarTodos ? denuncias.slice(0, 1) : denuncias;
 
+  const inputStyle = {
+    width: "100%",
+    padding: "10px 42px 10px 10px",
+    borderRadius: 8,
+    border: "1px solid #ccc",
+    outline: "none" as const,
+    boxSizing: "border-box" as const,
+  };
+
+  const normalInputStyle = {
+    width: "100%",
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 8,
+    border: "1px solid #ccc",
+    outline: "none" as const,
+    boxSizing: "border-box" as const,
+  };
+
+  const senhaWrapperStyle = {
+    position: "relative" as const,
+    marginBottom: 10,
+  };
+
+  const botaoOlhoStyle = {
+    position: "absolute" as const,
+    right: 8,
+    top: "50%",
+    transform: "translateY(-50%)",
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    fontSize: 12,
+    color: "#555",
+    padding: "4px 6px",
+  };
+
   return (
     <div
       style={{
@@ -246,18 +340,22 @@ function App() {
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                style={{ width: "100%", padding: 8, marginBottom: 10 }}
+                style={normalInputStyle}
               />
 
-              <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+              <div style={senhaWrapperStyle}>
                 <input
                   type={mostrarSenha ? "text" : "password"}
                   placeholder="Senha"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  style={{ flex: 1, padding: 8 }}
+                  style={inputStyle}
                 />
-                <button onClick={() => setMostrarSenha(!mostrarSenha)}>
+                <button
+                  type="button"
+                  onClick={() => setMostrarSenha(!mostrarSenha)}
+                  style={botaoOlhoStyle}
+                >
                   {mostrarSenha ? "Ocultar" : "Ver"}
                 </button>
               </div>
@@ -277,45 +375,138 @@ function App() {
                 placeholder="Nome"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
-                style={{ width: "100%", padding: 8, marginBottom: 10 }}
+                style={normalInputStyle}
               />
 
               <input
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                style={{ width: "100%", padding: 8, marginBottom: 10 }}
+                style={normalInputStyle}
               />
 
-              <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+              <div style={senhaWrapperStyle}>
                 <input
                   type={mostrarSenha ? "text" : "password"}
                   placeholder="Senha"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  style={{ flex: 1, padding: 8 }}
+                  style={inputStyle}
                 />
-                <button onClick={() => setMostrarSenha(!mostrarSenha)}>
+                <button
+                  type="button"
+                  onClick={() => setMostrarSenha(!mostrarSenha)}
+                  style={botaoOlhoStyle}
+                >
                   {mostrarSenha ? "Ocultar" : "Ver"}
                 </button>
               </div>
 
-              <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+              <div
+                style={{
+                  height: 8,
+                  backgroundColor: "#e9ecef",
+                  borderRadius: 999,
+                  overflow: "hidden",
+                  marginBottom: 6,
+                }}
+              >
+                <div
+                  style={{
+                    width: forcaSenha.largura,
+                    height: "100%",
+                    backgroundColor: forcaSenha.cor,
+                    transition: "all 0.3s ease",
+                  }}
+                />
+              </div>
+
+              <p
+                style={{
+                  marginTop: 0,
+                  marginBottom: 10,
+                  color: forcaSenha.cor,
+                  fontSize: 14,
+                  fontWeight: 600,
+                }}
+              >
+                {forcaSenha.texto}
+              </p>
+
+              <div
+                style={{
+                  fontSize: 13,
+                  marginBottom: 12,
+                  lineHeight: 1.6,
+                }}
+              >
+                <div style={{ color: regrasSenha.min8 ? "#28a745" : "#666" }}>
+                  {regrasSenha.min8 ? "✅" : "•"} Mínimo de 8 caracteres
+                </div>
+                <div
+                  style={{ color: regrasSenha.minuscula ? "#28a745" : "#666" }}
+                >
+                  {regrasSenha.minuscula ? "✅" : "•"} Letra minúscula
+                </div>
+                <div
+                  style={{ color: regrasSenha.maiuscula ? "#28a745" : "#666" }}
+                >
+                  {regrasSenha.maiuscula ? "✅" : "•"} Letra maiúscula
+                </div>
+                <div style={{ color: regrasSenha.numero ? "#28a745" : "#666" }}>
+                  {regrasSenha.numero ? "✅" : "•"} Número
+                </div>
+                <div
+                  style={{ color: regrasSenha.especial ? "#28a745" : "#666" }}
+                >
+                  {regrasSenha.especial ? "✅" : "•"} Símbolo especial
+                </div>
+              </div>
+
+              <div style={senhaWrapperStyle}>
                 <input
                   type={mostrarConfirmarSenha ? "text" : "password"}
                   placeholder="Confirmar senha"
                   value={confirmarSenha}
                   onChange={(e) => setConfirmarSenha(e.target.value)}
-                  style={{ flex: 1, padding: 8 }}
+                  style={inputStyle}
                 />
                 <button
+                  type="button"
                   onClick={() =>
                     setMostrarConfirmarSenha(!mostrarConfirmarSenha)
                   }
+                  style={botaoOlhoStyle}
                 >
                   {mostrarConfirmarSenha ? "Ocultar" : "Ver"}
                 </button>
               </div>
+
+              {senhasCoincidem && (
+                <p
+                  style={{
+                    color: "#28a745",
+                    fontSize: 13,
+                    marginTop: -4,
+                    marginBottom: 10,
+                  }}
+                >
+                  ✅ As senhas coincidem
+                </p>
+              )}
+
+              {senhasDiferentes && (
+                <p
+                  style={{
+                    color: "#dc3545",
+                    fontSize: 13,
+                    marginTop: -4,
+                    marginBottom: 10,
+                  }}
+                >
+                  ❌ As senhas não coincidem
+                </p>
+              )}
 
               <button onClick={handleSignup}>Cadastrar</button>
 
@@ -356,21 +547,25 @@ function App() {
                     placeholder="Título"
                     value={titulo}
                     onChange={(e) => setTitulo(e.target.value)}
-                    style={{ width: "100%", padding: 8, marginBottom: 10 }}
+                    style={normalInputStyle}
                   />
 
                   <textarea
                     placeholder="Descrição"
                     value={descricao}
                     onChange={(e) => setDescricao(e.target.value)}
-                    style={{ width: "100%", padding: 8, marginBottom: 10 }}
+                    style={{
+                      ...normalInputStyle,
+                      minHeight: 100,
+                      resize: "vertical",
+                    }}
                   />
 
                   <input
                     placeholder="Endereço"
                     value={endereco}
                     onChange={(e) => setEndereco(e.target.value)}
-                    style={{ width: "100%", padding: 8, marginBottom: 10 }}
+                    style={normalInputStyle}
                   />
 
                   <label style={{ display: "block", marginBottom: 10 }}>
