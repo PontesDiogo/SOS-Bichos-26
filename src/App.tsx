@@ -6,23 +6,72 @@ function App() {
 
   const [modo, setModo] = useState<"login" | "cadastro">("login");
 
+  const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmarSenha, setConfirmarSenha] = useState("");
 
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
+
+  const [titulo, setTitulo] = useState("");
+  const [descricao, setDescricao] = useState("");
+  const [endereco, setEndereco] = useState("");
+  const [anonimo, setAnonimo] = useState(false);
+
+  const [mostrarForm, setMostrarForm] = useState(false);
   const [denuncias, setDenuncias] = useState<any[]>([]);
   const [mostrarTodos, setMostrarTodos] = useState(false);
 
-  const role = user?.user_metadata?.role;
+  const role = user?.user_metadata?.role || "user";
 
-  // 🔎 validação simples de email
-  const validarEmail = (email: string) => {
-    return email.includes("@") && email.includes(".");
+  const statusOptions = [
+    "Pendente",
+    "Em análise",
+    "Em atendimento",
+    "Resolvido",
+    "Cancelado",
+  ];
+
+  const validarEmail = (valor: string) => {
+    return valor.includes("@") && valor.includes(".");
   };
 
-  // 🔐 Cadastro
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Pendente":
+        return "#fff3cd";
+      case "Em análise":
+        return "#d1ecf1";
+      case "Em atendimento":
+        return "#cce5ff";
+      case "Resolvido":
+        return "#d4edda";
+      case "Cancelado":
+        return "#f8d7da";
+      default:
+        return "#f5f5f5";
+    }
+  };
+
   const handleSignup = async () => {
+    if (!nome.trim()) {
+      alert("Informe seu nome");
+      return;
+    }
+
     if (!validarEmail(email)) {
       alert("Email inválido");
+      return;
+    }
+
+    if (!password.trim()) {
+      alert("Informe uma senha");
+      return;
+    }
+
+    if (password !== confirmarSenha) {
+      alert("As senhas não coincidem");
       return;
     }
 
@@ -31,15 +80,25 @@ function App() {
       password,
       options: {
         data: {
+          nome,
           role: "user",
         },
       },
     });
 
-    alert(error ? error.message : "Conta criada!");
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    alert("Conta criada!");
+    setNome("");
+    setEmail("");
+    setPassword("");
+    setConfirmarSenha("");
+    setModo("login");
   };
 
-  // 🔐 Login
   const handleLogin = async () => {
     if (!validarEmail(email)) {
       alert("Email inválido");
@@ -57,26 +116,26 @@ function App() {
       } else {
         alert(error.message);
       }
-    } else {
-      alert("Logado!");
-      getUser();
+      return;
     }
+
+    alert("Logado!");
+    await getUser();
   };
 
-  // 🚪 Logout
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
     setDenuncias([]);
+    setMostrarTodos(false);
+    setMostrarForm(false);
   };
 
-  // 👤 Usuário
   const getUser = async () => {
     const { data } = await supabase.auth.getUser();
     setUser(data.user);
   };
 
-  // 📋 Denúncias
   const carregarDenuncias = async () => {
     if (!user) return;
 
@@ -90,7 +149,67 @@ function App() {
       ascending: false,
     });
 
-    if (!error) setDenuncias(data || []);
+    if (error) {
+      console.error("Erro ao carregar denúncias:", error.message);
+      return;
+    }
+
+    setDenuncias(data || []);
+  };
+
+  const criarDenuncia = async () => {
+    if (!user) {
+      alert("Faça login primeiro");
+      return;
+    }
+
+    if (!titulo.trim() || !descricao.trim() || !endereco.trim()) {
+      alert("Preencha título, descrição e endereço");
+      return;
+    }
+
+    const nomeAutor = anonimo
+      ? "Anônimo"
+      : user?.user_metadata?.nome || user?.email || "Usuário";
+
+    const { error } = await supabase.from("denuncias").insert([
+      {
+        titulo,
+        descricao,
+        endereco,
+        user_id: user.id,
+        nome_usuario: nomeAutor,
+        anonimo,
+        status: "Pendente",
+      },
+    ]);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    alert("Denúncia criada!");
+    setTitulo("");
+    setDescricao("");
+    setEndereco("");
+    setAnonimo(false);
+    setMostrarForm(false);
+    carregarDenuncias();
+  };
+
+  const atualizarStatus = async (id: string, novoStatus: string) => {
+    const { error } = await supabase
+      .from("denuncias")
+      .update({ status: novoStatus })
+      .eq("id", id);
+
+    if (error) {
+      alert("Erro ao atualizar status: " + error.message);
+      return;
+    }
+
+    carregarDenuncias();
   };
 
   useEffect(() => {
@@ -103,17 +222,16 @@ function App() {
     }
   }, [user]);
 
-  const denunciasExibidas = mostrarTodos
-    ? denuncias
-    : denuncias.slice(0, 1);
+  const denunciasExibidas =
+    role === "user" && !mostrarTodos ? denuncias.slice(0, 1) : denuncias;
 
   return (
     <div
       style={{
-        maxWidth: 600,
+        maxWidth: 700,
         margin: "0 auto",
         padding: 20,
-        fontFamily: "Arial",
+        fontFamily: "Arial, sans-serif",
       }}
     >
       <h1>SOS Bichos 🐾</h1>
@@ -126,24 +244,29 @@ function App() {
 
               <input
                 placeholder="Email"
+                value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                style={{ width: "100%", padding: 8, marginBottom: 10 }}
               />
-              <br />
 
-              <input
-                type="password"
-                placeholder="Senha"
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <br /><br />
+              <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+                <input
+                  type={mostrarSenha ? "text" : "password"}
+                  placeholder="Senha"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  style={{ flex: 1, padding: 8 }}
+                />
+                <button onClick={() => setMostrarSenha(!mostrarSenha)}>
+                  {mostrarSenha ? "Ocultar" : "Ver"}
+                </button>
+              </div>
 
               <button onClick={handleLogin}>Entrar</button>
 
               <p>
                 Não tem conta?{" "}
-                <button onClick={() => setModo("cadastro")}>
-                  Cadastrar
-                </button>
+                <button onClick={() => setModo("cadastro")}>Cadastrar</button>
               </p>
             </>
           ) : (
@@ -151,57 +274,190 @@ function App() {
               <h2>Cadastro</h2>
 
               <input
-                placeholder="Email"
-                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Nome"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                style={{ width: "100%", padding: 8, marginBottom: 10 }}
               />
-              <br />
 
               <input
-                type="password"
-                placeholder="Senha"
-                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{ width: "100%", padding: 8, marginBottom: 10 }}
               />
-              <br /><br />
+
+              <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+                <input
+                  type={mostrarSenha ? "text" : "password"}
+                  placeholder="Senha"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  style={{ flex: 1, padding: 8 }}
+                />
+                <button onClick={() => setMostrarSenha(!mostrarSenha)}>
+                  {mostrarSenha ? "Ocultar" : "Ver"}
+                </button>
+              </div>
+
+              <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+                <input
+                  type={mostrarConfirmarSenha ? "text" : "password"}
+                  placeholder="Confirmar senha"
+                  value={confirmarSenha}
+                  onChange={(e) => setConfirmarSenha(e.target.value)}
+                  style={{ flex: 1, padding: 8 }}
+                />
+                <button
+                  onClick={() =>
+                    setMostrarConfirmarSenha(!mostrarConfirmarSenha)
+                  }
+                >
+                  {mostrarConfirmarSenha ? "Ocultar" : "Ver"}
+                </button>
+              </div>
 
               <button onClick={handleSignup}>Cadastrar</button>
 
               <p>
                 Já tem conta?{" "}
-                <button onClick={() => setModo("login")}>
-                  Login
-                </button>
+                <button onClick={() => setModo("login")}>Login</button>
               </p>
             </>
           )}
         </>
       ) : (
         <>
-          <h2>Bem-vindo 👋</h2>
+          <h2>Bem-vindo, {user?.user_metadata?.nome || user?.email} 👋</h2>
+          <p>
+            <strong>Perfil:</strong> {role}
+          </p>
 
           <button onClick={handleLogout}>Sair</button>
 
+          {role === "user" && (
+            <div style={{ marginTop: 20 }}>
+              <button onClick={() => setMostrarForm(!mostrarForm)}>
+                {mostrarForm ? "Fechar formulário" : "Nova denúncia 🚨"}
+              </button>
+
+              {mostrarForm && (
+                <div
+                  style={{
+                    marginTop: 15,
+                    padding: 15,
+                    border: "1px solid #ccc",
+                    borderRadius: 8,
+                  }}
+                >
+                  <h3>Criar denúncia</h3>
+
+                  <input
+                    placeholder="Título"
+                    value={titulo}
+                    onChange={(e) => setTitulo(e.target.value)}
+                    style={{ width: "100%", padding: 8, marginBottom: 10 }}
+                  />
+
+                  <textarea
+                    placeholder="Descrição"
+                    value={descricao}
+                    onChange={(e) => setDescricao(e.target.value)}
+                    style={{ width: "100%", padding: 8, marginBottom: 10 }}
+                  />
+
+                  <input
+                    placeholder="Endereço"
+                    value={endereco}
+                    onChange={(e) => setEndereco(e.target.value)}
+                    style={{ width: "100%", padding: 8, marginBottom: 10 }}
+                  />
+
+                  <label style={{ display: "block", marginBottom: 10 }}>
+                    <input
+                      type="checkbox"
+                      checked={anonimo}
+                      onChange={(e) => setAnonimo(e.target.checked)}
+                    />{" "}
+                    Desejo fazer denúncia anônima
+                  </label>
+
+                  <button onClick={criarDenuncia}>Salvar denúncia</button>
+                </div>
+              )}
+            </div>
+          )}
+
           <div style={{ marginTop: 30 }}>
-            <h3>Suas denúncias</h3>
+            <h3>{role === "admin" ? "Todas as denúncias" : "Suas denúncias"}</h3>
 
-            {denunciasExibidas.map((d) => (
-              <div
-                key={d.id}
-                style={{
-                  border: "1px solid #ccc",
-                  padding: 10,
-                  marginBottom: 10,
-                  borderRadius: 5,
-                   backgroundColor: d.status === "aberto" ? "#ffe5e5" : "#e5ffe5"
-                }}
-              >
-                <strong>{d.titulo}</strong>
-                <p>{d.descricao}</p>
-                <small>{d.endereco}</small>
-                <p>Status: {d.status}</p>
-              </div>
-            ))}
+            <div
+              style={{
+                maxHeight: role === "admin" ? "420px" : "unset",
+                overflowY: role === "admin" ? "auto" : "visible",
+                paddingRight: role === "admin" ? "8px" : "0",
+              }}
+            >
+              {denunciasExibidas.length === 0 && (
+                <p>Nenhuma denúncia encontrada.</p>
+              )}
 
-            {denuncias.length > 1 && (
+              {denunciasExibidas.map((d) => (
+                <div
+                  key={d.id}
+                  style={{
+                    border: "1px solid #ccc",
+                    padding: 12,
+                    marginBottom: 12,
+                    borderRadius: 8,
+                    backgroundColor: getStatusColor(d.status),
+                  }}
+                >
+                  <strong>{d.titulo}</strong>
+                  <p>{d.descricao}</p>
+                  <small>{d.endereco}</small>
+
+                  <p>
+                    <strong>Autor:</strong> {d.nome_usuario || "Não informado"}
+                  </p>
+
+                  <p>
+                    <small>
+                      {d.created_at
+                        ? new Date(d.created_at).toLocaleString()
+                        : "Sem data"}
+                    </small>
+                  </p>
+
+                  {role === "admin" ? (
+                    <div style={{ marginTop: 10 }}>
+                      <label>
+                        <strong>Status:</strong>{" "}
+                      </label>
+                      <select
+                        value={d.status}
+                        onChange={(e) =>
+                          atualizarStatus(d.id, e.target.value)
+                        }
+                        style={{ padding: 6, marginLeft: 8 }}
+                      >
+                        {statusOptions.map((status) => (
+                          <option key={status} value={status}>
+                            {status}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ) : (
+                    <p>
+                      <strong>Status:</strong> {d.status}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {role === "user" && denuncias.length > 1 && (
               <button onClick={() => setMostrarTodos(!mostrarTodos)}>
                 {mostrarTodos ? "Mostrar menos" : "..."}
               </button>
