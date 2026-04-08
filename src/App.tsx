@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "./lib/supabaseClient";
 import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
 import L from "leaflet";
+import type { LeafletMouseEvent } from "leaflet";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -18,7 +19,7 @@ function LocationSelector({
   setLocalizacaoConfirmada: (valor: boolean) => void;
 }) {
   useMapEvents({
-    click(e) {
+    click(e: LeafletMouseEvent) {
       setCoords({
         lat: e.latlng.lat,
         lng: e.latlng.lng,
@@ -29,6 +30,7 @@ function LocationSelector({
 
   return null;
 }
+
 type TipoOcorrencia =
   | "MAUS_TRATOS"
   | "ANIMAL_FERIDO"
@@ -1004,7 +1006,7 @@ function App() {
                           </p>
 
                           <MapContainer
-                            center={[-23.2643, -47.2992]}
+                            center={[-23.2643, -47.2992] as [number, number]}
                             zoom={13}
                             style={{
                               height: "300px",
@@ -1280,7 +1282,7 @@ function App() {
                   <p>
                     <strong>Status:</strong> {d.status}
                   </p>
-                )} 
+                )}
               </div>
             ))}
           </div>
