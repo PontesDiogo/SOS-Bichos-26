@@ -1300,17 +1300,6 @@ function App() {
                 <p><strong>Total de denúncias altas:</strong> {resumoPorGravidade.ALTA}</p>
                 <p><strong>Tipos diferentes registrados:</strong> {resumoPorTipo.length}</p>
 
-                <hr style={{ margin: "12px 0" }} />
-
-                <p style={{ marginBottom: 8 }}>
-                  Próximo passo sugerido:
-                </p>
-                <ul style={{ marginTop: 0 }}>
-                  <li>exportar CSV/PDF</li>
-                  <li>gráfico por tipo de ocorrência</li>
-                  <li>gráfico por status</li>
-                  <li>gráfico por cidade/bairro</li>
-                </ul>
               </div>
             </div>
           )}
