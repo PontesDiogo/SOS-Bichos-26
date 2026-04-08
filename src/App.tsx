@@ -588,9 +588,20 @@ function App() {
 
             <div
               style={{
-                maxHeight: role === "admin" ? "420px" : "unset",
-                overflowY: role === "admin" ? "auto" : "visible",
-                paddingRight: role === "admin" ? "8px" : "0",
+                maxHeight:
+                  role === "admin"
+                    ? "420px"
+                    : mostrarTodos
+                      ? "320px"
+                      : "unset",
+                overflowY:
+                  role === "admin"
+                    ? "auto"
+                    : mostrarTodos
+                      ? "auto"
+                      : "visible",
+                paddingRight:
+                  role === "admin" || mostrarTodos ? "8px" : "0",
               }}
             >
               {denunciasExibidas.length === 0 && (
