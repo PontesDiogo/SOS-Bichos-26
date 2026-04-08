@@ -29,6 +29,43 @@ function LocationSelector({
 
   return null;
 }
+type TipoOcorrencia =
+  | "MAUS_TRATOS"
+  | "ANIMAL_FERIDO"
+  | "ANIMAL_ABANDONADO"
+  | "SITUACAO_DE_RISCO"
+  | "SUSPEITA_ZOONOSE"
+  | "INFESTACAO_FOCO_SANITARIO"
+  | "ANIMAL_MORTO_VIA_PUBLICA"
+  | "SOLICITACAO_RESGATE"
+  | "OUTROS";
+
+type Gravidade = "BAIXA" | "MEDIA" | "ALTA" | "CRITICA";
+type AbaAdmin = "visaoGeral" | "denuncias" | "relatorios";
+
+const tiposOcorrencia: {
+  value: TipoOcorrencia;
+  label: string;
+  gravidade: Gravidade;
+}[] = [
+    { value: "MAUS_TRATOS", label: "Maus-tratos", gravidade: "CRITICA" },
+    { value: "ANIMAL_FERIDO", label: "Animal ferido", gravidade: "ALTA" },
+    { value: "ANIMAL_ABANDONADO", label: "Animal abandonado", gravidade: "ALTA" },
+    { value: "SITUACAO_DE_RISCO", label: "Animal em situação de risco", gravidade: "ALTA" },
+    { value: "SUSPEITA_ZOONOSE", label: "Suspeita de zoonose", gravidade: "CRITICA" },
+    { value: "INFESTACAO_FOCO_SANITARIO", label: "Infestação / foco sanitário", gravidade: "CRITICA" },
+    { value: "ANIMAL_MORTO_VIA_PUBLICA", label: "Animal morto em via pública", gravidade: "MEDIA" },
+    { value: "SOLICITACAO_RESGATE", label: "Solicitação de resgate", gravidade: "MEDIA" },
+    { value: "OUTROS", label: "Outros", gravidade: "BAIXA" },
+  ];
+
+const obterGravidadePorTipo = (tipo: TipoOcorrencia): Gravidade => {
+  return tiposOcorrencia.find((item) => item.value === tipo)?.gravidade || "BAIXA";
+};
+
+const formatarTipoOcorrencia = (tipo: string) => {
+  return tiposOcorrencia.find((item) => item.value === tipo)?.label || tipo || "Não informado";
+};
 
 function App() {
   const [user, setUser] = useState<any>(null);
@@ -64,6 +101,13 @@ function App() {
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [localizacaoConfirmada, setLocalizacaoConfirmada] = useState(false);
 
+  const [tipoOcorrencia, setTipoOcorrencia] = useState<TipoOcorrencia>("MAUS_TRATOS");
+  const [outroTipoOcorrencia, setOutroTipoOcorrencia] = useState("");
+  const [abaAdmin, setAbaAdmin] = useState<AbaAdmin>("visaoGeral");
+
+  const [filtroTipoAdmin, setFiltroTipoAdmin] = useState("TODOS");
+  const [filtroStatusAdmin, setFiltroStatusAdmin] = useState("TODOS");
+
   const role = user?.user_metadata?.role || "user";
 
   const statusOptions = [
@@ -75,9 +119,9 @@ function App() {
   ];
 
   const estadosBrasil = [
-    "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS",
-    "MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC",
-    "SP","SE","TO"
+    "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS",
+    "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC",
+    "SP", "SE", "TO"
   ];
 
   const validarEmail = (valor: string) => {
@@ -155,6 +199,43 @@ function App() {
     }
     return { texto: "Senha forte", largura: "100%", cor: "#28a745" };
   }, [password, pontuacaoSenha]);
+
+  const denunciasFiltradasAdmin = useMemo(() => {
+    return denuncias.filter((d) => {
+      const tipoOk =
+        filtroTipoAdmin === "TODOS" || d.tipo_ocorrencia === filtroTipoAdmin;
+
+      const statusOk =
+        filtroStatusAdmin === "TODOS" || d.status === filtroStatusAdmin;
+
+      return tipoOk && statusOk;
+    });
+  }, [denuncias, filtroTipoAdmin, filtroStatusAdmin]);
+
+  const resumoPorTipo = useMemo(() => {
+    return tiposOcorrencia
+      .map((tipo) => ({
+        label: tipo.label,
+        total: denuncias.filter((d) => d.tipo_ocorrencia === tipo.value).length,
+      }))
+      .filter((item) => item.total > 0);
+  }, [denuncias]);
+
+  const resumoPorGravidade = useMemo(() => {
+    const totais = {
+      BAIXA: 0,
+      MEDIA: 0,
+      ALTA: 0,
+      CRITICA: 0,
+    };
+
+    denuncias.forEach((d) => {
+      const gravidade = (d.gravidade as Gravidade) || "BAIXA";
+      totais[gravidade] += 1;
+    });
+
+    return totais;
+  }, [denuncias]);
 
   const senhasCoincidem =
     confirmarSenha.length > 0 && password === confirmarSenha;
@@ -342,6 +423,18 @@ function App() {
       ? "Anônimo"
       : user?.user_metadata?.nome || user?.email || "Usuário";
 
+    if (!tipoOcorrencia) {
+      alert("Selecione o tipo de ocorrência");
+      return;
+    }
+
+    if (tipoOcorrencia === "OUTROS" && !outroTipoOcorrencia.trim()) {
+      alert('Descreva o tipo da ocorrência ao selecionar "Outros"');
+      return;
+    }
+
+    const gravidade = obterGravidadePorTipo(tipoOcorrencia);
+
     const { error } = await supabase.from("denuncias").insert([
       {
         titulo,
@@ -353,6 +446,14 @@ function App() {
         status: "Pendente",
         latitude: localizacaoConfirmada ? coords?.lat : null,
         longitude: localizacaoConfirmada ? coords?.lng : null,
+
+        tipo_ocorrencia: tipoOcorrencia,
+        tipo_ocorrencia_outros:
+          tipoOcorrencia === "OUTROS" ? outroTipoOcorrencia.trim() : null,
+        gravidade,
+        cidade,
+        estado,
+        cep,
       },
     ]);
 
@@ -376,6 +477,8 @@ function App() {
 
     setMostrarForm(false);
     carregarDenuncias();
+    setTipoOcorrencia("MAUS_TRATOS");
+    setOutroTipoOcorrencia("");
   };
 
   const atualizarStatus = async (id: string, novoStatus: string) => {
@@ -648,6 +751,56 @@ function App() {
           </p>
 
           <button onClick={handleLogout}>Sair</button>
+          {role === "admin" && (
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                marginTop: 20,
+                marginBottom: 20,
+                flexWrap: "wrap",
+              }}
+            >
+              <button
+                onClick={() => setAbaAdmin("visaoGeral")}
+                style={{
+                  padding: "8px 12px",
+                  borderRadius: 8,
+                  border: "1px solid #ccc",
+                  backgroundColor: abaAdmin === "visaoGeral" ? "#222" : "#fff",
+                  color: abaAdmin === "visaoGeral" ? "#fff" : "#000",
+                }}
+              >
+                Visão geral
+              </button>
+
+              <button
+                onClick={() => setAbaAdmin("denuncias")}
+                style={{
+                  padding: "8px 12px",
+                  borderRadius: 8,
+                  border: "1px solid #ccc",
+                  backgroundColor: abaAdmin === "denuncias" ? "#222" : "#fff",
+                  color: abaAdmin === "denuncias" ? "#fff" : "#000",
+                }}
+              >
+                Denúncias
+              </button>
+
+              <button
+                onClick={() => setAbaAdmin("relatorios")}
+                style={{
+                  padding: "8px 12px",
+                  borderRadius: 8,
+                  border: "1px solid #ccc",
+                  backgroundColor: abaAdmin === "relatorios" ? "#222" : "#fff",
+                  color: abaAdmin === "relatorios" ? "#fff" : "#000",
+                }}
+              >
+                Relatórios
+              </button>
+            </div>
+          )}
 
           {role === "user" && (
             <div style={{ marginTop: 20 }}>
@@ -673,6 +826,25 @@ function App() {
                     onChange={(e) => setTitulo(e.target.value)}
                     style={normalInputStyle}
                   />
+                  <select
+                    value={tipoOcorrencia}
+                    onChange={(e) => setTipoOcorrencia(e.target.value as TipoOcorrencia)}
+                    style={normalInputStyle}
+                  >
+                    {tiposOcorrencia.map((tipo) => (
+                      <option key={tipo.value} value={tipo.value}>
+                        {tipo.label}
+                      </option>
+                    ))}
+                  </select>
+                  {tipoOcorrencia === "OUTROS" && (
+                    <input
+                      placeholder="Descreva o tipo da ocorrência"
+                      value={outroTipoOcorrencia}
+                      onChange={(e) => setOutroTipoOcorrencia(e.target.value)}
+                      style={normalInputStyle}
+                    />
+                  )}
 
                   <textarea
                     placeholder="Descrição"
@@ -913,103 +1085,240 @@ function App() {
             </div>
           )}
 
-          <div style={{ marginTop: 30 }}>
-            <h3>{role === "admin" ? "Todas as denúncias" : "Suas denúncias"}</h3>
-
-            <div
-              style={{
-                maxHeight:
-                  role === "admin"
-                    ? "420px"
-                    : mostrarTodos
-                    ? "320px"
-                    : "unset",
-                overflowY:
-                  role === "admin"
-                    ? "auto"
-                    : mostrarTodos
-                    ? "auto"
-                    : "visible",
-                paddingRight:
-                  role === "admin" || mostrarTodos ? "8px" : "0",
-              }}
-            >
-              {denunciasExibidas.length === 0 && (
-                <p>Nenhuma denúncia encontrada.</p>
-              )}
-
-              {denunciasExibidas.map((d) => (
+          {(role !== "admin" || abaAdmin === "denuncias") && (
+            <div style={{ marginTop: 30 }}>
+              <h3>{role === "admin" ? "Todas as denúncias" : "Suas denúncias"}</h3>
+              {role === "admin" && (
                 <div
-                  key={d.id}
                   style={{
-                    border: "1px solid #ccc",
-                    padding: 12,
-                    marginBottom: 12,
-                    borderRadius: 8,
-                    backgroundColor: getStatusColor(d.status),
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: 10,
+                    marginBottom: 16,
                   }}
                 >
-                  <strong>{d.titulo}</strong>
-                  <p>{d.descricao}</p>
-                  <small>{d.endereco}</small>
+                  <select
+                    value={filtroTipoAdmin}
+                    onChange={(e) => setFiltroTipoAdmin(e.target.value)}
+                    style={normalInputStyle}
+                  >
+                    <option value="TODOS">Todos os tipos</option>
+                    {tiposOcorrencia.map((tipo) => (
+                      <option key={tipo.value} value={tipo.value}>
+                        {tipo.label}
+                      </option>
+                    ))}
+                  </select>
 
-                  <p>
-                    <strong>Autor:</strong> {d.nome_usuario || "Não informado"}
-                  </p>
-
-                  <p>
-                    <small>
-                      {d.created_at
-                        ? new Date(d.created_at).toLocaleString()
-                        : "Sem data"}
-                    </small>
-                  </p>
-
-                  {d.latitude && d.longitude && (
-                    <p style={{ fontSize: 13 }}>
-                      📍 {Number(d.latitude).toFixed(5)},{" "}
-                      {Number(d.longitude).toFixed(5)}
-                    </p>
-                  )}
-
-                  {role === "admin" ? (
-                    <div style={{ marginTop: 10 }}>
-                      <label>
-                        <strong>Status:</strong>{" "}
-                      </label>
-                      <select
-                        value={d.status}
-                        onChange={(e) =>
-                          atualizarStatus(d.id, e.target.value)
-                        }
-                        style={{ padding: 6, marginLeft: 8 }}
-                      >
-                        {statusOptions.map((status) => (
-                          <option key={status} value={status}>
-                            {status}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  ) : (
-                    <p>
-                      <strong>Status:</strong> {d.status}
-                    </p>
-                  )}
+                  <select
+                    value={filtroStatusAdmin}
+                    onChange={(e) => setFiltroStatusAdmin(e.target.value)}
+                    style={normalInputStyle}
+                  >
+                    <option value="TODOS">Todos os status</option>
+                    {statusOptions.map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              ))}
+              )}
             </div>
+          )}
 
-            {role === "user" && denuncias.length > 1 && (
-              <button onClick={() => setMostrarTodos(!mostrarTodos)}>
-                {mostrarTodos ? "Mostrar menos" : "..."}
-              </button>
+          <div
+            style={{
+              maxHeight:
+                role === "admin"
+                  ? "420px"
+                  : mostrarTodos
+                    ? "320px"
+                    : "unset",
+              overflowY:
+                role === "admin"
+                  ? "auto"
+                  : mostrarTodos
+                    ? "auto"
+                    : "visible",
+              paddingRight:
+                role === "admin" || mostrarTodos ? "8px" : "0",
+            }}
+          >
+            {role === "admin" && abaAdmin === "visaoGeral" && (
+              <div style={{ marginTop: 20, marginBottom: 30 }}>
+                <h3>Resumo administrativo</h3>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                    gap: 12,
+                    marginBottom: 16,
+                  }}
+                >
+                  <div style={{ border: "1px solid #ccc", borderRadius: 8, padding: 12 }}>
+                    <strong>Total de denúncias</strong>
+                    <p style={{ margin: "8px 0 0 0" }}>{denuncias.length}</p>
+                  </div>
+
+                  <div style={{ border: "1px solid #ccc", borderRadius: 8, padding: 12 }}>
+                    <strong>Críticas</strong>
+                    <p style={{ margin: "8px 0 0 0" }}>{resumoPorGravidade.CRITICA}</p>
+                  </div>
+
+                  <div style={{ border: "1px solid #ccc", borderRadius: 8, padding: 12 }}>
+                    <strong>Altas</strong>
+                    <p style={{ margin: "8px 0 0 0" }}>{resumoPorGravidade.ALTA}</p>
+                  </div>
+
+                  <div style={{ border: "1px solid #ccc", borderRadius: 8, padding: 12 }}>
+                    <strong>Em atendimento</strong>
+                    <p style={{ margin: "8px 0 0 0" }}>
+                      {denuncias.filter((d) => d.status === "Em atendimento").length}
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{ border: "1px solid #ccc", borderRadius: 8, padding: 12 }}>
+                  <strong>Ocorrências por tipo</strong>
+                  <div style={{ marginTop: 10 }}>
+                    {resumoPorTipo.length === 0 ? (
+                      <p style={{ margin: 0 }}>Nenhuma denúncia cadastrada ainda.</p>
+                    ) : (
+                      resumoPorTipo.map((item) => (
+                        <div
+                          key={item.label}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            padding: "6px 0",
+                            borderBottom: "1px solid #eee",
+                          }}
+                        >
+                          <span>{item.label}</span>
+                          <strong>{item.total}</strong>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
             )}
+            {(role === "admin" ? denunciasFiltradasAdmin : denunciasExibidas).length === 0 && (
+              <p>Nenhuma denúncia encontrada.</p>
+            )}
+
+            {(role === "admin" ? denunciasFiltradasAdmin : denunciasExibidas).map((d) => (
+              <div
+                key={d.id}
+                style={{
+                  border: "1px solid #ccc",
+                  padding: 12,
+                  marginBottom: 12,
+                  borderRadius: 8,
+                  backgroundColor: getStatusColor(d.status),
+                }}
+              >
+                <strong>{d.titulo}</strong>
+                <p>{d.descricao}</p>
+                <small>{d.endereco}</small>
+                <p style={{ marginTop: 8, marginBottom: 4 }}>
+                  <strong>Tipo:</strong> {formatarTipoOcorrencia(d.tipo_ocorrencia)}
+                </p>
+
+                {role === "admin" && (
+                  <p style={{ marginTop: 0, marginBottom: 4 }}>
+                    <strong>Gravidade:</strong> {d.gravidade || "Não informada"}
+                  </p>
+                )}
+
+                {d.tipo_ocorrencia === "OUTROS" && d.tipo_ocorrencia_outros && (
+                  <p style={{ marginTop: 0, marginBottom: 4 }}>
+                    <strong>Complemento:</strong> {d.tipo_ocorrencia_outros}
+                  </p>
+                )}
+
+                <p>
+                  <strong>Autor:</strong> {d.nome_usuario || "Não informado"}
+                </p>
+
+                <p>
+                  <small>
+                    {d.created_at
+                      ? new Date(d.created_at).toLocaleString()
+                      : "Sem data"}
+                  </small>
+                </p>
+
+                {d.latitude && d.longitude && (
+                  <p style={{ fontSize: 13 }}>
+                    📍 {Number(d.latitude).toFixed(5)},{" "}
+                    {Number(d.longitude).toFixed(5)}
+                  </p>
+                )}
+
+
+                {role === "admin" ? (
+                  <div style={{ marginTop: 10 }}>
+                    <label>
+                      <strong>Status:</strong>{" "}
+                    </label>
+                    <select
+                      value={d.status}
+                      onChange={(e) => atualizarStatus(d.id, e.target.value)}
+                      style={{ padding: 6, marginLeft: 8 }}
+                    >
+                      {statusOptions.map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  <p>
+                    <strong>Status:</strong> {d.status}
+                  </p>
+                )} 
+              </div>
+            ))}
           </div>
+
+          {role === "user" && denuncias.length > 1 && (
+            <button onClick={() => setMostrarTodos(!mostrarTodos)}>
+              {mostrarTodos ? "Mostrar menos" : "..."}
+            </button>
+          )}
+          {role === "admin" && abaAdmin === "relatorios" && (
+            <div style={{ marginTop: 30 }}>
+              <h3>Base para relatórios</h3>
+
+              <div style={{ border: "1px solid #ccc", borderRadius: 8, padding: 12 }}>
+                <p><strong>Total de denúncias:</strong> {denuncias.length}</p>
+                <p><strong>Total de denúncias críticas:</strong> {resumoPorGravidade.CRITICA}</p>
+                <p><strong>Total de denúncias altas:</strong> {resumoPorGravidade.ALTA}</p>
+                <p><strong>Tipos diferentes registrados:</strong> {resumoPorTipo.length}</p>
+
+                <hr style={{ margin: "12px 0" }} />
+
+                <p style={{ marginBottom: 8 }}>
+                  Próximo passo sugerido:
+                </p>
+                <ul style={{ marginTop: 0 }}>
+                  <li>exportar CSV/PDF</li>
+                  <li>gráfico por tipo de ocorrência</li>
+                  <li>gráfico por status</li>
+                  <li>gráfico por cidade/bairro</li>
+                </ul>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>
   );
 }
+
 
 export default App;
