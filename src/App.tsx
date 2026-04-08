@@ -21,8 +21,33 @@ function App() {
 
   const role = user?.user_metadata?.role || "user";
 
+  const statusOptions = [
+    "Pendente",
+    "Em análise",
+    "Em atendimento",
+    "Resolvido",
+    "Cancelado",
+  ];
+
   const validarEmail = (valor: string) => {
     return valor.includes("@") && valor.includes(".");
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Pendente":
+        return "#fff3cd";
+      case "Em análise":
+        return "#d1ecf1";
+      case "Em atendimento":
+        return "#cce5ff";
+      case "Resolvido":
+        return "#d4edda";
+      case "Cancelado":
+        return "#f8d7da";
+      default:
+        return "#f5f5f5";
+    }
   };
 
   const handleSignup = async () => {
@@ -87,13 +112,9 @@ function App() {
     setMostrarForm(false);
   };
 
- 
-    const getUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user);
-      console.log("USER:", data.user);
-      console.log("ROLE METADATA:", data.user?.user_metadata?.role);
-    
+  const getUser = async () => {
+    const { data } = await supabase.auth.getUser();
+    setUser(data.user);
   };
 
   const carregarDenuncias = async () => {
@@ -140,7 +161,7 @@ function App() {
         user_id: user.id,
         nome_usuario: nomeAutor,
         anonimo,
-        status: "aberto",
+        status: "Pendente",
       },
     ]);
 
@@ -155,6 +176,20 @@ function App() {
     setEndereco("");
     setAnonimo(false);
     setMostrarForm(false);
+    carregarDenuncias();
+  };
+
+  const atualizarStatus = async (id: string, novoStatus: string) => {
+    const { error } = await supabase
+      .from("denuncias")
+      .update({ status: novoStatus })
+      .eq("id", id);
+
+    if (error) {
+      alert("Erro ao atualizar status: " + error.message);
+      return;
+    }
+
     carregarDenuncias();
   };
 
@@ -310,38 +345,71 @@ function App() {
           <div style={{ marginTop: 30 }}>
             <h3>{role === "admin" ? "Todas as denúncias" : "Suas denúncias"}</h3>
 
-            {denunciasExibidas.length === 0 && (
-              <p>Nenhuma denúncia encontrada.</p>
-            )}
+            <div
+              style={{
+                maxHeight: role === "admin" ? "420px" : "unset",
+                overflowY: role === "admin" ? "auto" : "visible",
+                paddingRight: role === "admin" ? "8px" : "0",
+              }}
+            >
+              {denunciasExibidas.length === 0 && (
+                <p>Nenhuma denúncia encontrada.</p>
+              )}
 
-            {denunciasExibidas.map((d) => (
-              <div
-                key={d.id}
-                style={{
-                  border: "1px solid #ccc",
-                  padding: 12,
-                  marginBottom: 12,
-                  borderRadius: 8,
-                  backgroundColor:
-                    d.status === "aberto" ? "#ffe5e5" : "#e5ffe5",
-                }}
-              >
-                <strong>{d.titulo}</strong>
-                <p>{d.descricao}</p>
-                <small>{d.endereco}</small>
-                <p>Status: {d.status}</p>
-                <p>
-                  <strong>Autor:</strong> {d.nome_usuario || "Não informado"}
-                </p>
-                <p>
-                  <small>
-                    {d.created_at
-                      ? new Date(d.created_at).toLocaleString()
-                      : "Sem data"}
-                  </small>
-                </p>
-              </div>
-            ))}
+              {denunciasExibidas.map((d) => (
+                <div
+                  key={d.id}
+                  style={{
+                    border: "1px solid #ccc",
+                    padding: 12,
+                    marginBottom: 12,
+                    borderRadius: 8,
+                    backgroundColor: getStatusColor(d.status),
+                  }}
+                >
+                  <strong>{d.titulo}</strong>
+                  <p>{d.descricao}</p>
+                  <small>{d.endereco}</small>
+
+                  <p>
+                    <strong>Autor:</strong> {d.nome_usuario || "Não informado"}
+                  </p>
+
+                  <p>
+                    <small>
+                      {d.created_at
+                        ? new Date(d.created_at).toLocaleString()
+                        : "Sem data"}
+                    </small>
+                  </p>
+
+                  {role === "admin" ? (
+                    <div style={{ marginTop: 10 }}>
+                      <label>
+                        <strong>Status:</strong>{" "}
+                      </label>
+                      <select
+                        value={d.status}
+                        onChange={(e) =>
+                          atualizarStatus(d.id, e.target.value)
+                        }
+                        style={{ padding: 6, marginLeft: 8 }}
+                      >
+                        {statusOptions.map((status) => (
+                          <option key={status} value={status}>
+                            {status}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ) : (
+                    <p>
+                      <strong>Status:</strong> {d.status}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
 
             {role === "user" && denuncias.length > 1 && (
               <button onClick={() => setMostrarTodos(!mostrarTodos)}>
