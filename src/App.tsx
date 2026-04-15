@@ -101,6 +101,7 @@ function App() {
 
   // Mapa
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([-23.2643, -47.2992]);
   const [localizacaoConfirmada, setLocalizacaoConfirmada] = useState(false);
 
   const [tipoOcorrencia, setTipoOcorrencia] = useState<TipoOcorrencia>("MAUS_TRATOS");
@@ -506,6 +507,11 @@ function App() {
       carregarDenuncias();
     }
   }, [user]);
+  useEffect(() => {
+    if (mostrarEnderecoModal) {
+      buscarLocalizacaoAtual();
+    }
+  }, [mostrarEnderecoModal]);
 
   const denunciasExibidas =
     role === "user" && !mostrarTodos ? denuncias.slice(0, 1) : denuncias;
@@ -546,7 +552,31 @@ function App() {
     color: "#555",
     padding: "4px 6px",
   };
+  const buscarLocalizacaoAtual = () => {
+    if (!navigator.geolocation) {
+      return;
+    }
 
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        setMapCenter([latitude, longitude]);
+        setCoords({ lat: latitude, lng: longitude });
+        setLocalizacaoConfirmada(false);
+      },
+      (error) => {
+        console.warn("Não foi possível obter localização atual:", error.message);
+        setMapCenter([-23.2643, -47.2992]);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000,
+      }
+    );
+  };
   return (
     <div
       style={{
@@ -556,7 +586,7 @@ function App() {
         fontFamily: "Arial, sans-serif",
       }}
     >
-      
+
       {!user ? (
         <>
           {modo === "login" ? (
@@ -624,26 +654,7 @@ function App() {
                   Login
                 </button>
 
-                {/* Social Buttons */}
-                <div className="flex gap-3 mb-6">
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      alert("Login com Facebook em desenvolvimento");
-                    }}
-                    className="flex-1 bg-teal-100 hover:bg-teal-200 text-teal-700 font-semibold py-3 rounded-lg transition"
-                  >
-                    f
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      alert("Login com Instagram em desenvolvimento");
-                    }}
-                    className="flex-1 bg-teal-100 hover:bg-teal-200 text-teal-700 font-semibold py-3 rounded-lg transition"
-                  >
-                    📷
-                  </button>
+               
                 </div>
 
                 {/* Signup Link */}
@@ -657,17 +668,16 @@ function App() {
                   </button>
                 </p>
               </div>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 px-4 py-8">
-              <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden">
-                {/* Header com Logo */}
-                <div className="bg-gradient-to-b from-teal-400 to-teal-500 py-8 text-center">
-                  <h1 className="text-4xl font-bold text-white tracking-wider">SOS BICHOS</h1>
-                </div>
+            ) : (
+              <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 px-4 py-8">
+                <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden">
+                  {/* Header com Logo */}
+                  <div className="bg-gradient-to-b from-teal-400 to-teal-500 py-8 text-center">
+                    <h1 className="text-4xl font-bold text-white tracking-wider">SOS BICHOS</h1>
+                  </div>
 
-                {/* Formulário */}
-                <div className="p-6">
+                  {/* Formulário */}
+                  <div className="p-6">
                   {/* Nome */}
                   <div className="mb-4">
                     <label className="block text-gray-800 text-sm font-bold mb-2">
@@ -816,41 +826,22 @@ function App() {
                     Cadastrar
                   </button>
 
-                  {/* Botões de Redes Sociais */}
-                  <div className="flex gap-3 justify-center mb-6">
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        alert("Login com Facebook em desenvolvimento");
-                      }}
-                      className="w-12 h-12 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-full transition flex items-center justify-center text-lg"
-                    >
-                      f
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        alert("Login com Instagram em desenvolvimento");
-                      }}
-                      className="w-12 h-12 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-full transition flex items-center justify-center text-lg"
-                    >
-                      📷
-                    </button>
-                  </div>
 
-                  {/* Link para Login */}
-                  <p className="text-center text-gray-700 text-sm">
-                    Já tenho cadastro{" "}
-                    <button
-                      onClick={() => setModo("login")}
-                      className="text-teal-600 hover:text-teal-700 font-semibold"
-                    >
-                      Faça login
-                    </button>
-                  </p>
                 </div>
+
+                {/* Link para Login */}
+                <p className="text-center text-gray-700 text-sm">
+                  Já tenho cadastro{" "}
+                  <button
+                    onClick={() => setModo("login")}
+                    className="text-teal-600 hover:text-teal-700 font-semibold"
+                  >
+                    Faça login
+                  </button>
+                </p>
               </div>
             </div>
+
           )}
         </>
       ) : (
@@ -1114,7 +1105,8 @@ function App() {
                           </p>
 
                           <MapContainer
-                            center={[-23.2643, -47.2992] as [number, number]}
+                            key={`${mapCenter[0]}-${mapCenter[1]}`}
+                            center={mapCenter}
                             zoom={13}
                             style={{
                               height: "300px",
@@ -1156,6 +1148,7 @@ function App() {
                                 onClick={() => {
                                   setCoords(null);
                                   setLocalizacaoConfirmada(false);
+                                  setMapCenter([-23.2643, -47.2992]);
                                 }}
                               >
                                 Limpar localização
