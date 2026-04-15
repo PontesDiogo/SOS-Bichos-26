@@ -556,193 +556,301 @@ function App() {
         fontFamily: "Arial, sans-serif",
       }}
     >
-      <h1>SOS Bichos 🐾</h1>
-
+      
       {!user ? (
         <>
           {modo === "login" ? (
-            <>
-              <h2>Login</h2>
+            <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 px-4">
+              <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-sm w-full">
+                {/* Logo e Título */}
+                <div className="text-center mb-8">
+                  <h1 className="text-3xl font-bold text-gray-800 mb-2">SOS Bichos 🐾</h1>
+                  <p className="text-gray-600 text-sm">Sistema de proteção animal</p>
+                </div>
 
-              <input
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={normalInputStyle}
-              />
+                {/* Email Input */}
+                <div className="mb-5">
+                  <label className="block text-gray-700 text-sm font-semibold mb-2">
+                    Endereço de email
+                  </label>
+                  <input
+                    placeholder="Seu email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-4 py-3 bg-teal-50 border-2 border-teal-200 rounded-lg focus:outline-none focus:border-teal-500 focus:bg-white transition"
+                  />
+                </div>
 
-              <div style={senhaWrapperStyle}>
-                <input
-                  type={mostrarSenha ? "text" : "password"}
-                  placeholder="Senha"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  style={inputStyle}
-                />
-                <button
-                  type="button"
-                  onClick={() => setMostrarSenha(!mostrarSenha)}
-                  style={botaoOlhoStyle}
+                {/* Password Input */}
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-semibold mb-2">
+                    Senha
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={mostrarSenha ? "text" : "password"}
+                      placeholder="Sua senha"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full px-4 py-3 bg-teal-50 border-2 border-teal-200 rounded-lg focus:outline-none focus:border-teal-500 focus:bg-white transition"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setMostrarSenha(!mostrarSenha)}
+                      className="absolute right-3 top-3 text-teal-600 hover:text-teal-700 text-lg"
+                    >
+                      {mostrarSenha ? "👁️" : "👁️‍🗨️"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Forgot Password Link */}
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    alert("Recuperação de senha em desenvolvimento");
+                  }}
+                  className="text-sm text-teal-600 hover:text-teal-700 font-medium mb-6 block"
                 >
-                  {mostrarSenha ? "Ocultar" : "Ver"}
+                  Esqueci minha senha
+                </a>
+
+                {/* Login Button */}
+                <button
+                  onClick={handleLogin}
+                  className="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 rounded-lg transition mb-4"
+                >
+                  Login
                 </button>
+
+                {/* Social Buttons */}
+                <div className="flex gap-3 mb-6">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      alert("Login com Facebook em desenvolvimento");
+                    }}
+                    className="flex-1 bg-teal-100 hover:bg-teal-200 text-teal-700 font-semibold py-3 rounded-lg transition"
+                  >
+                    f
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      alert("Login com Instagram em desenvolvimento");
+                    }}
+                    className="flex-1 bg-teal-100 hover:bg-teal-200 text-teal-700 font-semibold py-3 rounded-lg transition"
+                  >
+                    📷
+                  </button>
+                </div>
+
+                {/* Signup Link */}
+                <p className="text-center text-gray-700">
+                  Não possui um cadastro?{" "}
+                  <button
+                    onClick={() => setModo("cadastro")}
+                    className="text-teal-600 hover:text-teal-700 font-semibold"
+                  >
+                    Cadastre-se
+                  </button>
+                </p>
               </div>
-
-              <button onClick={handleLogin}>Entrar</button>
-
-              <p>
-                Não tem conta?{" "}
-                <button onClick={() => setModo("cadastro")}>Cadastrar</button>
-              </p>
-            </>
+            </div>
           ) : (
-            <>
-              <h2>Cadastro</h2>
+            <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 px-4 py-8">
+              <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden">
+                {/* Header com Logo */}
+                <div className="bg-gradient-to-b from-teal-400 to-teal-500 py-8 text-center">
+                  <h1 className="text-4xl font-bold text-white tracking-wider">SOS BICHOS</h1>
+                </div>
 
-              <input
-                placeholder="Nome"
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-                style={normalInputStyle}
-              />
+                {/* Formulário */}
+                <div className="p-6">
+                  {/* Nome */}
+                  <div className="mb-4">
+                    <label className="block text-gray-800 text-sm font-bold mb-2">
+                      Nome:
+                    </label>
+                    <input
+                      placeholder=""
+                      value={nome}
+                      onChange={(e) => setNome(e.target.value)}
+                      className="w-full px-4 py-3 bg-teal-100 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
+                    />
+                  </div>
 
-              <input
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={normalInputStyle}
-              />
+                  {/* Email */}
+                  <div className="mb-4">
+                    <label className="block text-gray-800 text-sm font-bold mb-2">
+                      Endereço de E-mail:
+                    </label>
+                    <input
+                      placeholder=""
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full px-4 py-3 bg-teal-100 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
+                    />
+                  </div>
 
-              <div style={senhaWrapperStyle}>
-                <input
-                  type={mostrarSenha ? "text" : "password"}
-                  placeholder="Senha"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  style={inputStyle}
-                />
-                <button
-                  type="button"
-                  onClick={() => setMostrarSenha(!mostrarSenha)}
-                  style={botaoOlhoStyle}
-                >
-                  {mostrarSenha ? "Ocultar" : "Ver"}
-                </button>
+                  {/* Senha */}
+                  <div className="mb-4">
+                    <label className="block text-gray-800 text-sm font-bold mb-2">
+                      Senha:
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={mostrarSenha ? "text" : "password"}
+                        placeholder=""
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full px-4 py-3 bg-teal-100 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setMostrarSenha(!mostrarSenha)}
+                        className="absolute right-4 top-3 text-teal-600 hover:text-teal-700 text-xl"
+                      >
+                        {mostrarSenha ? "👁️" : "👁️‍🗨️"}
+                      </button>
+                    </div>
+
+                    {/* Força da Senha - Indicador Visual */}
+                    <div className="mt-2">
+                      <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          style={{
+                            width: forcaSenha.largura,
+                            height: "100%",
+                            backgroundColor: forcaSenha.cor,
+                            transition: "all 0.3s ease",
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Requisitos da Senha em tamanho reduzido */}
+                    <div className="mt-2 text-xs space-y-0.5">
+                      <div style={{ color: regrasSenha.min8 ? "#28a745" : "#999" }}>
+                        {regrasSenha.min8 ? "✅" : "○"} 8 caracteres
+                      </div>
+                      <div style={{ color: regrasSenha.maiuscula ? "#28a745" : "#999" }}>
+                        {regrasSenha.maiuscula ? "✅" : "○"} Letra maiúscula
+                      </div>
+                      <div style={{ color: regrasSenha.minuscula ? "#28a745" : "#999" }}>
+                        {regrasSenha.minuscula ? "✅" : "○"} Letra minúscula
+                      </div>
+                      <div style={{ color: regrasSenha.numero ? "#28a745" : "#999" }}>
+                        {regrasSenha.numero ? "✅" : "○"} Número
+                      </div>
+                      <div style={{ color: regrasSenha.especial ? "#28a745" : "#999" }}>
+                        {regrasSenha.especial ? "✅" : "○"} Símbolo especial
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Confirmar Senha */}
+                  <div className="mb-6">
+                    <label className="block text-gray-800 text-sm font-bold mb-2">
+                      Confirmar senha:
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={mostrarConfirmarSenha ? "text" : "password"}
+                        placeholder=""
+                        value={confirmarSenha}
+                        onChange={(e) => setConfirmarSenha(e.target.value)}
+                        className="w-full px-4 py-3 bg-teal-100 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setMostrarConfirmarSenha(!mostrarConfirmarSenha)}
+                        className="absolute right-4 top-3 text-teal-600 hover:text-teal-700 text-xl"
+                      >
+                        {mostrarConfirmarSenha ? "👁️" : "👁️‍🗨️"}
+                      </button>
+                    </div>
+
+                    {/* Validação de Senhas */}
+                    {senhasCoincidem && (
+                      <p className="text-xs text-green-600 font-semibold mt-2">
+                        ✅ As senhas coincidem
+                      </p>
+                    )}
+                    {senhasDiferentes && (
+                      <p className="text-xs text-red-600 font-semibold mt-2">
+                        ❌ As senhas não coincidem
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Checkbox Política de Privacidade */}
+                  <div className="mb-6 flex items-start gap-2">
+                    <input
+                      type="checkbox"
+                      id="politica"
+                      className="w-4 h-4 mt-0.5 rounded border-gray-300 text-teal-500 focus:ring-teal-500"
+                      defaultChecked={false}
+                    />
+                    <label htmlFor="politica" className="text-xs text-gray-700">
+                      Li e concordo com os termos de{" "}
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          alert("Link para Política de Privacidade em desenvolvimento");
+                        }}
+                        className="text-teal-600 hover:text-teal-700 font-semibold"
+                      >
+                        Política de Privacidade
+                      </a>
+                    </label>
+                  </div>
+
+                  {/* Botão Cadastrar */}
+                  <button
+                    onClick={handleSignup}
+                    className="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 rounded-lg transition mb-4"
+                  >
+                    Cadastrar
+                  </button>
+
+                  {/* Botões de Redes Sociais */}
+                  <div className="flex gap-3 justify-center mb-6">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        alert("Login com Facebook em desenvolvimento");
+                      }}
+                      className="w-12 h-12 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-full transition flex items-center justify-center text-lg"
+                    >
+                      f
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        alert("Login com Instagram em desenvolvimento");
+                      }}
+                      className="w-12 h-12 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-full transition flex items-center justify-center text-lg"
+                    >
+                      📷
+                    </button>
+                  </div>
+
+                  {/* Link para Login */}
+                  <p className="text-center text-gray-700 text-sm">
+                    Já tenho cadastro{" "}
+                    <button
+                      onClick={() => setModo("login")}
+                      className="text-teal-600 hover:text-teal-700 font-semibold"
+                    >
+                      Faça login
+                    </button>
+                  </p>
+                </div>
               </div>
-
-              <div
-                style={{
-                  height: 8,
-                  backgroundColor: "#e9ecef",
-                  borderRadius: 999,
-                  overflow: "hidden",
-                  marginBottom: 6,
-                }}
-              >
-                <div
-                  style={{
-                    width: forcaSenha.largura,
-                    height: "100%",
-                    backgroundColor: forcaSenha.cor,
-                    transition: "all 0.3s ease",
-                  }}
-                />
-              </div>
-
-              <p
-                style={{
-                  marginTop: 0,
-                  marginBottom: 10,
-                  color: forcaSenha.cor,
-                  fontSize: 14,
-                  fontWeight: 600,
-                }}
-              >
-                {forcaSenha.texto}
-              </p>
-
-              <div
-                style={{
-                  fontSize: 13,
-                  marginBottom: 12,
-                  lineHeight: 1.6,
-                }}
-              >
-                <div style={{ color: regrasSenha.min8 ? "#28a745" : "#666" }}>
-                  {regrasSenha.min8 ? "✅" : "•"} Mínimo de 8 caracteres
-                </div>
-                <div
-                  style={{ color: regrasSenha.minuscula ? "#28a745" : "#666" }}
-                >
-                  {regrasSenha.minuscula ? "✅" : "•"} Letra minúscula
-                </div>
-                <div
-                  style={{ color: regrasSenha.maiuscula ? "#28a745" : "#666" }}
-                >
-                  {regrasSenha.maiuscula ? "✅" : "•"} Letra maiúscula
-                </div>
-                <div style={{ color: regrasSenha.numero ? "#28a745" : "#666" }}>
-                  {regrasSenha.numero ? "✅" : "•"} Número
-                </div>
-                <div
-                  style={{ color: regrasSenha.especial ? "#28a745" : "#666" }}
-                >
-                  {regrasSenha.especial ? "✅" : "•"} Símbolo especial
-                </div>
-              </div>
-
-              <div style={senhaWrapperStyle}>
-                <input
-                  type={mostrarConfirmarSenha ? "text" : "password"}
-                  placeholder="Confirmar senha"
-                  value={confirmarSenha}
-                  onChange={(e) => setConfirmarSenha(e.target.value)}
-                  style={inputStyle}
-                />
-                <button
-                  type="button"
-                  onClick={() =>
-                    setMostrarConfirmarSenha(!mostrarConfirmarSenha)
-                  }
-                  style={botaoOlhoStyle}
-                >
-                  {mostrarConfirmarSenha ? "Ocultar" : "Ver"}
-                </button>
-              </div>
-
-              {senhasCoincidem && (
-                <p
-                  style={{
-                    color: "#28a745",
-                    fontSize: 13,
-                    marginTop: -4,
-                    marginBottom: 10,
-                  }}
-                >
-                  ✅ As senhas coincidem
-                </p>
-              )}
-
-              {senhasDiferentes && (
-                <p
-                  style={{
-                    color: "#dc3545",
-                    fontSize: 13,
-                    marginTop: -4,
-                    marginBottom: 10,
-                  }}
-                >
-                  ❌ As senhas não coincidem
-                </p>
-              )}
-
-              <button onClick={handleSignup}>Cadastrar</button>
-
-              <p>
-                Já tem conta?{" "}
-                <button onClick={() => setModo("login")}>Login</button>
-              </p>
-            </>
+            </div>
           )}
         </>
       ) : (
