@@ -564,7 +564,7 @@ function App() {
 
         setMapCenter([latitude, longitude]);
         setCoords({ lat: latitude, lng: longitude });
-        setLocalizacaoConfirmada(false);
+        setLocalizacaoConfirmada(true);
       },
       (error) => {
         console.warn("Não foi possível obter localização atual:", error.message);
