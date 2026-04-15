@@ -611,136 +611,73 @@ function App() {
       {!user ? (
         <>
           {modo === "login" ? (
-            <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 px-4">
-              <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-sm w-full">
-                {/* Logo e Título */}
-                <div className="text-center mb-8">
-                  <h1 className="text-3xl font-bold text-gray-800 mb-2">SOS Bichos 🐾</h1>
-                  <p className="text-gray-600 text-sm">Sistema de proteção animal</p>
+            <div className="auth-page">
+              <div className="auth-card">
+
+                {/* IMAGEM */}
+                <div className="auth-hero">
+                  <img src="/dog.png" alt="SOS Bichos" />
+                  <div className="auth-title">SOS Bichos</div>
                 </div>
 
-                {/* Email Input */}
-                <div className="mb-5">
-                  <label className="block text-gray-700 text-sm font-semibold mb-2">
-                    Endereço de email
-                  </label>
+                <div className="auth-body">
+                  <label className="auth-label">Endereço de email</label>
                   <input
-                    placeholder="Seu email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-3 bg-teal-50 border-2 border-teal-200 rounded-lg focus:outline-none focus:border-teal-500 focus:bg-white transition"
+                    className="auth-input"
                   />
+
+                  <label className="auth-label">Senha</label>
+                  <input
+                    type={mostrarSenha ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="auth-input"
+                  />
+
+                  <button onClick={handleLogin} className="auth-button">
+                    Login
+                  </button>
+
+                  <button
+                    onClick={() => setModo("recuperarSenha")}
+                    className="auth-link"
+                  >
+                    Esqueci minha senha
+                  </button>
+
+                  <button
+                    onClick={() => setModo("cadastro")}
+                    className="auth-link"
+                  >
+                    Não possui cadastro?
+                  </button>
                 </div>
-
-                {/* Password Input */}
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-semibold mb-2">
-                    Senha
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={mostrarSenha ? "text" : "password"}
-                      placeholder="Sua senha"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-4 py-3 bg-teal-50 border-2 border-teal-200 rounded-lg focus:outline-none focus:border-teal-500 focus:bg-white transition"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setMostrarSenha(!mostrarSenha)}
-                      className="absolute right-3 top-3 text-teal-600 hover:text-teal-700 text-lg"
-                    >
-                      {mostrarSenha ? "👁️" : "👁️‍🗨️"}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Forgot Password Link */}
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setModo("recuperarSenha");
-                  }}
-                  className="text-sm text-teal-600 hover:text-teal-700 font-medium mb-6 block"
-                >
-                  Esqueci minha senha
-                </a>
-
-                {/* Login Button */}
-                <button
-                  onClick={handleLogin}
-                  className="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 rounded-lg transition mb-4"
-                >
-                  Login
-                </button>
-
-
               </div>
-
-              {/* Signup Link */}
-              <p className="text-center text-gray-700">
-                Não possui um cadastro?{" "}
-                <button
-                  onClick={() => setModo("cadastro")}
-                  className="text-teal-600 hover:text-teal-700 font-semibold"
-                >
-                  Cadastre-se
-                </button>
-              </p>
             </div>
           ) : modo === "recuperarSenha" ? (
-            <div style={{
-              maxWidth: 420,
-              margin: "60px auto",
-              padding: 24,
-              backgroundColor: "#fff",
-              borderRadius: 16,
-              boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
-            }}>
-              <h2 style={{ marginTop: 0 }}>Recuperar senha</h2>
-              <p style={{ color: "#666", marginBottom: 16 }}>
-                Informe seu e-mail para receber o link de redefinição.
-              </p>
+            <div className="auth-page">
+              <div className="auth-card">
+                <div className="auth-body">
+                  <h2>Recuperar senha</h2>
 
-              <input
-                placeholder="Seu e-mail"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={normalInputStyle}
-              />
+                  <label className="auth-label">Seu e-mail</label>
+                  <input
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="auth-input"
+                  />
 
-              <button
-                onClick={handleResetPassword}
-                style={{
-                  width: "100%",
-                  padding: 12,
-                  borderRadius: 8,
-                  border: "none",
-                  backgroundColor: "#14b8a6",
-                  color: "#fff",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  marginBottom: 12,
-                }}
-              >
-                Enviar link de recuperação
-              </button>
+                  <button onClick={handleResetPassword} className="auth-button">
+                    Enviar link
+                  </button>
 
-              <button
-                onClick={() => setModo("login")}
-                style={{
-                  width: "100%",
-                  padding: 12,
-                  borderRadius: 8,
-                  border: "1px solid #ccc",
-                  backgroundColor: "#fff",
-                  color: "#333",
-                  cursor: "pointer",
-                }}
-              >
-                Voltar para login
-              </button>
+                  <button onClick={() => setModo("login")} className="auth-link">
+                    Voltar
+                  </button>
+                </div>
+              </div>
             </div>) : (
             <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 px-4 py-8">
               <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden">
