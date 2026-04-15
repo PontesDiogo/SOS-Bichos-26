@@ -72,7 +72,7 @@ const formatarTipoOcorrencia = (tipo: string) => {
 function App() {
   const [user, setUser] = useState<any>(null);
 
-  const [modo, setModo] = useState<"login" | "cadastro">("login");
+  const [modo, setModo] = useState<"login" | "cadastro" | "recuperarSenha">("login");
 
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
@@ -202,6 +202,27 @@ function App() {
     }
     return { texto: "Senha forte", largura: "100%", cor: "#28a745" };
   }, [password, pontuacaoSenha]);
+
+  const handleResetPassword = async () => {
+    if (!validarEmail(email)) {
+      alert("Informe um e-mail válido");
+      return;
+    }
+
+    const emailLimpo = email.trim().toLowerCase();
+
+    const { error } = await supabase.auth.resetPasswordForEmail(emailLimpo, {
+      redirectTo: window.location.origin,
+    });
+
+    if (error) {
+      alert("Erro ao solicitar recuperação de senha: " + error.message);
+      return;
+    }
+
+    alert("Se existir uma conta com esse e-mail, o link de recuperação será enviado.");
+    setModo("login");
+  };
 
   const denunciasFiltradasAdmin = useMemo(() => {
     return denuncias.filter((d) => {
@@ -639,7 +660,7 @@ function App() {
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
-                    alert("Recuperação de senha em desenvolvimento");
+                    setModo("recuperarSenha");
                   }}
                   className="text-sm text-teal-600 hover:text-teal-700 font-medium mb-6 block"
                 >
@@ -654,30 +675,82 @@ function App() {
                   Login
                 </button>
 
-               
+
+              </div>
+
+              {/* Signup Link */}
+              <p className="text-center text-gray-700">
+                Não possui um cadastro?{" "}
+                <button
+                  onClick={() => setModo("cadastro")}
+                  className="text-teal-600 hover:text-teal-700 font-semibold"
+                >
+                  Cadastre-se
+                </button>
+              </p>
+            </div>
+          ) : modo === "recuperarSenha" ? (
+            <div style={{
+              maxWidth: 420,
+              margin: "60px auto",
+              padding: 24,
+              backgroundColor: "#fff",
+              borderRadius: 16,
+              boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+            }}>
+              <h2 style={{ marginTop: 0 }}>Recuperar senha</h2>
+              <p style={{ color: "#666", marginBottom: 16 }}>
+                Informe seu e-mail para receber o link de redefinição.
+              </p>
+
+              <input
+                placeholder="Seu e-mail"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={normalInputStyle}
+              />
+
+              <button
+                onClick={handleResetPassword}
+                style={{
+                  width: "100%",
+                  padding: 12,
+                  borderRadius: 8,
+                  border: "none",
+                  backgroundColor: "#14b8a6",
+                  color: "#fff",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  marginBottom: 12,
+                }}
+              >
+                Enviar link de recuperação
+              </button>
+
+              <button
+                onClick={() => setModo("login")}
+                style={{
+                  width: "100%",
+                  padding: 12,
+                  borderRadius: 8,
+                  border: "1px solid #ccc",
+                  backgroundColor: "#fff",
+                  color: "#333",
+                  cursor: "pointer",
+                }}
+              >
+                Voltar para login
+              </button>
+            </div>) : (
+            <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 px-4 py-8">
+              <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden">
+                {/* Header com Logo */}
+                <div className="bg-gradient-to-b from-teal-400 to-teal-500 py-8 text-center">
+                  <h1 className="text-4xl font-bold text-white tracking-wider">SOS BICHOS</h1>
                 </div>
 
-                {/* Signup Link */}
-                <p className="text-center text-gray-700">
-                  Não possui um cadastro?{" "}
-                  <button
-                    onClick={() => setModo("cadastro")}
-                    className="text-teal-600 hover:text-teal-700 font-semibold"
-                  >
-                    Cadastre-se
-                  </button>
-                </p>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 px-4 py-8">
-                <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden">
-                  {/* Header com Logo */}
-                  <div className="bg-gradient-to-b from-teal-400 to-teal-500 py-8 text-center">
-                    <h1 className="text-4xl font-bold text-white tracking-wider">SOS BICHOS</h1>
-                  </div>
-
-                  {/* Formulário */}
-                  <div className="p-6">
+                {/* Formulário */}
+                <div className="p-6">
                   {/* Nome */}
                   <div className="mb-4">
                     <label className="block text-gray-800 text-sm font-bold mb-2">
