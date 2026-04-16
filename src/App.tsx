@@ -8,7 +8,8 @@ import "leaflet/dist/leaflet.css";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
@@ -47,34 +48,82 @@ type TipoOcorrencia =
 type Gravidade = "BAIXA" | "MEDIA" | "ALTA" | "CRITICA";
 type AbaAdmin = "visaoGeral" | "denuncias" | "relatorios";
 
+type Denuncia = {
+  id: string;
+  titulo: string;
+  descricao: string;
+  endereco: string;
+  user_id: string;
+  nome_usuario: string;
+  anonimo: boolean;
+  status: string;
+  latitude: number | null;
+  longitude: number | null;
+  tipo_ocorrencia: TipoOcorrencia;
+  tipo_ocorrencia_outros: string | null;
+  gravidade: Gravidade | null;
+  cidade: string | null;
+  estado: string | null;
+  cep: string | null;
+  created_at: string | null;
+};
+
 const tiposOcorrencia: {
   value: TipoOcorrencia;
   label: string;
   gravidade: Gravidade;
 }[] = [
-  { value: "MAUS_TRATOS", label: "Maus-tratos", gravidade: "CRITICA" },
-  { value: "ANIMAL_FERIDO", label: "Animal ferido", gravidade: "ALTA" },
-  { value: "ANIMAL_ABANDONADO", label: "Animal abandonado", gravidade: "ALTA" },
-  { value: "SITUACAO_DE_RISCO", label: "Animal em situação de risco", gravidade: "ALTA" },
-  { value: "SUSPEITA_ZOONOSE", label: "Suspeita de zoonose", gravidade: "CRITICA" },
-  { value: "INFESTACAO_FOCO_SANITARIO", label: "Infestação / foco sanitário", gravidade: "CRITICA" },
-  { value: "ANIMAL_MORTO_VIA_PUBLICA", label: "Animal morto em via pública", gravidade: "MEDIA" },
-  { value: "SOLICITACAO_RESGATE", label: "Solicitação de resgate", gravidade: "MEDIA" },
-  { value: "OUTROS", label: "Outros", gravidade: "BAIXA" },
-];
+    { value: "MAUS_TRATOS", label: "Maus-tratos", gravidade: "CRITICA" },
+    { value: "ANIMAL_FERIDO", label: "Animal ferido", gravidade: "ALTA" },
+    { value: "ANIMAL_ABANDONADO", label: "Animal abandonado", gravidade: "ALTA" },
+    {
+      value: "SITUACAO_DE_RISCO",
+      label: "Animal em situação de risco",
+      gravidade: "ALTA",
+    },
+    {
+      value: "SUSPEITA_ZOONOSE",
+      label: "Suspeita de zoonose",
+      gravidade: "CRITICA",
+    },
+    {
+      value: "INFESTACAO_FOCO_SANITARIO",
+      label: "Infestação / foco sanitário",
+      gravidade: "CRITICA",
+    },
+    {
+      value: "ANIMAL_MORTO_VIA_PUBLICA",
+      label: "Animal morto em via pública",
+      gravidade: "MEDIA",
+    },
+    {
+      value: "SOLICITACAO_RESGATE",
+      label: "Solicitação de resgate",
+      gravidade: "MEDIA",
+    },
+    { value: "OUTROS", label: "Outros", gravidade: "BAIXA" },
+  ];
 
 const obterGravidadePorTipo = (tipo: TipoOcorrencia): Gravidade => {
-  return tiposOcorrencia.find((item) => item.value === tipo)?.gravidade || "BAIXA";
+  return (
+    tiposOcorrencia.find((item) => item.value === tipo)?.gravidade || "BAIXA"
+  );
 };
 
 const formatarTipoOcorrencia = (tipo: string) => {
-  return tiposOcorrencia.find((item) => item.value === tipo)?.label || tipo || "Não informado";
+  return (
+    tiposOcorrencia.find((item) => item.value === tipo)?.label ||
+    tipo ||
+    "Não informado"
+  );
 };
 
 function App() {
   const [user, setUser] = useState<any>(null);
 
-  const [modo, setModo] = useState<"login" | "cadastro" | "recuperarSenha">("login");
+  const [modo, setModo] = useState<"login" | "cadastro" | "recuperarSenha">(
+    "login"
+  );
 
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
@@ -91,22 +140,25 @@ function App() {
   const [mostrarForm, setMostrarForm] = useState(false);
   const [mostrarEnderecoModal, setMostrarEnderecoModal] = useState(false);
 
-  const [denuncias, setDenuncias] = useState<any[]>([]);
+  const [denuncias, setDenuncias] = useState<Denuncia[]>([]);
   const [mostrarTodos, setMostrarTodos] = useState(false);
 
-  // Endereço
   const [rua, setRua] = useState("");
   const [numero, setNumero] = useState("");
   const [cep, setCep] = useState("");
   const [cidade, setCidade] = useState("");
   const [estado, setEstado] = useState("");
 
-  // Mapa
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [mapCenter, setMapCenter] = useState<[number, number]>([-23.2643, -47.2992]);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
+    null
+  );
+  const [mapCenter, setMapCenter] = useState<[number, number]>([
+    -23.2643, -47.2992,
+  ]);
   const [localizacaoConfirmada, setLocalizacaoConfirmada] = useState(false);
 
-  const [tipoOcorrencia, setTipoOcorrencia] = useState<TipoOcorrencia>("MAUS_TRATOS");
+  const [tipoOcorrencia, setTipoOcorrencia] =
+    useState<TipoOcorrencia>("MAUS_TRATOS");
   const [outroTipoOcorrencia, setOutroTipoOcorrencia] = useState("");
   const [abaAdmin, setAbaAdmin] = useState<AbaAdmin>("visaoGeral");
 
@@ -124,9 +176,33 @@ function App() {
   ];
 
   const estadosBrasil = [
-    "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS",
-    "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC",
-    "SP", "SE", "TO"
+    "AC",
+    "AL",
+    "AP",
+    "AM",
+    "BA",
+    "CE",
+    "DF",
+    "ES",
+    "GO",
+    "MA",
+    "MT",
+    "MS",
+    "MG",
+    "PA",
+    "PB",
+    "PR",
+    "PE",
+    "PI",
+    "RJ",
+    "RN",
+    "RS",
+    "RO",
+    "RR",
+    "SC",
+    "SP",
+    "SE",
+    "TO",
   ];
 
   const validarEmail = (valor: string) => {
@@ -174,10 +250,15 @@ function App() {
 
   const resumoEndereco = useMemo(() => {
     const endereco = montarEndereco();
+
     if (endereco) return endereco;
+
     if (localizacaoConfirmada && coords) {
-      return `Localização confirmada no mapa (${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)})`;
+      return `Localização confirmada no mapa (${coords.lat.toFixed(
+        5
+      )}, ${coords.lng.toFixed(5)})`;
     }
+
     return "Nenhum endereço selecionado";
   }, [rua, numero, cidade, estado, cep, localizacaoConfirmada, coords]);
 
@@ -206,27 +287,6 @@ function App() {
     return { texto: "Senha forte", largura: "100%", cor: "#28a745" };
   }, [password, pontuacaoSenha]);
 
-  const handleResetPassword = async () => {
-    if (!validarEmail(email)) {
-      alert("Informe um e-mail válido");
-      return;
-    }
-
-    const emailLimpo = email.trim().toLowerCase();
-
-    const { error } = await supabase.auth.resetPasswordForEmail(emailLimpo, {
-      redirectTo: window.location.origin,
-    });
-
-    if (error) {
-      alert("Erro ao solicitar recuperação de senha: " + error.message);
-      return;
-    }
-
-    alert("Se existir uma conta com esse e-mail, o link de recuperação será enviado.");
-    setModo("login");
-  };
-
   const denunciasFiltradasAdmin = useMemo(() => {
     return denuncias.filter((d) => {
       const tipoOk =
@@ -249,7 +309,7 @@ function App() {
   }, [denuncias]);
 
   const resumoPorGravidade = useMemo(() => {
-    const totais = {
+    const totais: Record<Gravidade, number> = {
       BAIXA: 0,
       MEDIA: 0,
       ALTA: 0,
@@ -264,11 +324,77 @@ function App() {
     return totais;
   }, [denuncias]);
 
+  const denunciasExibidas =
+    role === "user" && !mostrarTodos ? denuncias.slice(0, 1) : denuncias;
+
   const senhasCoincidem =
     confirmarSenha.length > 0 && password === confirmarSenha;
-
   const senhasDiferentes =
     confirmarSenha.length > 0 && password !== confirmarSenha;
+
+  const limparFormularioDenuncia = () => {
+    setTitulo("");
+    setDescricao("");
+    setAnonimo(false);
+    setRua("");
+    setNumero("");
+    setCep("");
+    setCidade("");
+    setEstado("");
+    setCoords(null);
+    setLocalizacaoConfirmada(false);
+    setMapCenter([-23.2643, -47.2992]);
+    setTipoOcorrencia("MAUS_TRATOS");
+    setOutroTipoOcorrencia("");
+    setMostrarEnderecoModal(false);
+  };
+
+  const getUser = async () => {
+    const { data } = await supabase.auth.getUser();
+    setUser(data.user);
+  };
+
+  const carregarDenuncias = async () => {
+    if (!user) return;
+
+    let query = supabase.from("denuncias").select("*");
+
+    if (role === "user") {
+      query = query.eq("user_id", user.id);
+    }
+
+    const { data, error } = await query.order("created_at", {
+      ascending: false,
+    });
+
+    if (error) {
+      console.error("Erro ao carregar denúncias:", error.message);
+      return;
+    }
+
+    setDenuncias((data as Denuncia[]) || []);
+  };
+
+  const handleResetPassword = async () => {
+    if (!validarEmail(email)) {
+      alert("Informe um e-mail válido");
+      return;
+    }
+
+    const emailLimpo = email.trim().toLowerCase();
+
+    const { error } = await supabase.auth.resetPasswordForEmail(emailLimpo, {
+      redirectTo: window.location.origin,
+    });
+
+    if (error) {
+      alert("Erro ao solicitar recuperação de senha: " + error.message);
+      return;
+    }
+
+    alert("Se existir uma conta com esse e-mail, o link de recuperação será enviado.");
+    setModo("login");
+  };
 
   const handleSignup = async () => {
     if (!nome.trim()) {
@@ -355,32 +481,6 @@ function App() {
     setMostrarEnderecoModal(false);
   };
 
-  const getUser = async () => {
-    const { data } = await supabase.auth.getUser();
-    setUser(data.user);
-  };
-
-  const carregarDenuncias = async () => {
-    if (!user) return;
-
-    let query = supabase.from("denuncias").select("*");
-
-    if (role === "user") {
-      query = query.eq("user_id", user.id);
-    }
-
-    const { data, error } = await query.order("created_at", {
-      ascending: false,
-    });
-
-    if (error) {
-      console.error("Erro ao carregar denúncias:", error.message);
-      return;
-    }
-
-    setDenuncias(data || []);
-  };
-
   const buscarCEP = async () => {
     const cepLimpo = cep.replace(/\D/g, "");
 
@@ -408,9 +508,7 @@ function App() {
   };
 
   const buscarLocalizacaoAtual = () => {
-    if (!navigator.geolocation) {
-      return;
-    }
+    if (!navigator.geolocation) return;
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -514,20 +612,8 @@ function App() {
     }
 
     alert("Denúncia criada!");
-    setTitulo("");
-    setDescricao("");
-    setAnonimo(false);
-    setRua("");
-    setNumero("");
-    setCep("");
-    setCidade("");
-    setEstado("");
-    setCoords(null);
-    setLocalizacaoConfirmada(false);
-    setMapCenter([-23.2643, -47.2992]);
+    limparFormularioDenuncia();
     setMostrarForm(false);
-    setTipoOcorrencia("MAUS_TRATOS");
-    setOutroTipoOcorrencia("");
     carregarDenuncias();
   };
 
@@ -554,11 +640,6 @@ function App() {
       carregarDenuncias();
     }
   }, [user]);
-  useEffect(() => {
-    if (mostrarEnderecoModal) {
-      buscarLocalizacaoAtual();
-    }
-  }, [mostrarEnderecoModal]);
 
   useEffect(() => {
     if (mostrarEnderecoModal) {
@@ -566,21 +647,19 @@ function App() {
     }
   }, [mostrarEnderecoModal]);
 
-const denunciasExibidas =
-  role === "user" && !mostrarTodos ? denuncias.slice(0, 1) : denuncias;
-
-return (
-  <div className="app-shell">
-    <div className="app-container">
-      {!user ? (
-        <>
-          {modo === "login" ? (
-            <div className="auth-page">
-              <div className="auth-card">
-                <div className="auth-hero">
-                  <img src="/dog.png" alt="SOS Bichos" />
-                  <div className="auth-title">SOS Bichos</div>
-                </div>
+  return (
+    <div className="app-shell">
+      <div className="app-container">
+        {!user ? (
+          <>
+            {modo === "login" ? (
+              <div className="auth-page">
+                <div className="auth-card">
+                  <div className="auth-hero">
+                    <div className="auth-overlay">
+                      <div className="auth-title">SOS Bichos</div>
+                    </div>
+                  </div>
 
                   <div className="auth-body">
                     <label className="auth-label">Endereço de email</label>
@@ -639,11 +718,17 @@ return (
                       className="auth-input"
                     />
 
-                    <button onClick={handleResetPassword} className="auth-button">
+                    <button
+                      onClick={handleResetPassword}
+                      className="auth-button"
+                    >
                       Enviar link
                     </button>
 
-                    <button onClick={() => setModo("login")} className="auth-link">
+                    <button
+                      onClick={() => setModo("login")}
+                      className="auth-link"
+                    >
                       Voltar
                     </button>
                   </div>
@@ -673,20 +758,38 @@ return (
                     />
 
                     <label className="auth-label">Senha</label>
-                    <input
-                      type={mostrarSenha ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="auth-input"
-                    />
+                    <div className="password-field">
+                      <input
+                        type={mostrarSenha ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="auth-input"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setMostrarSenha(!mostrarSenha)}
+                      >
+                        {mostrarSenha ? "👁️" : "👁️‍🗨️"}
+                      </button>
+                    </div>
 
                     <label className="auth-label">Confirmar senha</label>
-                    <input
-                      type={mostrarConfirmarSenha ? "text" : "password"}
-                      value={confirmarSenha}
-                      onChange={(e) => setConfirmarSenha(e.target.value)}
-                      className="auth-input"
-                    />
+                    <div className="password-field">
+                      <input
+                        type={mostrarConfirmarSenha ? "text" : "password"}
+                        value={confirmarSenha}
+                        onChange={(e) => setConfirmarSenha(e.target.value)}
+                        className="auth-input"
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setMostrarConfirmarSenha(!mostrarConfirmarSenha)
+                        }
+                      >
+                        {mostrarConfirmarSenha ? "👁️" : "👁️‍🗨️"}
+                      </button>
+                    </div>
 
                     <div style={{ marginBottom: 10 }}>
                       <div
@@ -705,128 +808,41 @@ return (
                             transition: "all 0.3s ease",
                           }}
                         />
+                      </div>
 
-
-                        <input
-                          placeholder="Número"
-                          value={numero}
-                          onChange={(e) => setNumero(e.target.value)}
-                          style={normalInputStyle}
-                        />
-
-                        <input
-                          placeholder="Cidade"
-                          value={cidade}
-                          onChange={(e) => setCidade(e.target.value)}
-                          style={normalInputStyle}
-                        />
-
-                        <select
-                          value={estado}
-                          onChange={(e) => setEstado(e.target.value)}
-                          style={normalInputStyle}
-                        >
-                          <option value="">Selecione o estado</option>
-                          {estadosBrasil.map((uf) => (
-                            <option key={uf} value={uf}>
-                              {uf}
-                            </option>
-                          ))}
-                        </select>
-
-                        <div style={{ marginBottom: 10 }}>
-                          <p style={{ marginBottom: 8 }}>
-                            <strong>Ou selecione no mapa:</strong>
-                          </p>
-
-                          <MapContainer
-                            key={`${mapCenter[0]}-${mapCenter[1]}`}
-                            center={mapCenter}
-                            zoom={13}
-                            style={{
-                              height: "300px",
-                              width: "100%",
-                              borderRadius: 8,
-                              overflow: "hidden",
-                            }}
-                          >
-                            <TileLayer
-                              attribution='&copy; OpenStreetMap contributors'
-                              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                            />
-                            <LocationSelector
-                              setCoords={setCoords}
-                              setLocalizacaoConfirmada={setLocalizacaoConfirmada}
-                            />
-                            {coords && (
-                              <Marker position={[coords.lat, coords.lng]} />
-                            )}
-                          </MapContainer>
-
-                          {coords && (
-                            <div style={{ marginTop: 8 }}>
-                              <p style={{ fontSize: 14, marginBottom: 8 }}>
-                                Local selecionado: {coords.lat.toFixed(5)},{" "}
-                                {coords.lng.toFixed(5)}
-                              </p>
-
-                              <button
-                                type="button"
-                                onClick={() => setLocalizacaoConfirmada(true)}
-                                style={{ marginRight: 8 }}
-                              >
-                                Confirmar localização
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setCoords(null);
-                                  setLocalizacaoConfirmada(false);
-                                  setMapCenter([-23.2643, -47.2992]);
-                                }}
-                              >
-                                Limpar localização
-                              </button>
-
-                              {localizacaoConfirmada && (
-                                <p style={{ color: "#28a745", marginTop: 8 }}>
-                                  ✅ Localização confirmada
-                                </p>
-                              )}
-                            </div>
-                          )}
-                        </div>
-
-                        <div
+                      {forcaSenha.texto && (
+                        <p
                           style={{
-                            display: "flex",
-                            gap: 8,
-                            justifyContent: "flex-end",
+                            fontSize: 13,
+                            marginTop: 8,
+                            color: forcaSenha.cor,
                           }}
                         >
-                          <button
-                            type="button"
-                            onClick={() => setMostrarEnderecoModal(false)}
-                          >
-                            Cancelar
-                          </button>
-                          <button type="button" onClick={confirmarEndereco}>
-                            Confirmar endereço
-                          </button>
-                        </div>
-
-                      </div>
+                          {forcaSenha.texto}
+                        </p>
+                      )}
                     </div>
 
                     {senhasCoincidem && (
-                      <p style={{ color: "#16a34a", fontSize: 13, marginTop: 0 }}>
+                      <p
+                        style={{
+                          color: "#16a34a",
+                          fontSize: 13,
+                          marginTop: 0,
+                        }}
+                      >
                         ✅ As senhas coincidem
                       </p>
                     )}
 
                     {senhasDiferentes && (
-                      <p style={{ color: "#dc2626", fontSize: 13, marginTop: 0 }}>
+                      <p
+                        style={{
+                          color: "#dc2626",
+                          fontSize: 13,
+                          marginTop: 0,
+                        }}
+                      >
                         ❌ As senhas não coincidem
                       </p>
                     )}
@@ -835,7 +851,10 @@ return (
                       Cadastrar
                     </button>
 
-                    <button onClick={() => setModo("login")} className="auth-link">
+                    <button
+                      onClick={() => setModo("login")}
+                      className="auth-link"
+                    >
                       Já tenho cadastro
                     </button>
                   </div>
@@ -858,7 +877,10 @@ return (
                   {user?.user_metadata?.nome || user?.email}
                 </span>
                 <span className="app-tag">Perfil: {role}</span>
-                <button onClick={handleLogout} className="app-button-secondary">
+                <button
+                  onClick={handleLogout}
+                  className="app-button-secondary"
+                >
                   Sair
                 </button>
               </div>
@@ -868,21 +890,33 @@ return (
               <div className="admin-nav">
                 <button
                   onClick={() => setAbaAdmin("visaoGeral")}
-                  className={abaAdmin === "visaoGeral" ? "app-button" : "app-button-secondary"}
+                  className={
+                    abaAdmin === "visaoGeral"
+                      ? "app-button"
+                      : "app-button-secondary"
+                  }
                 >
                   Visão geral
                 </button>
 
                 <button
                   onClick={() => setAbaAdmin("denuncias")}
-                  className={abaAdmin === "denuncias" ? "app-button" : "app-button-secondary"}
+                  className={
+                    abaAdmin === "denuncias"
+                      ? "app-button"
+                      : "app-button-secondary"
+                  }
                 >
                   Denúncias
                 </button>
 
                 <button
                   onClick={() => setAbaAdmin("relatorios")}
-                  className={abaAdmin === "relatorios" ? "app-button" : "app-button-secondary"}
+                  className={
+                    abaAdmin === "relatorios"
+                      ? "app-button"
+                      : "app-button-secondary"
+                  }
                 >
                   Relatórios
                 </button>
@@ -891,7 +925,10 @@ return (
 
             {role === "user" && (
               <div className="section-card">
-                <button onClick={() => setMostrarForm(!mostrarForm)} className="app-button">
+                <button
+                  onClick={() => setMostrarForm(!mostrarForm)}
+                  className="app-button"
+                >
                   {mostrarForm ? "Fechar formulário" : "Nova denúncia 🚨"}
                 </button>
 
@@ -909,7 +946,9 @@ return (
 
                       <select
                         value={tipoOcorrencia}
-                        onChange={(e) => setTipoOcorrencia(e.target.value as TipoOcorrencia)}
+                        onChange={(e) =>
+                          setTipoOcorrencia(e.target.value as TipoOcorrencia)
+                        }
                         className="field-select"
                       >
                         {tiposOcorrencia.map((tipo) => (
@@ -923,7 +962,9 @@ return (
                         <input
                           placeholder="Descreva o tipo da ocorrência"
                           value={outroTipoOcorrencia}
-                          onChange={(e) => setOutroTipoOcorrencia(e.target.value)}
+                          onChange={(e) =>
+                            setOutroTipoOcorrencia(e.target.value)
+                          }
                           className="field-input"
                         />
                       )}
@@ -966,168 +1007,6 @@ return (
                     <button onClick={criarDenuncia} className="app-button">
                       Salvar denúncia
                     </button>
-
-                    {mostrarEnderecoModal && (
-                      <div className="modal-overlay">
-                        <div className="modal-card">
-                          <div className="modal-header">
-                            <h3 style={{ margin: 0 }}>Endereço da denúncia</h3>
-                            <button
-                              type="button"
-                              onClick={() => setMostrarEnderecoModal(false)}
-                              className="app-button-secondary"
-                            >
-                              Fechar
-                            </button>
-                          </div>
-
-                          <div className="form-row-2">
-                            <input
-                              placeholder="CEP"
-                              value={cep}
-                              onChange={(e) => setCep(formatarCEP(e.target.value))}
-                              className="field-input"
-                            />
-                            <button type="button" onClick={buscarCEP} className="app-button">
-                              Buscar CEP
-                            </button>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => window.open("https://viacep.com.br/", "_blank")}
-                            className="app-button-secondary"
-                            style={{ marginBottom: 12 }}
-                          >
-                            Não sei meu CEP
-                          </button>
-
-                          <div className="form-row-2">
-                            <input
-                              placeholder="Rua"
-                              value={rua}
-                              onChange={(e) => setRua(e.target.value)}
-                              className="field-input"
-                            />
-
-                            <input
-                              placeholder="Número"
-                              value={numero}
-                              onChange={(e) => setNumero(e.target.value)}
-                              className="field-input"
-                            />
-                          </div>
-
-                          <div className="form-row-2">
-                            <input
-                              placeholder="Cidade"
-                              value={cidade}
-                              onChange={(e) => setCidade(e.target.value)}
-                              className="field-input"
-                            />
-
-                            <select
-                              value={estado}
-                              onChange={(e) => setEstado(e.target.value)}
-                              className="field-select"
-                            >
-                              <option value="">Selecione o estado</option>
-                              {estadosBrasil.map((uf) => (
-                                <option key={uf} value={uf}>
-                                  {uf}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-
-                          <div style={{ marginBottom: 10 }}>
-                            <p style={{ marginBottom: 8 }}>
-                              <strong>Ou selecione no mapa:</strong>
-                            </p>
-
-                            <MapContainer
-                              key={`${mapCenter[0]}-${mapCenter[1]}`}
-                              center={mapCenter}
-                              zoom={13}
-                              style={{
-                                height: "300px",
-                                width: "100%",
-                                borderRadius: 8,
-                                overflow: "hidden",
-                              }}
-                            >
-                              <TileLayer
-                                attribution='&copy; OpenStreetMap contributors'
-                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                              />
-                              <LocationSelector
-                                setCoords={setCoords}
-                                setLocalizacaoConfirmada={setLocalizacaoConfirmada}
-                              />
-                              {coords && (
-                                <Marker position={[coords.lat, coords.lng]} />
-                              )}
-                            </MapContainer>
-
-                            {coords && (
-                              <div style={{ marginTop: 8 }}>
-                                <p style={{ fontSize: 14, marginBottom: 8 }}>
-                                  Local selecionado: {coords.lat.toFixed(5)},{" "}
-                                  {coords.lng.toFixed(5)}
-                                </p>
-
-                                <button
-                                  type="button"
-                                  onClick={() => setLocalizacaoConfirmada(true)}
-                                  className="app-button"
-                                  style={{ marginRight: 8 }}
-                                >
-                                  Confirmar localização
-                                </button>
-
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setCoords(null);
-                                    setLocalizacaoConfirmada(false);
-                                    setMapCenter([-23.2643, -47.2992]);
-                                  }}
-                                  className="app-button-secondary"
-                                >
-                                  Limpar localização
-                                </button>
-
-                                {localizacaoConfirmada && (
-                                  <p style={{ color: "#28a745", marginTop: 8 }}>
-                                    ✅ Localização confirmada
-                                  </p>
-                                )}
-                              </div>
-                            )}
-                          </div>
-
-                          <div
-                            style={{
-                              display: "flex",
-                              gap: 8,
-                              justifyContent: "flex-end",
-                              flexWrap: "wrap",
-                            }}
-                          >
-                            <button
-                              type="button"
-                              onClick={() => setMostrarEnderecoModal(false)}
-                              className="app-button-secondary"
-                            >
-                              Cancelar
-                            </button>
-                            <button type="button" onClick={confirmarEndereco} className="app-button">
-                              Confirmar endereço
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
@@ -1170,11 +1049,15 @@ return (
                 )}
 
                 <div className="list-scroll">
-                  {(role === "admin" ? denunciasFiltradasAdmin : denunciasExibidas).length === 0 && (
-                    <p>Nenhuma denúncia encontrada.</p>
-                  )}
+                  {(role === "admin"
+                    ? denunciasFiltradasAdmin
+                    : denunciasExibidas
+                  ).length === 0 && <p>Nenhuma denúncia encontrada.</p>}
 
-                  {(role === "admin" ? denunciasFiltradasAdmin : denunciasExibidas).map((d) => (
+                  {(role === "admin"
+                    ? denunciasFiltradasAdmin
+                    : denunciasExibidas
+                  ).map((d) => (
                     <div
                       key={d.id}
                       className="denuncia-card"
@@ -1198,14 +1081,17 @@ return (
                         <span className="badge">Status: {d.status}</span>
                       </div>
 
-                      {d.tipo_ocorrencia === "OUTROS" && d.tipo_ocorrencia_outros && (
-                        <p className="denuncia-meta">
-                          <strong>Complemento:</strong> {d.tipo_ocorrencia_outros}
-                        </p>
-                      )}
+                      {d.tipo_ocorrencia === "OUTROS" &&
+                        d.tipo_ocorrencia_outros && (
+                          <p className="denuncia-meta">
+                            <strong>Complemento:</strong>{" "}
+                            {d.tipo_ocorrencia_outros}
+                          </p>
+                        )}
 
                       <p className="denuncia-meta">
-                        <strong>Autor:</strong> {d.nome_usuario || "Não informado"}
+                        <strong>Autor:</strong>{" "}
+                        {d.nome_usuario || "Não informado"}
                       </p>
 
                       <p className="denuncia-meta">
@@ -1230,7 +1116,9 @@ return (
                           </label>
                           <select
                             value={d.status}
-                            onChange={(e) => atualizarStatus(d.id, e.target.value)}
+                            onChange={(e) =>
+                              atualizarStatus(d.id, e.target.value)
+                            }
                             className="field-select"
                             style={{ marginTop: 8 }}
                           >
@@ -1251,7 +1139,10 @@ return (
                 </div>
 
                 {role === "user" && denuncias.length > 1 && (
-                  <button onClick={() => setMostrarTodos(!mostrarTodos)} className="app-button-secondary">
+                  <button
+                    onClick={() => setMostrarTodos(!mostrarTodos)}
+                    className="app-button-secondary"
+                  >
                     {mostrarTodos ? "Mostrar menos" : "Mostrar mais"}
                   </button>
                 )}
@@ -1280,7 +1171,12 @@ return (
 
                   <div className="admin-stat">
                     <strong>Em atendimento</strong>
-                    <span>{denuncias.filter((d) => d.status === "Em atendimento").length}</span>
+                    <span>
+                      {
+                        denuncias.filter((d) => d.status === "Em atendimento")
+                          .length
+                      }
+                    </span>
                   </div>
                 </div>
 
@@ -1288,7 +1184,9 @@ return (
                   <strong>Ocorrências por tipo</strong>
                   <div style={{ marginTop: 10 }}>
                     {resumoPorTipo.length === 0 ? (
-                      <p style={{ margin: 0 }}>Nenhuma denúncia cadastrada ainda.</p>
+                      <p style={{ margin: 0 }}>
+                        Nenhuma denúncia cadastrada ainda.
+                      </p>
                     ) : (
                       resumoPorTipo.map((item) => (
                         <div
@@ -1315,10 +1213,189 @@ return (
                 <h3 className="section-title">Base para relatórios</h3>
 
                 <div className="info-box">
-                  <p><strong>Total de denúncias:</strong> {denuncias.length}</p>
-                  <p><strong>Total de denúncias críticas:</strong> {resumoPorGravidade.CRITICA}</p>
-                  <p><strong>Total de denúncias altas:</strong> {resumoPorGravidade.ALTA}</p>
-                  <p><strong>Tipos diferentes registrados:</strong> {resumoPorTipo.length}</p>
+                  <p>
+                    <strong>Total de denúncias:</strong> {denuncias.length}
+                  </p>
+                  <p>
+                    <strong>Total de denúncias críticas:</strong>{" "}
+                    {resumoPorGravidade.CRITICA}
+                  </p>
+                  <p>
+                    <strong>Total de denúncias altas:</strong>{" "}
+                    {resumoPorGravidade.ALTA}
+                  </p>
+                  <p>
+                    <strong>Tipos diferentes registrados:</strong>{" "}
+                    {resumoPorTipo.length}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {mostrarEnderecoModal && (
+              <div className="modal-overlay">
+                <div className="modal-card">
+                  <div className="modal-header">
+                    <h3 style={{ margin: 0 }}>Endereço da denúncia</h3>
+                    <button
+                      type="button"
+                      onClick={() => setMostrarEnderecoModal(false)}
+                      className="app-button-secondary"
+                    >
+                      Fechar
+                    </button>
+                  </div>
+
+                  <div className="form-row-2">
+                    <input
+                      placeholder="CEP"
+                      value={cep}
+                      onChange={(e) => setCep(formatarCEP(e.target.value))}
+                      className="field-input"
+                    />
+                    <button
+                      type="button"
+                      onClick={buscarCEP}
+                      className="app-button"
+                    >
+                      Buscar CEP
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => window.open("https://viacep.com.br/", "_blank")}
+                    className="app-button-secondary"
+                    style={{ marginBottom: 12 }}
+                  >
+                    Não sei meu CEP
+                  </button>
+
+                  <div className="form-row-2">
+                    <input
+                      placeholder="Rua"
+                      value={rua}
+                      onChange={(e) => setRua(e.target.value)}
+                      className="field-input"
+                    />
+
+                    <input
+                      placeholder="Número"
+                      value={numero}
+                      onChange={(e) => setNumero(e.target.value)}
+                      className="field-input"
+                    />
+                  </div>
+
+                  <div className="form-row-2">
+                    <input
+                      placeholder="Cidade"
+                      value={cidade}
+                      onChange={(e) => setCidade(e.target.value)}
+                      className="field-input"
+                    />
+
+                    <select
+                      value={estado}
+                      onChange={(e) => setEstado(e.target.value)}
+                      className="field-select"
+                    >
+                      <option value="">Selecione o estado</option>
+                      {estadosBrasil.map((uf) => (
+                        <option key={uf} value={uf}>
+                          {uf}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div style={{ marginBottom: 10 }}>
+                    <p style={{ marginBottom: 8 }}>
+                      <strong>Ou selecione no mapa:</strong>
+                    </p>
+
+                    <MapContainer
+                      key={`${mapCenter[0]}-${mapCenter[1]}`}
+                      center={mapCenter}
+                      zoom={13}
+                      style={{
+                        height: "300px",
+                        width: "100%",
+                        borderRadius: 8,
+                        overflow: "hidden",
+                      }}
+                    >
+                      <TileLayer
+                        attribution="&copy; OpenStreetMap contributors"
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      />
+                      <LocationSelector
+                        setCoords={setCoords}
+                        setLocalizacaoConfirmada={setLocalizacaoConfirmada}
+                      />
+                      {coords && <Marker position={[coords.lat, coords.lng]} />}
+                    </MapContainer>
+
+                    {coords && (
+                      <div style={{ marginTop: 8 }}>
+                        <p style={{ fontSize: 14, marginBottom: 8 }}>
+                          Local selecionado: {coords.lat.toFixed(5)},{" "}
+                          {coords.lng.toFixed(5)}
+                        </p>
+
+                        <button
+                          type="button"
+                          onClick={() => setLocalizacaoConfirmada(true)}
+                          className="app-button"
+                          style={{ marginRight: 8 }}
+                        >
+                          Confirmar localização
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCoords(null);
+                            setLocalizacaoConfirmada(false);
+                            setMapCenter([-23.2643, -47.2992]);
+                          }}
+                          className="app-button-secondary"
+                        >
+                          Limpar localização
+                        </button>
+
+                        {localizacaoConfirmada && (
+                          <p style={{ color: "#28a745", marginTop: 8 }}>
+                            ✅ Localização confirmada
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 8,
+                      justifyContent: "flex-end",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setMostrarEnderecoModal(false)}
+                      className="app-button-secondary"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={confirmarEndereco}
+                      className="app-button"
+                    >
+                      Confirmar endereço
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
