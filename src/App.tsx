@@ -708,9 +708,14 @@ function App() {
             ) : modo === "recuperarSenha" ? (
               <div className="auth-page">
                 <div className="auth-card">
-                  <div className="auth-body">
-                    <h2>Recuperar senha</h2>
 
+                  <div className="auth-hero">
+                    <div className="auth-overlay">
+                      <div className="auth-title">Recuperar senha</div>
+                    </div>
+                  </div>
+
+                  <div className="auth-body">
                     <label className="auth-label">Seu e-mail</label>
                     <input
                       value={email}
@@ -718,10 +723,7 @@ function App() {
                       className="auth-input"
                     />
 
-                    <button
-                      onClick={handleResetPassword}
-                      className="auth-button"
-                    >
+                    <button onClick={handleResetPassword} className="auth-button">
                       Enviar link
                     </button>
 
@@ -732,14 +734,16 @@ function App() {
                       Voltar
                     </button>
                   </div>
+
                 </div>
               </div>
             ) : (
               <div className="auth-page">
                 <div className="auth-card">
                   <div className="auth-hero">
-                    <img src="/dog.png" alt="Cadastro SOS Bichos" />
-                    <div className="auth-title">Cadastre-se</div>
+                    <div className="auth-overlay">
+                      <div className="auth-title">Cadastre-se</div>
+                    </div>
                   </div>
 
                   <div className="auth-body">
