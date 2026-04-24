@@ -5,15 +5,21 @@ import { PageContainer } from "../components/layout/PageContainer";
 import { DenunciaForm } from "../components/denuncia/DenunciaForm";
 
 interface HomePageProps {
+  userId: string;
   userName?: string;
   isAdmin?: boolean;
   onLogout?: () => void;
 }
 
-export function HomePage({ userName, isAdmin = false, onLogout }: HomePageProps) {
+export function HomePage({
+  userId,
+  userName,
+  isAdmin = false,
+  onLogout,
+}: HomePageProps) {
   function handleDenunciar() {
-    const formSection = document.getElementById("denuncias");
-    formSection?.scrollIntoView({ behavior: "smooth" });
+    const section = document.getElementById("denuncias");
+    section?.scrollIntoView({ behavior: "smooth" });
   }
 
   return (
@@ -29,8 +35,10 @@ export function HomePage({ userName, isAdmin = false, onLogout }: HomePageProps)
       />
 
       <PageContainer>
+        {/* 🔥 Banner principal */}
         <Banner onDenunciar={handleDenunciar} />
 
+        {/* 🧠 Sobre o projeto */}
         <section id="sobre" className="home-section">
           <span className="section-tag">Sobre o projeto</span>
 
@@ -70,20 +78,23 @@ export function HomePage({ userName, isAdmin = false, onLogout }: HomePageProps)
           </div>
         </section>
 
+        {/* 🐾 Denúncias */}
         <section id="denuncias" className="home-section">
           <span className="section-tag">Denúncias</span>
 
           <h2>Registrar e acompanhar ocorrências</h2>
 
           <p>
-            Aqui entraremos com o formulário de denúncia e, logo abaixo, a lista
-            de denúncias com fotos.
+            Aqui você pode registrar uma nova denúncia com descrição,
+            localização e foto.
           </p>
 
           <DenunciaForm
-            userId="ID_TEMPORARIO_DO_USUARIO"
+            userId={userId}
             nomeUsuario={userName || "Usuário"}
-            onCreated={() => console.log("Denúncia criada")}
+            onCreated={() => {
+              console.log("Denúncia criada!");
+            }}
           />
         </section>
       </PageContainer>
