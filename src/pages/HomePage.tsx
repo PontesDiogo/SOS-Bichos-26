@@ -2,6 +2,7 @@ import { Banner } from "../components/layout/Banner";
 import { Footer } from "../components/layout/Footer";
 import { Navbar } from "../components/layout/Navbar";
 import { PageContainer } from "../components/layout/PageContainer";
+import { DenunciaForm } from "../components/denuncia/DenunciaForm";
 
 interface HomePageProps {
   userName?: string;
@@ -79,13 +80,11 @@ export function HomePage({ userName, isAdmin = false, onLogout }: HomePageProps)
             de denúncias com fotos.
           </p>
 
-          <div className="placeholder-card">
-            <strong>Próximo bloco:</strong>
-            <p>
-              Vamos encaixar aqui o formulário real de denúncia, upload de foto,
-              endereço, mapa e listagem.
-            </p>
-          </div>
+          <DenunciaForm
+            userId="ID_TEMPORARIO_DO_USUARIO"
+            nomeUsuario={userName || "Usuário"}
+            onCreated={() => console.log("Denúncia criada")}
+          />
         </section>
       </PageContainer>
 

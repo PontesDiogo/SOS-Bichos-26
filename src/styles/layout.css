@@ -1,0 +1,242 @@
+.denuncia-form {
+  margin-top: 24px;
+  padding: 28px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 14px 30px rgba(47, 42, 37, 0.08);
+}
+
+.form-header h2 {
+  margin: 0;
+}
+
+.form-header p {
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+.form-group {
+  margin-top: 18px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select,
+.form-grid input {
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  color: var(--color-text);
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-muted);
+}
+
+.checkbox-field input {
+  width: auto;
+}
+
+.endereco-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: var(--radius-md);
+  background: #faf7f1;
+  border: 1px solid var(--color-border);
+}
+
+.endereco-summary p {
+  margin: 6px 0 0;
+  color: var(--color-muted);
+}
+
+.endereco-summary button,
+.form-action-field button,
+.modal-actions button,
+.photo-preview button {
+  padding: 11px 14px;
+  border-radius: 999px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.primary-button {
+  margin-top: 22px;
+  padding: 14px 18px;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: white;
+  font-weight: 700;
+}
+
+.primary-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.form-error {
+  margin-top: 12px;
+  color: #b42318;
+  font-weight: 700;
+}
+
+.form-success {
+  margin-top: 12px;
+  color: #027a48;
+  font-weight: 700;
+}
+
+.photo-upload {
+  margin-top: 20px;
+}
+
+.photo-upload input {
+  display: block;
+  margin-top: 8px;
+}
+
+.photo-preview {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.photo-preview img {
+  width: 180px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(47, 42, 37, 0.55);
+}
+
+.modal-content {
+  width: min(920px, 100%);
+  max-height: 92vh;
+  overflow: auto;
+  padding: 28px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.modal-header h2 {
+  margin: 0;
+}
+
+.modal-header p {
+  color: var(--color-muted);
+}
+
+.modal-header button {
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: #faf7f1;
+  border: 1px solid var(--color-border);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 160px;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.form-action-field {
+  display: flex;
+  align-items: end;
+}
+
+.link-button {
+  margin-top: 12px;
+  background: transparent;
+  color: var(--color-primary-dark);
+  font-weight: 700;
+  padding: 0;
+}
+
+.mapa-selector {
+  margin-top: 22px;
+}
+
+.mapa-box {
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.mapa-container {
+  height: 360px;
+  width: 100%;
+}
+
+.mapa-coords {
+  color: var(--color-muted);
+  font-weight: 700;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+@media (max-width: 700px) {
+  .endereco-summary,
+  .modal-header,
+  .modal-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-action-field {
+    align-items: stretch;
+  }
+}
