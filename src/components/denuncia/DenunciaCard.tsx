@@ -1,11 +1,18 @@
 import type { Denuncia } from "../../types/denuncia";
+import { cancelarDenuncia } from "../../services/denunciaService";
 import { formatarDataHora } from "../../utils/formatters";
 
 interface DenunciaCardProps {
   denuncia: Denuncia | null;
+  onEdit?: (denuncia: Denuncia) => void;
+  onUpdated?: () => void;
 }
 
-export function DenunciaCard({ denuncia }: DenunciaCardProps) {
+export function DenunciaCard({
+  denuncia,
+  onEdit,
+  onUpdated,
+}: DenunciaCardProps) {
   if (!denuncia) {
     return (
       <article className="denuncia-card denuncia-card--empty">
@@ -17,6 +24,26 @@ export function DenunciaCard({ denuncia }: DenunciaCardProps) {
       </article>
     );
   }
+
+  async function handleCancelar() {
+    if (!denuncia) return;
+
+    const confirmar = window.confirm(
+      "Tem certeza que deseja cancelar esta denúncia?"
+    );
+
+    if (!confirmar) return;
+
+    try {
+      await cancelarDenuncia(denuncia.id);
+      onUpdated?.();
+    } catch (error) {
+      console.error(error);
+      alert("Não foi possível cancelar a denúncia.");
+    }
+  }
+
+  const podeEditarOuCancelar = denuncia.status === "Pendente";
 
   return (
     <article className="denuncia-card">
@@ -33,7 +60,11 @@ export function DenunciaCard({ denuncia }: DenunciaCardProps) {
             <h3>{denuncia.resumo || "Denúncia sem resumo"}</h3>
           </div>
 
-          <span className={`status-pill status-pill--${normalizeStatus(denuncia.status)}`}>
+          <span
+            className={`status-pill status-pill--${normalizeStatus(
+              denuncia.status
+            )}`}
+          >
             {denuncia.status}
           </span>
         </div>
@@ -66,10 +97,17 @@ export function DenunciaCard({ denuncia }: DenunciaCardProps) {
           )}
         </div>
 
-        {denuncia.status === "Pendente" && (
+        {podeEditarOuCancelar && (
           <div className="denuncia-card__actions">
-            <button type="button">Editar denúncia</button>
-            <button type="button" className="danger-button">
+            <button type="button" onClick={() => onEdit?.(denuncia)}>
+              Editar denúncia
+            </button>
+
+            <button
+              type="button"
+              className="danger-button"
+              onClick={handleCancelar}
+            >
               Cancelar denúncia
             </button>
           </div>

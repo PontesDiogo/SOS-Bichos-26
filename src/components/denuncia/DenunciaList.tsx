@@ -2,19 +2,23 @@ import { useEffect, useState } from "react";
 import type { Denuncia } from "../../types/denuncia";
 import { DenunciaCard } from "./DenunciaCard";
 import { DenunciaListItem } from "./DenunciaListItem";
+import { EditarDenunciaModal } from "./EditarDenunciaModal";
 
 interface DenunciaListProps {
   denuncias: Denuncia[];
   loading?: boolean;
   erro?: string;
+  onUpdated?: () => void;
 }
 
 export function DenunciaList({
   denuncias,
   loading = false,
   erro = "",
+  onUpdated,
 }: DenunciaListProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [editingDenuncia, setEditingDenuncia] = useState<Denuncia | null>(null);
 
   useEffect(() => {
     if (denuncias.length > 0 && !selectedId) {
@@ -66,19 +70,35 @@ export function DenunciaList({
   }
 
   return (
-    <section className="denuncias-panel">
-      <div className="denuncias-list">
-        {denuncias.map((denuncia) => (
-          <DenunciaListItem
-            key={denuncia.id}
-            denuncia={denuncia}
-            isSelected={denuncia.id === selectedId}
-            onClick={() => setSelectedId(denuncia.id)}
-          />
-        ))}
-      </div>
+    <>
+      <section className="denuncias-panel">
+        <div className="denuncias-list">
+          {denuncias.map((denuncia) => (
+            <DenunciaListItem
+              key={denuncia.id}
+              denuncia={denuncia}
+              isSelected={denuncia.id === selectedId}
+              onClick={() => setSelectedId(denuncia.id)}
+            />
+          ))}
+        </div>
 
-      <DenunciaCard denuncia={selectedDenuncia} />
-    </section>
+        <DenunciaCard
+          denuncia={selectedDenuncia}
+          onEdit={setEditingDenuncia}
+          onUpdated={onUpdated}
+        />
+      </section>
+
+      <EditarDenunciaModal
+        isOpen={!!editingDenuncia}
+        denuncia={editingDenuncia}
+        onClose={() => setEditingDenuncia(null)}
+        onUpdated={() => {
+          onUpdated?.();
+          setEditingDenuncia(null);
+        }}
+      />
+    </>
   );
 }

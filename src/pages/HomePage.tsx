@@ -110,7 +110,12 @@ export function HomePage({
             respectivos status.
           </p>
 
-          <DenunciaList denuncias={denuncias} loading={loading} erro={erro} />
+          <DenunciaList
+            denuncias={denuncias}
+            loading={loading}
+            erro={erro}
+            onUpdated={carregarDenuncias}
+          />
         </section>
       </PageContainer>
 
