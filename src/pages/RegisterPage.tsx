@@ -12,7 +12,7 @@ interface RegisterPageProps {
   onGoToPolitica?: () => void;
 }
 
-export function RegisterPage({ onGoToLogin, onGoToPolitica }: RegisterPageProps) {
+export function RegisterPage({ onGoToLogin }: RegisterPageProps) {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");

@@ -97,7 +97,7 @@ function App() {
       userName={nome}
       isAdmin={isAdmin}
       onPerfil={() => setAppScreen("perfil")}
-      onPolitica={() => setAppScreen("politica")}
+
       onLogout={logout}
     />
   );

@@ -11,16 +11,14 @@ interface HomePageProps {
   userName?: string;
   isAdmin?: boolean;
   onPerfil?: () => void;
-  onPolitica?: () => void;
   onLogout?: () => void;
 }
 
 export function HomePage({
   userId,
   userName,
-  isAdmin = false,
+  isAdmin,
   onPerfil,
-  onPolitica,
   onLogout,
 }: HomePageProps) {
   const { denuncias, loading, erro, carregarDenuncias } = useDenuncias({
