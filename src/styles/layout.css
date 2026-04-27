@@ -793,3 +793,12 @@
 .modal-actions--edit .primary-button {
   margin-top: 0;
 }
+.auth-shell--simple {
+  width: min(620px, 100%);
+  min-height: auto;
+  display: block;
+}
+
+.auth-content--center {
+  align-items: stretch;
+}

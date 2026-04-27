@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
+import { RecuperarSenhaPage } from "./pages/RecuperarSenhaPage";
+import { RedefinirSenhaPage } from "./pages/RedefinirSenhaPage";
 import { useAuth } from "./hooks/useAuth";
 import "./index.css";
 import "./styles/layout.css";
@@ -12,19 +14,45 @@ function App() {
   const { user, nome, isAdmin, loadingAuth, logout } = useAuth();
   const [authScreen, setAuthScreen] = useState<AuthScreen>("login");
 
+  useEffect(() => {
+    const currentPath = window.location.pathname;
+
+    if (currentPath.includes("redefinir-senha")) {
+      setAuthScreen("reset");
+    }
+  }, []);
+
   if (loadingAuth) {
     return (
       <main className="auth-page">
-        <section className="auth-card">
-          <p>Carregando...</p>
+        <section className="auth-shell auth-shell--simple">
+          <div className="auth-content auth-content--center">
+            <p>Carregando...</p>
+          </div>
         </section>
       </main>
     );
   }
 
-  if (!user) {
+  if (!user || authScreen === "reset") {
     if (authScreen === "register") {
       return <RegisterPage onGoToLogin={() => setAuthScreen("login")} />;
+    }
+
+    if (authScreen === "recover") {
+      return <RecuperarSenhaPage onGoToLogin={() => setAuthScreen("login")} />;
+    }
+
+    if (authScreen === "reset") {
+      return (
+        <RedefinirSenhaPage
+          onGoToLogin={async () => {
+            await logout();
+            window.history.replaceState({}, "", "/");
+            setAuthScreen("login");
+          }}
+        />
+      );
     }
 
     return (
