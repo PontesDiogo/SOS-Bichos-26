@@ -1,5 +1,5 @@
 export interface RelatorioCard {
-  titulo: string;
+  resumo: string;
   valor: number;
 }
 
