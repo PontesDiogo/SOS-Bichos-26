@@ -160,17 +160,20 @@ export function RegisterPage({ onGoToLogin }: RegisterPageProps) {
                 </button>
               </div>
 
-              {confirmarSenha && senha !== confirmarSenha && (
-                <small className="password-rule password-rule--invalid">
-                  As senhas ainda não conferem.
-                </small>
-              )}
-
-              {confirmarSenha && senha === confirmarSenha && (
-                <small className="password-rule password-rule--valid">
-                  As senhas conferem.
-                </small>
-              )}
+              <small
+                className={`password-confirm-feedback ${confirmarSenha
+                    ? senha === confirmarSenha
+                      ? "password-rule--valid"
+                      : "password-rule--invalid"
+                    : ""
+                  }`}
+              >
+                {confirmarSenha
+                  ? senha === confirmarSenha
+                    ? "As senhas conferem."
+                    : "As senhas ainda não conferem."
+                  : " "}
+              </small>
             </div>
 
             <label className="checkbox-field politica-field">
