@@ -35,6 +35,8 @@ export async function signUp({
       data: {
         nome,
         role: "user",
+        avatar_url: null,
+        conta_desativada: false,
         politica_privacidade_aceita: aceitouPolitica,
         politica_privacidade_aceita_em: aceitouPolitica
           ? new Date().toISOString()
@@ -43,7 +45,17 @@ export async function signUp({
     },
   });
 
-  if (error) throw error;
+  if (error) {
+    if (
+      error.message.toLowerCase().includes("already registered") ||
+      error.message.toLowerCase().includes("already exists")
+    ) {
+      throw new Error("Este e-mail já está cadastrado.");
+    }
+
+    throw error;
+  }
+
   return data;
 }
 

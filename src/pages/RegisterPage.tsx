@@ -5,18 +5,20 @@ import {
   validarSenhaForte,
 } from "../utils/validators";
 import dogImage from "../assets/images/dog.png";
+import { PoliticaPrivacidadeModal } from "../components/common/PoliticaPrivacidadeModal";
 
 interface RegisterPageProps {
   onGoToLogin: () => void;
+  onGoToPolitica?: () => void;
 }
 
-export function RegisterPage({ onGoToLogin }: RegisterPageProps) {
+export function RegisterPage({ onGoToLogin, onGoToPolitica }: RegisterPageProps) {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [aceitouPolitica, setAceitouPolitica] = useState(false);
-
+  const [politicaOpen, setPoliticaOpen] = useState(false);
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
 
@@ -68,8 +70,13 @@ export function RegisterPage({ onGoToLogin }: RegisterPageProps) {
       setSenha("");
       setConfirmarSenha("");
       setAceitouPolitica(false);
-    } catch {
-      setErro("Não foi possível realizar o cadastro. Verifique os dados.");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Não foi possível realizar o cadastro. Verifique os dados.";
+
+      setErro(message);
     } finally {
       setLoading(false);
     }
@@ -161,10 +168,10 @@ export function RegisterPage({ onGoToLogin }: RegisterPageProps) {
 
               <small
                 className={`password-confirm-feedback ${confirmarSenha
-                    ? senha === confirmarSenha
-                      ? "password-rule--valid"
-                      : "password-rule--invalid"
-                    : ""
+                  ? senha === confirmarSenha
+                    ? "password-rule--valid"
+                    : "password-rule--invalid"
+                  : ""
                   }`}
               >
                 {confirmarSenha
@@ -181,9 +188,20 @@ export function RegisterPage({ onGoToLogin }: RegisterPageProps) {
                 checked={aceitouPolitica}
                 onChange={(e) => setAceitouPolitica(e.target.checked)}
               />
+
               <span>
                 Li e aceito a{" "}
-                <button type="button">Política de Privacidade</button>.
+                <button
+                  type="button"
+                  className="inline-link-button"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    setPoliticaOpen(true);
+                  }}
+                >
+                  Política de Privacidade
+                </button>
+                .
               </span>
             </label>
 
@@ -212,6 +230,10 @@ export function RegisterPage({ onGoToLogin }: RegisterPageProps) {
           </div>
         </aside>
       </section>
+      <PoliticaPrivacidadeModal
+        isOpen={politicaOpen}
+        onClose={() => setPoliticaOpen(false)}
+      />
     </main>
   );
 }

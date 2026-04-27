@@ -16,3 +16,19 @@ export async function uploadFotoDenuncia(file: File, userId: string): Promise<st
 
   return data.publicUrl;
 }
+export async function uploadFotoPerfil(file: File, userId: string): Promise<string> {
+  const extensao = file.name.split(".").pop();
+  const fileName = `${userId}/avatar-${Date.now()}.${extensao}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("avatars")
+    .upload(fileName, file, {
+      upsert: true,
+    });
+
+  if (uploadError) throw uploadError;
+
+  const { data } = supabase.storage.from("avatars").getPublicUrl(fileName);
+
+  return data.publicUrl;
+}

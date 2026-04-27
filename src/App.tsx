@@ -4,15 +4,19 @@ import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { RecuperarSenhaPage } from "./pages/RecuperarSenhaPage";
 import { RedefinirSenhaPage } from "./pages/RedefinirSenhaPage";
+import { PerfilPage } from "./pages/PerfilPage";
+import { PoliticaPrivacidadePage } from "./pages/PoliticaPrivacidadePage";
 import { useAuth } from "./hooks/useAuth";
 import "./index.css";
 import "./styles/layout.css";
 
 type AuthScreen = "login" | "register" | "recover" | "reset";
+type AppScreen = "home" | "perfil" | "politica";
 
 function App() {
-  const { user, nome, isAdmin, loadingAuth, logout } = useAuth();
+  const { user, nome, role, isAdmin, loadingAuth, logout } = useAuth();
   const [authScreen, setAuthScreen] = useState<AuthScreen>("login");
+  const [appScreen, setAppScreen] = useState<AppScreen>("home");
 
   useEffect(() => {
     const currentPath = window.location.pathname;
@@ -36,7 +40,12 @@ function App() {
 
   if (!user || authScreen === "reset") {
     if (authScreen === "register") {
-      return <RegisterPage onGoToLogin={() => setAuthScreen("login")} />;
+      return (
+        <RegisterPage
+          onGoToLogin={() => setAuthScreen("login")}
+          onGoToPolitica={() => setAuthScreen("login")}
+        />
+      );
     }
 
     if (authScreen === "recover") {
@@ -63,11 +72,32 @@ function App() {
     );
   }
 
+  if (appScreen === "perfil") {
+    return (
+      <PerfilPage
+        userId={user.id}
+        nome={nome}
+        email={user.email}
+        role={role}
+        avatarUrl={user.user_metadata?.avatar_url || null}
+        onBack={() => setAppScreen("home")}
+        onLogout={logout}
+        onUpdated={() => window.location.reload()}
+      />
+    );
+  }
+
+  if (appScreen === "politica") {
+    return <PoliticaPrivacidadePage onBack={() => setAppScreen("home")} />;
+  }
+
   return (
     <HomePage
       userId={user.id}
       userName={nome}
       isAdmin={isAdmin}
+      onPerfil={() => setAppScreen("perfil")}
+      onPolitica={() => setAppScreen("politica")}
       onLogout={logout}
     />
   );
