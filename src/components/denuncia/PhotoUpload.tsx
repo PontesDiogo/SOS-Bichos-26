@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { validarImagem } from "../../utils/validators";
 
 interface PhotoUploadProps {
@@ -9,6 +9,20 @@ interface PhotoUploadProps {
 export function PhotoUpload({ file, onChange }: PhotoUploadProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [erro, setErro] = useState("");
+
+  useEffect(() => {
+    if (!file) {
+      setPreview(null);
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    setPreview(objectUrl);
+
+    return () => {
+      URL.revokeObjectURL(objectUrl);
+    };
+  }, [file]);
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const selectedFile = event.target.files?.[0];
@@ -22,12 +36,10 @@ export function PhotoUpload({ file, onChange }: PhotoUploadProps) {
     if (validationError) {
       setErro(validationError);
       onChange(null);
-      setPreview(null);
       return;
     }
 
     onChange(selectedFile);
-    setPreview(URL.createObjectURL(selectedFile));
   }
 
   function handleRemove() {
@@ -40,6 +52,10 @@ export function PhotoUpload({ file, onChange }: PhotoUploadProps) {
     <div className="photo-upload">
       <label className="form-label">Foto da ocorrência</label>
 
+      <p className="photo-upload__hint">
+        Você pode tirar uma foto na hora ou escolher uma imagem da galeria.
+      </p>
+
       <input
         type="file"
         accept="image/*"
@@ -47,11 +63,14 @@ export function PhotoUpload({ file, onChange }: PhotoUploadProps) {
         onChange={handleFileChange}
       />
 
+      {file && <small className="photo-upload__filename">{file.name}</small>}
+
       {erro && <p className="form-error">{erro}</p>}
 
       {preview && file && (
         <div className="photo-preview">
           <img src={preview} alt="Prévia da ocorrência" />
+
           <button type="button" onClick={handleRemove}>
             Remover foto
           </button>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Endereco } from "../../types/endereco";
 import { buscarEnderecoPorCep } from "../../services/cepService";
+import { buscarEnderecoPorCoordenadas } from "../../services/geocodingService";
 import { formatarCep } from "../../utils/formatters";
 import { MapaSelector } from "../mapa/MapaSelector";
 
@@ -39,6 +40,7 @@ export function EnderecoModal({
   const [latitude, setLatitude] = useState<number | null>(initialLatitude);
   const [longitude, setLongitude] = useState<number | null>(initialLongitude);
   const [loadingCep, setLoadingCep] = useState(false);
+  const [loadingEnderecoMapa, setLoadingEnderecoMapa] = useState(false);
   const [erro, setErro] = useState("");
 
   if (!isOpen) return null;
@@ -66,6 +68,38 @@ export function EnderecoModal({
       setErro("Não foi possível encontrar o CEP informado.");
     } finally {
       setLoadingCep(false);
+    }
+  }
+
+  async function handleSelecionarCoordenadas(coords: {
+    latitude: number;
+    longitude: number;
+  }) {
+    try {
+      setErro("");
+      setLatitude(coords.latitude);
+      setLongitude(coords.longitude);
+      setLoadingEnderecoMapa(true);
+
+      const enderecoEncontrado = await buscarEnderecoPorCoordenadas(
+        coords.latitude,
+        coords.longitude
+      );
+
+      setEndereco((prev) => ({
+        ...prev,
+        cep: enderecoEncontrado.cep || prev.cep,
+        rua: enderecoEncontrado.rua || prev.rua,
+        numero: enderecoEncontrado.numero || prev.numero,
+        cidade: enderecoEncontrado.cidade || prev.cidade,
+        estado: enderecoEncontrado.estado || prev.estado,
+      }));
+    } catch {
+      setErro(
+        "Localização marcada, mas não foi possível preencher o endereço automaticamente."
+      );
+    } finally {
+      setLoadingEnderecoMapa(false);
     }
   }
 
@@ -146,6 +180,10 @@ export function EnderecoModal({
 
         {erro && <p className="form-error">{erro}</p>}
 
+        {loadingEnderecoMapa && (
+          <p className="form-success">Buscando endereço pela localização...</p>
+        )}
+
         <button
           type="button"
           className="link-button"
@@ -162,10 +200,7 @@ export function EnderecoModal({
         <MapaSelector
           latitude={latitude}
           longitude={longitude}
-          onChange={({ latitude, longitude }) => {
-            setLatitude(latitude);
-            setLongitude(longitude);
-          }}
+          onChange={handleSelecionarCoordenadas}
         />
 
         <div className="modal-actions">
