@@ -32,3 +32,25 @@ export function validarImagem(file: File): string | null {
 
   return null;
 }
+export function getPasswordStrength(senha: string) {
+  const checks = {
+    minLength: senha.length >= 8,
+    upperLower: /[A-Z]/.test(senha) && /[a-z]/.test(senha),
+    number: /\d/.test(senha),
+    special: /[^A-Za-z0-9]/.test(senha),
+  };
+
+  const score = Object.values(checks).filter(Boolean).length;
+
+  let label = "Fraca";
+
+  if (score === 2) label = "Média";
+  if (score === 3) label = "Boa";
+  if (score === 4) label = "Forte";
+
+  return {
+    checks,
+    score,
+    label,
+  };
+}

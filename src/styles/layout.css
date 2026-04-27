@@ -802,3 +802,66 @@
 .auth-content--center {
   align-items: stretch;
 }
+.password-strength {
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 16px;
+  background: #faf7f1;
+  border: 1px solid var(--color-border);
+}
+
+.password-strength__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.password-strength__header small {
+  color: var(--color-muted);
+  font-weight: 700;
+}
+
+.password-strength__header strong {
+  color: var(--color-primary-dark);
+  font-size: 0.9rem;
+}
+
+.password-strength__bar {
+  height: 8px;
+  margin-top: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #eadfce;
+}
+
+.password-strength__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-primary);
+  transition: width 0.25s ease;
+}
+
+.password-rules {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.88rem;
+}
+
+.password-rule--valid {
+  color: #027a48;
+  font-weight: 700;
+}
+
+.password-rule--invalid {
+  color: var(--color-muted);
+}
+
+.form-group > .password-rule {
+  display: block;
+  margin-top: 8px;
+}

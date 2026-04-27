@@ -15,8 +15,19 @@ export async function signIn(email: string, senha: string) {
   if (error) throw error;
   return data;
 }
+interface SignUpPayload {
+  nome: string;
+  email: string;
+  senha: string;
+  aceitouPolitica?: boolean;
+}
 
-export async function signUp({ nome, email, senha }: SignUpPayload) {
+export async function signUp({
+  nome,
+  email,
+  senha,
+  aceitouPolitica = false,
+}: SignUpPayload) {
   const { data, error } = await supabase.auth.signUp({
     email,
     password: senha,
@@ -24,6 +35,10 @@ export async function signUp({ nome, email, senha }: SignUpPayload) {
       data: {
         nome,
         role: "user",
+        politica_privacidade_aceita: aceitouPolitica,
+        politica_privacidade_aceita_em: aceitouPolitica
+          ? new Date().toISOString()
+          : null,
       },
     },
   });

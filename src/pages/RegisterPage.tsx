@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { signUp } from "../services/authService";
-import { validarSenhaForte } from "../utils/validators";
+import {
+  getPasswordStrength,
+  validarSenhaForte,
+} from "../utils/validators";
 import dogImage from "../assets/images/dog.png";
 
 interface RegisterPageProps {
@@ -21,6 +24,8 @@ export function RegisterPage({ onGoToLogin }: RegisterPageProps) {
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
 
+  const passwordStrength = getPasswordStrength(senha);
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -36,7 +41,7 @@ export function RegisterPage({ onGoToLogin }: RegisterPageProps) {
 
       if (!validarSenhaForte(senha)) {
         setErro(
-          "A senha precisa ter pelo menos 8 caracteres, letra maiúscula, minúscula, número e caractere especial."
+          "A senha precisa cumprir todos os requisitos mínimos de segurança."
         );
         return;
       }
@@ -51,7 +56,12 @@ export function RegisterPage({ onGoToLogin }: RegisterPageProps) {
         return;
       }
 
-      await signUp({ nome, email, senha });
+      await signUp({
+        nome,
+        email,
+        senha,
+        aceitouPolitica,
+      });
 
       setSucesso("Cadastro realizado com sucesso! Agora você pode fazer login.");
       setNome("");
@@ -121,6 +131,8 @@ export function RegisterPage({ onGoToLogin }: RegisterPageProps) {
                   {mostrarSenha ? <EyeOffIcon /> : <EyeIcon />}
                 </button>
               </div>
+
+              <PasswordStrength senha={senha} />
             </div>
 
             <div className="form-group">
@@ -147,6 +159,18 @@ export function RegisterPage({ onGoToLogin }: RegisterPageProps) {
                   {mostrarConfirmarSenha ? <EyeOffIcon /> : <EyeIcon />}
                 </button>
               </div>
+
+              {confirmarSenha && senha !== confirmarSenha && (
+                <small className="password-rule password-rule--invalid">
+                  As senhas ainda não conferem.
+                </small>
+              )}
+
+              {confirmarSenha && senha === confirmarSenha && (
+                <small className="password-rule password-rule--valid">
+                  As senhas conferem.
+                </small>
+              )}
             </div>
 
             <label className="checkbox-field politica-field">
@@ -156,7 +180,8 @@ export function RegisterPage({ onGoToLogin }: RegisterPageProps) {
                 onChange={(e) => setAceitouPolitica(e.target.checked)}
               />
               <span>
-                Li e aceito a <button type="button">Política de Privacidade</button>.
+                Li e aceito a{" "}
+                <button type="button">Política de Privacidade</button>.
               </span>
             </label>
 
@@ -186,6 +211,54 @@ export function RegisterPage({ onGoToLogin }: RegisterPageProps) {
         </aside>
       </section>
     </main>
+  );
+}
+
+function PasswordStrength({ senha }: { senha: string }) {
+  const { checks, score, label } = getPasswordStrength(senha);
+  const percent = (score / 4) * 100;
+
+  return (
+    <div className="password-strength">
+      <div className="password-strength__header">
+        <small>Força da senha</small>
+        <strong>{senha ? label : "Digite uma senha"}</strong>
+      </div>
+
+      <div className="password-strength__bar">
+        <span style={{ width: `${percent}%` }} />
+      </div>
+
+      <ul className="password-rules">
+        <PasswordRule valid={checks.minLength}>
+          Mínimo de 8 caracteres
+        </PasswordRule>
+
+        <PasswordRule valid={checks.upperLower}>
+          Letras maiúsculas e minúsculas
+        </PasswordRule>
+
+        <PasswordRule valid={checks.number}>Pelo menos 1 número</PasswordRule>
+
+        <PasswordRule valid={checks.special}>
+          Pelo menos 1 caractere especial
+        </PasswordRule>
+      </ul>
+    </div>
+  );
+}
+
+function PasswordRule({
+  valid,
+  children,
+}: {
+  valid: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <li className={valid ? "password-rule--valid" : "password-rule--invalid"}>
+      {valid ? "✓" : "•"} {children}
+    </li>
   );
 }
 
