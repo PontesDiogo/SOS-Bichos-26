@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Denuncia, TipoDenuncia } from "../../types/denuncia";
 import { TIPOS_DENUNCIA } from "../../utils/constants";
 import { editarDenuncia } from "../../services/denunciaService";
@@ -16,13 +16,20 @@ export function EditarDenunciaModal({
   onClose,
   onUpdated,
 }: EditarDenunciaModalProps) {
-  const [resumo, setResumo] = useState(denuncia?.resumo || "");
-  const [descricao, setDescricao] = useState(denuncia?.descricao || "");
-  const [tipo, setTipo] = useState<TipoDenuncia>(
-    (denuncia?.tipo as TipoDenuncia) || "Maus-tratos"
-  );
+  const [resumo, setResumo] = useState("");
+  const [descricao, setDescricao] = useState("");
+  const [tipo, setTipo] = useState<TipoDenuncia>("Maus-tratos");
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
+
+  useEffect(() => {
+    if (denuncia && isOpen) {
+      setResumo(denuncia.resumo || "");
+      setDescricao(denuncia.descricao || "");
+      setTipo((denuncia.tipo as TipoDenuncia) || "Maus-tratos");
+      setErro("");
+    }
+  }, [denuncia, isOpen]);
 
   if (!isOpen || !denuncia) return null;
 
@@ -105,8 +112,8 @@ export function EditarDenunciaModal({
 
           {erro && <p className="form-error">{erro}</p>}
 
-          <div className="modal-actions">
-            <button type="button" onClick={onClose}>
+          <div className="modal-actions modal-actions--edit">
+            <button type="button" className="secondary-button" onClick={onClose}>
               Cancelar
             </button>
 

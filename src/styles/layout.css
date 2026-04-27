@@ -777,3 +777,19 @@
     align-items: stretch;
   }
 }
+.secondary-button {
+  padding: 14px 18px;
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  font-weight: 700;
+}
+
+.modal-actions--edit {
+  align-items: center;
+}
+
+.modal-actions--edit .primary-button {
+  margin-top: 0;
+}
