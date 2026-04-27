@@ -36,6 +36,8 @@ export function EditarDenunciaModal({
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    if (!denuncia) return;
+
     if (denuncia.status !== "Pendente") {
       setErro("Só é possível editar denúncias pendentes.");
       return;

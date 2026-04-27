@@ -24,7 +24,6 @@ export function RegisterPage({ onGoToLogin }: RegisterPageProps) {
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
 
-  const passwordStrength = getPasswordStrength(senha);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
