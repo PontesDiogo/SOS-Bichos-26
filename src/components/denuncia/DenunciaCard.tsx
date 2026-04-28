@@ -1,5 +1,8 @@
+import { useEffect, useState } from "react";
 import type { Denuncia } from "../../types/denuncia";
+import type { DenunciaFeedback } from "../../types/feedback";
 import { cancelarDenuncia } from "../../services/denunciaService";
+import { listarFeedbacksPorDenuncia } from "../../services/feedbackService";
 import { formatarDataHora } from "../../utils/formatters";
 
 interface DenunciaCardProps {
@@ -13,6 +16,33 @@ export function DenunciaCard({
   onEdit,
   onUpdated,
 }: DenunciaCardProps) {
+  const [feedbacks, setFeedbacks] = useState<DenunciaFeedback[]>([]);
+  const [loadingFeedbacks, setLoadingFeedbacks] = useState(false);
+
+  useEffect(() => {
+    async function carregarFeedbacks() {
+      if (!denuncia?.id) {
+        setFeedbacks([]);
+        return;
+      }
+
+      try {
+        setLoadingFeedbacks(true);
+
+        const data = await listarFeedbacksPorDenuncia(denuncia.id);
+
+        setFeedbacks(data);
+      } catch (error) {
+        console.error(error);
+        setFeedbacks([]);
+      } finally {
+        setLoadingFeedbacks(false);
+      }
+    }
+
+    carregarFeedbacks();
+  }, [denuncia?.id]);
+
   if (!denuncia) {
     return (
       <article className="denuncia-card denuncia-card--empty">
@@ -95,6 +125,34 @@ export function DenunciaCard({
               </span>
             </div>
           )}
+        </div>
+
+        <div className="feedback-box">
+          <h3>Histórico da denúncia</h3>
+
+          {loadingFeedbacks && <p>Carregando atualizações...</p>}
+
+          {!loadingFeedbacks && feedbacks.length === 0 && (
+            <p>Ainda não há atualizações registradas para esta denúncia.</p>
+          )}
+
+          {!loadingFeedbacks &&
+            feedbacks.map((feedback) => (
+              <div key={feedback.id} className="feedback-item">
+                <div className="feedback-item__header">
+                  <strong>{feedback.status_novo}</strong>
+                  <small>{formatarDataHora(feedback.created_at)}</small>
+                </div>
+
+                <p>{feedback.descricao}</p>
+
+                {feedback.proxima_acao && (
+                  <p>
+                    <strong>Próxima ação:</strong> {feedback.proxima_acao}
+                  </p>
+                )}
+              </div>
+            ))}
         </div>
 
         {podeEditarOuCancelar && (
