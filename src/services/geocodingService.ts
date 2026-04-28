@@ -19,6 +19,13 @@ export async function buscarEnderecoPorCoordenadas(
     cep: address.postcode || "",
     rua: address.road || address.pedestrian || address.footway || "",
     numero: address.house_number || "",
+    bairro:
+      address.suburb ||
+      address.neighbourhood ||
+      address.quarter ||
+      address.city_district ||
+      address.county ||
+      "",
     cidade:
       address.city ||
       address.town ||

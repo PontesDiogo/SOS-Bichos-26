@@ -17,6 +17,7 @@ const emptyEndereco: Endereco = {
   cep: "",
   rua: "",
   numero: "",
+  bairro: "",
   cidade: "",
   estado: "",
 };
@@ -77,6 +78,10 @@ export function DenunciaForm({
         descricao,
         tipo,
         endereco: enderecoFormatado || "Localização informada pelo mapa",
+        bairro: endereco.bairro || null,
+        cidade: endereco.cidade || null,
+        estado: endereco.estado || null,
+        cep: endereco.cep || null,
         latitude,
         longitude,
         foto_url: fotoUrl,
@@ -167,8 +172,8 @@ export function DenunciaForm({
             {enderecoFormatado ||
               (latitude && longitude
                 ? `Localização confirmada no mapa (${latitude.toFixed(
-                    5
-                  )}, ${longitude.toFixed(5)})`
+                  5
+                )}, ${longitude.toFixed(5)})`
                 : "Nenhum endereço informado ainda.")}
           </p>
         </div>
@@ -208,6 +213,7 @@ function montarEnderecoFormatado(endereco: Endereco): string {
   const partes = [
     endereco.rua,
     endereco.numero,
+    endereco.bairro,
     endereco.cidade,
     endereco.estado,
     endereco.cep,

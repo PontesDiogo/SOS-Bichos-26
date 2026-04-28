@@ -14,6 +14,7 @@ export async function buscarEnderecoPorCep(cep: string): Promise<Endereco> {
     cep: data.cep,
     rua: data.logradouro || "",
     numero: "",
+    bairro: data.bairro || "",
     cidade: data.localidade || "",
     estado: data.uf || "",
   };

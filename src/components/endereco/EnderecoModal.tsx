@@ -22,6 +22,7 @@ const emptyEndereco: Endereco = {
   cep: "",
   rua: "",
   numero: "",
+  bairro: "",
   cidade: "",
   estado: "",
 };
@@ -91,6 +92,7 @@ export function EnderecoModal({
         cep: enderecoEncontrado.cep || prev.cep,
         rua: enderecoEncontrado.rua || prev.rua,
         numero: enderecoEncontrado.numero || prev.numero,
+        bairro: enderecoEncontrado.bairro || prev.bairro,
         cidade: enderecoEncontrado.cidade || prev.cidade,
         estado: enderecoEncontrado.estado || prev.estado,
       }));
@@ -156,6 +158,14 @@ export function EnderecoModal({
               value={endereco.numero}
               onChange={(e) => updateField("numero", e.target.value)}
               placeholder="Nº"
+            />
+          </div>
+          <div>
+            <label className="form-label">Bairro</label>
+            <input
+              value={endereco.bairro}
+              onChange={(e) => updateField("bairro", e.target.value)}
+              placeholder="Bairro"
             />
           </div>
 

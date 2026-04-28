@@ -19,6 +19,10 @@ export interface Denuncia {
   tipo: TipoDenuncia;
   status: StatusDenuncia;
   endereco: string;
+  bairro?: string | null;
+  cidade?: string | null;
+  estado?: string | null;
+  cep?: string | null;
   latitude: number | null;
   longitude: number | null;
   foto_url?: string | null;
@@ -35,6 +39,10 @@ export interface CriarDenunciaPayload {
   descricao: string;
   tipo: TipoDenuncia;
   endereco: string;
+  bairro?: string | null;
+  cidade?: string | null;
+  estado?: string | null;
+  cep?: string | null;
   latitude: number | null;
   longitude: number | null;
   foto_url?: string | null;
@@ -48,6 +56,10 @@ export interface EditarDenunciaPayload {
   descricao?: string;
   tipo?: TipoDenuncia;
   endereco?: string;
+  bairro?: string | null;
+  cidade?: string | null;
+  estado?: string | null;
+  cep?: string | null;
   latitude?: number | null;
   longitude?: number | null;
   foto_url?: string | null;
