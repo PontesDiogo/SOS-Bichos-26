@@ -10,7 +10,10 @@ export async function uploadFotoDenuncia(file: File, userId: string): Promise<st
       upsert: true,
     });
 
-  if (uploadError) throw uploadError;
+  if (uploadError) {
+    console.error("Erro ao enviar foto da denúncia:", uploadError);
+    throw uploadError;
+  }
 
   const { data } = supabase.storage.from("denuncias").getPublicUrl(fileName);
 

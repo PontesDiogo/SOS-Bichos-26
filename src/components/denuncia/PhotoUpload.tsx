@@ -38,6 +38,7 @@ export function PhotoUpload({ file, onChange }: PhotoUploadProps) {
       onChange(null);
       return;
     }
+    
 
     onChange(selectedFile);
   }
@@ -49,6 +50,7 @@ export function PhotoUpload({ file, onChange }: PhotoUploadProps) {
   }
 
   return (
+    
     <div className="photo-upload">
       <label className="form-label">Foto da ocorrência</label>
 
