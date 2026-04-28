@@ -20,6 +20,7 @@ interface AdminPageProps {
   onHome: () => void;
   onPerfil: () => void;
   onLogout: () => void;
+  onRelatorios: () => void;
 }
 
 export function AdminPage({
@@ -28,6 +29,7 @@ export function AdminPage({
   onHome,
   onPerfil,
   onLogout,
+  onRelatorios,
 }: AdminPageProps) {
   const [denuncias, setDenuncias] = useState<Denuncia[]>([]);
   const [denunciaSelecionada, setDenunciaSelecionada] =
@@ -167,7 +169,7 @@ export function AdminPage({
         onDenunciar={onHome}
         onPerfil={onPerfil}
         onAdmin={() => undefined}
-        onRelatorios={() => console.log("Ir para relatórios")}
+        onRelatorios={onRelatorios}
         onLogout={onLogout}
       />
 

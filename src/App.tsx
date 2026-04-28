@@ -10,6 +10,7 @@ import { useAuth } from "./hooks/useAuth";
 import { AdminPage } from "./pages/AdminPage";
 import "./index.css";
 import "./styles/layout.css";
+import { RelatoriosPage } from "./pages/RelatoriosPage";
 
 type AuthScreen = "login" | "register" | "recover" | "reset";
 type AppScreen = "home" | "perfil" | "admin" | "relatorios" | "politica";
@@ -39,6 +40,20 @@ function App() {
           </div>
         </section>
       </main>
+    );
+  }
+
+  if (appScreen === "relatorios" && isAdmin && user) {
+    return (
+      <RelatoriosPage
+        userName={nome}
+        avatarUrl={user.user_metadata?.avatar_url ?? null}
+        onHome={() => setAppScreen("home")}
+        onAdmin={() => setAppScreen("admin")}
+        onPerfil={() => setAppScreen("perfil")}
+      
+        onLogout={logout}
+      />
     );
   }
 
@@ -83,6 +98,7 @@ function App() {
         avatarUrl={user.user_metadata?.avatar_url ?? null}
         onHome={() => setAppScreen("home")}
         onPerfil={() => setAppScreen("perfil")}
+        onRelatorios={() => setAppScreen("relatorios")}
         onLogout={logout}
       />
     );
@@ -115,6 +131,7 @@ function App() {
       isAdmin={isAdmin}
       onPerfil={() => setAppScreen("perfil")}
       onAdmin={() => setAppScreen("admin")}
+      onRelatorios={() => setAppScreen("relatorios")}
       onLogout={logout}
     />
   );

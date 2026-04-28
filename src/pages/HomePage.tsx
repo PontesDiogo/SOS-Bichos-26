@@ -13,6 +13,7 @@ interface HomePageProps {
   isAdmin?: boolean;
   onPerfil?: () => void;
   onAdmin?: () => void;
+  onRelatorios?: () => void;
   onLogout?: () => void;
 }
 
@@ -23,6 +24,7 @@ export function HomePage({
   isAdmin,
   onPerfil,
   onAdmin,
+  onRelatorios,
   onLogout,
 }: HomePageProps) {
   const { denuncias, loading, erro, carregarDenuncias } = useDenuncias({
@@ -35,6 +37,8 @@ export function HomePage({
     section?.scrollIntoView({ behavior: "smooth" });
   }
 
+  
+
   return (
     <>
       <Navbar
@@ -44,7 +48,7 @@ export function HomePage({
         onDenunciar={handleDenunciar}
         onPerfil={onPerfil}
         onAdmin={onAdmin}
-        onRelatorios={() => console.log("Ir para relatórios")}
+        onRelatorios={onRelatorios}
         onLogout={onLogout}
       />
 
