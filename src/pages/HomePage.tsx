@@ -12,6 +12,7 @@ interface HomePageProps {
   avatarUrl?: string | null;
   isAdmin?: boolean;
   onPerfil?: () => void;
+  onAdmin?: () => void;
   onLogout?: () => void;
 }
 
@@ -21,6 +22,7 @@ export function HomePage({
   avatarUrl,
   isAdmin,
   onPerfil,
+  onAdmin,
   onLogout,
 }: HomePageProps) {
   const { denuncias, loading, erro, carregarDenuncias } = useDenuncias({
@@ -41,7 +43,7 @@ export function HomePage({
         avatarUrl={avatarUrl}
         onDenunciar={handleDenunciar}
         onPerfil={onPerfil}
-        onAdmin={() => console.log("Ir para admin")}
+        onAdmin={onAdmin}
         onRelatorios={() => console.log("Ir para relatórios")}
         onLogout={onLogout}
       />

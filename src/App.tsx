@@ -7,16 +7,20 @@ import { RedefinirSenhaPage } from "./pages/RedefinirSenhaPage";
 import { PerfilPage } from "./pages/PerfilPage";
 import { PoliticaPrivacidadePage } from "./pages/PoliticaPrivacidadePage";
 import { useAuth } from "./hooks/useAuth";
+import { AdminPage } from "./pages/AdminPage";
 import "./index.css";
 import "./styles/layout.css";
 
 type AuthScreen = "login" | "register" | "recover" | "reset";
-type AppScreen = "home" | "perfil" | "politica";
+type AppScreen = "home" | "perfil" | "admin" | "relatorios" | "politica";
+
+
 
 function App() {
   const { user, nome, role, isAdmin, loadingAuth, logout } = useAuth();
   const [authScreen, setAuthScreen] = useState<AuthScreen>("login");
   const [appScreen, setAppScreen] = useState<AppScreen>("home");
+
 
   useEffect(() => {
     const currentPath = window.location.pathname;
@@ -72,6 +76,18 @@ function App() {
     );
   }
 
+  if (appScreen === "admin" && isAdmin && user) {
+    return (
+      <AdminPage
+        userName={nome}
+        avatarUrl={user.user_metadata?.avatar_url ?? null}
+        onHome={() => setAppScreen("home")}
+        onPerfil={() => setAppScreen("perfil")}
+        onLogout={logout}
+      />
+    );
+  }
+
   if (appScreen === "perfil") {
     return (
       <PerfilPage
@@ -95,10 +111,10 @@ function App() {
     <HomePage
       userId={user.id}
       userName={nome}
+      avatarUrl={user.user_metadata?.avatar_url ?? null}
       isAdmin={isAdmin}
       onPerfil={() => setAppScreen("perfil")}
-      avatarUrl={user.user_metadata?.avatar_url ?? null}
-
+      onAdmin={() => setAppScreen("admin")}
       onLogout={logout}
     />
   );
