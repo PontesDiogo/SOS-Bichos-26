@@ -4,7 +4,7 @@ interface NavbarProps {
   userName?: string;
   isAdmin?: boolean;
   user?: User | null;
-  avatarUrl?: string;
+  avatarUrl?: string| null;
   onDenunciar?: () => void;
   onPerfil?: () => void;
   onAdmin?: () => void;
