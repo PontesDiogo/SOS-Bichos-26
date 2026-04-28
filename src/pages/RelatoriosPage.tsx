@@ -17,6 +17,9 @@ import { PageContainer } from "../components/layout/PageContainer";
 import { Footer } from "../components/layout/Footer";
 import { listarTodasDenuncias } from "../services/denunciaService";
 import type { Denuncia, StatusDenuncia, TipoDenuncia } from "../types/denuncia";
+import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 interface RelatoriosPageProps {
     userName?: string;
@@ -25,6 +28,31 @@ interface RelatoriosPageProps {
     onAdmin: () => void;
     onPerfil: () => void;
     onLogout: () => void;
+}
+function AjustarMapa({ denuncias }: { denuncias: Denuncia[] }) {
+    const map = useMap();
+
+    useEffect(() => {
+        const pontos = denuncias
+            .filter(
+                (denuncia) =>
+                    typeof denuncia.latitude === "number" &&
+                    typeof denuncia.longitude === "number"
+            )
+            .map((denuncia) => [denuncia.latitude!, denuncia.longitude!] as [number, number]);
+
+        if (pontos.length === 0) return;
+
+        if (pontos.length === 1) {
+            map.setView(pontos[0], 14);
+            return;
+        }
+
+        const bounds = L.latLngBounds(pontos);
+        map.fitBounds(bounds, { padding: [40, 40] });
+    }, [denuncias, map]);
+
+    return null;
 }
 
 const STATUS_ORDEM: StatusDenuncia[] = [
@@ -50,6 +78,15 @@ const CHART_COLORS = [
     "#84a98c",
     "#b42318",
 ];
+
+const markerIcon = new L.Icon({
+    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+    iconRetinaUrl:
+        "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+});
 
 export function RelatoriosPage({
     userName,
@@ -151,6 +188,13 @@ export function RelatoriosPage({
             .sort((a, b) => b.total - a.total)
             .slice(0, 8);
     }, [denuncias]);
+    const denunciasComLocalizacao = useMemo(() => {
+        return denuncias.filter(
+            (denuncia) =>
+                typeof denuncia.latitude === "number" &&
+                typeof denuncia.longitude === "number"
+        );
+    }, [denuncias]);
 
     return (
         <>
@@ -230,6 +274,60 @@ export function RelatoriosPage({
 
                         <section className="relatorios-charts-grid">
                             <section className="relatorios-ranking-section">
+                                <section className="relatorios-map-section">
+                                    <div className="relatorio-chart-header">
+                                        <div>
+                                            <span className="section-tag">Mapa</span>
+                                            <h2>Distribuição das denúncias</h2>
+                                        </div>
+                                    </div>
+
+                                    <p className="relatorios-map-description">
+                                        Visualize a distribuição geográfica das denúncias registradas. O mapa é
+                                        iniciado em Itu/SP e se ajusta automaticamente conforme aparecem ocorrências
+                                        em outras regiões.
+                                    </p>
+
+                                    <div className="relatorios-map-box">
+                                        {denunciasComLocalizacao.length === 0 ? (
+                                            <div className="empty-map-message">
+                                                Ainda não há denúncias com localização para exibir no mapa.
+                                            </div>
+                                        ) : (
+                                            <MapContainer
+                                                center={[-23.2642, -47.2992]}
+                                                zoom={13}
+                                                className="relatorios-map"
+                                                scrollWheelZoom={false}
+                                            >
+                                                <TileLayer
+                                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                                />
+
+                                                <AjustarMapa denuncias={denunciasComLocalizacao} />
+
+                                                {denunciasComLocalizacao.map((denuncia) => (
+                                                    <Marker
+                                                        key={denuncia.id}
+                                                        position={[denuncia.latitude!, denuncia.longitude!]}
+                                                        icon={markerIcon}
+                                                    >
+                                                        <Popup>
+                                                            <strong>{denuncia.resumo || "Denúncia sem resumo"}</strong>
+                                                            <br />
+                                                            {denuncia.tipo}
+                                                            <br />
+                                                            Status: {denuncia.status}
+                                                            <br />
+                                                            {denuncia.bairro || denuncia.endereco || "Local não informado"}
+                                                        </Popup>
+                                                    </Marker>
+                                                ))}
+                                            </MapContainer>
+                                        )}
+                                    </div>
+                                </section>
                                 <div className="relatorio-chart-header">
                                     <div>
                                         <span className="section-tag">Regiões</span>
