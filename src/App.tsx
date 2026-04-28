@@ -97,6 +97,7 @@ function App() {
       userName={nome}
       isAdmin={isAdmin}
       onPerfil={() => setAppScreen("perfil")}
+      avatarUrl={user.user_metadata?.avatar_url ?? null}
 
       onLogout={logout}
     />

@@ -1,6 +1,10 @@
+import type { User } from "@supabase/supabase-js";
+
 interface NavbarProps {
   userName?: string;
   isAdmin?: boolean;
+  user?: User | null;
+  avatarUrl?: string;
   onDenunciar?: () => void;
   onPerfil?: () => void;
   onAdmin?: () => void;
@@ -9,14 +13,17 @@ interface NavbarProps {
 }
 
 export function Navbar({
-  userName,
-  isAdmin = false,
+  isAdmin,
+  user,
+  avatarUrl,
   onDenunciar,
   onPerfil,
+  onLogout,
   onAdmin,
   onRelatorios,
-  onLogout,
 }: NavbarProps) {
+  const fotoPerfil = avatarUrl || user?.user_metadata?.avatar_url || null;
+
   return (
     <header className="navbar">
       <div className="navbar__brand">
@@ -44,8 +51,17 @@ export function Navbar({
           Fazer denúncia
         </button>
 
-        <button type="button" onClick={onPerfil}>
-          {userName ? `Olá, ${userName}` : "Usuário"}
+        <button
+          type="button"
+          className="navbar-avatar-btn"
+          onClick={onPerfil}
+          title="Meu perfil"
+        >
+          {fotoPerfil ? (
+            <img src={fotoPerfil} alt="Perfil" className="navbar-avatar-img" />
+          ) : (
+            <div className="navbar-avatar-placeholder">👤</div>
+          )}
         </button>
 
         <button type="button" onClick={onLogout}>

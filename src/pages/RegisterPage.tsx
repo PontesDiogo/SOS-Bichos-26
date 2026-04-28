@@ -6,6 +6,8 @@ import {
 } from "../utils/validators";
 import dogImage from "../assets/images/dog.png";
 import { PoliticaPrivacidadeModal } from "../components/common/PoliticaPrivacidadeModal";
+import { EyeIcon, EyeOffIcon } from "../components/common/Icons/EyeIcon";
+
 
 interface RegisterPageProps {
   onGoToLogin: () => void;
@@ -286,18 +288,4 @@ function PasswordRule({
   );
 }
 
-function EyeIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 5C6.5 5 2.3 9.2 1 12c1.3 2.8 5.5 7 11 7s9.7-4.2 11-7c-1.3-2.8-5.5-7-11-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm0-2.2A1.8 1.8 0 1 0 12 10a1.8 1.8 0 0 0 0 3.8Z" />
-    </svg>
-  );
-}
 
-function EyeOffIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M3.3 2 22 20.7 20.7 22l-3-3A12.2 12.2 0 0 1 12 20C6.5 20 2.3 15.8 1 13c.6-1.3 1.9-3 3.6-4.4L2 3.3 3.3 2Zm5.1 8.4A4 4 0 0 0 13.6 15.6l-1.7-1.7A1.8 1.8 0 0 1 10.1 12l-1.7-1.6ZM12 6c5.5 0 9.7 4.2 11 7a13.3 13.3 0 0 1-3.2 4.2l-2.9-2.9A4 4 0 0 0 11 8.1L8.8 5.9A12.6 12.6 0 0 1 12 6Z" />
-    </svg>
-  );
-}

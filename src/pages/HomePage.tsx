@@ -9,6 +9,7 @@ import { useDenuncias } from "../hooks/useDenuncia";
 interface HomePageProps {
   userId: string;
   userName?: string;
+  avatarUrl?: string | null;
   isAdmin?: boolean;
   onPerfil?: () => void;
   onLogout?: () => void;
@@ -17,6 +18,7 @@ interface HomePageProps {
 export function HomePage({
   userId,
   userName,
+  avatarUrl,
   isAdmin,
   onPerfil,
   onLogout,
@@ -36,6 +38,7 @@ export function HomePage({
       <Navbar
         userName={userName}
         isAdmin={isAdmin}
+        avatarUrl={avatarUrl}
         onDenunciar={handleDenunciar}
         onPerfil={onPerfil}
         onAdmin={() => console.log("Ir para admin")}
