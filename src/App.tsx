@@ -11,6 +11,8 @@ import { AdminPage } from "./pages/AdminPage";
 import "./index.css";
 import "./styles/layout.css";
 import { RelatoriosPage } from "./pages/RelatoriosPage";
+import { Navbar } from "./components/layout/Navbar";
+import { Footer } from "./components/layout/Footer";
 
 type AuthScreen = "login" | "register" | "recover" | "reset";
 type AppScreen = "home" | "perfil" | "admin" | "relatorios" | "politica";
@@ -51,7 +53,7 @@ function App() {
         onHome={() => setAppScreen("home")}
         onAdmin={() => setAppScreen("admin")}
         onPerfil={() => setAppScreen("perfil")}
-      
+
         onLogout={logout}
       />
     );
@@ -104,18 +106,34 @@ function App() {
     );
   }
 
-  if (appScreen === "perfil") {
+  if (appScreen === "perfil" && user) {
     return (
-      <PerfilPage
-        userId={user.id}
-        nome={nome}
-        email={user.email}
-        role={role}
-        avatarUrl={user.user_metadata?.avatar_url || null}
-        onBack={() => setAppScreen("home")}
-        onLogout={logout}
-        onUpdated={() => window.location.reload()}
-      />
+      <>
+        <Navbar
+          userName={nome}
+          avatarUrl={user.user_metadata?.avatar_url ?? null}
+          isAdmin={isAdmin}
+          onHome={() => setAppScreen("home")}
+          onDenunciar={() => setAppScreen("home")}
+          onPerfil={() => setAppScreen("perfil")}
+          onAdmin={() => setAppScreen("admin")}
+          onRelatorios={() => setAppScreen("relatorios")}
+          onLogout={logout}
+        />
+
+        <PerfilPage
+          userId={user.id}
+          nome={nome}
+          email={user.email}
+          role={role}
+          avatarUrl={user.user_metadata?.avatar_url ?? null}
+          onBack={() => setAppScreen("home")}
+          onLogout={logout}
+          onUpdated={() => window.location.reload()}
+        />
+
+        <Footer />
+      </>
     );
   }
 
@@ -129,6 +147,7 @@ function App() {
       userName={nome}
       avatarUrl={user.user_metadata?.avatar_url ?? null}
       isAdmin={isAdmin}
+      onHome={() => setAppScreen("home")}
       onPerfil={() => setAppScreen("perfil")}
       onAdmin={() => setAppScreen("admin")}
       onRelatorios={() => setAppScreen("relatorios")}

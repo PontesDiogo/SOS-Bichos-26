@@ -166,6 +166,7 @@ export function AdminPage({
         userName={userName}
         avatarUrl={avatarUrl}
         isAdmin
+        onHome={onHome}
         onDenunciar={onHome}
         onPerfil={onPerfil}
         onAdmin={() => undefined}
@@ -240,11 +241,10 @@ export function AdminPage({
                     <button
                       key={denuncia.id}
                       type="button"
-                      className={`admin-list-item ${
-                        denunciaSelecionada?.id === denuncia.id
+                      className={`admin-list-item ${denunciaSelecionada?.id === denuncia.id
                           ? "is-selected"
                           : ""
-                      }`}
+                        }`}
                       onClick={() => {
                         setDenunciaSelecionada(denuncia);
                         carregarFeedbacks(denuncia.id);
@@ -320,7 +320,7 @@ export function AdminPage({
                               {denunciaSelecionada.anonimo
                                 ? "Anônimo"
                                 : denunciaSelecionada.nome_usuario ||
-                                  "Não informado"}
+                                "Não informado"}
                             </span>
                           </div>
 
@@ -342,7 +342,7 @@ export function AdminPage({
                             <strong>Coordenadas</strong>
                             <span>
                               {denunciaSelecionada.latitude &&
-                              denunciaSelecionada.longitude
+                                denunciaSelecionada.longitude
                                 ? `${denunciaSelecionada.latitude}, ${denunciaSelecionada.longitude}`
                                 : "Não informado"}
                             </span>

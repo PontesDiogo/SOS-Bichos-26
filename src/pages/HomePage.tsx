@@ -15,6 +15,7 @@ interface HomePageProps {
   onAdmin?: () => void;
   onRelatorios?: () => void;
   onLogout?: () => void;
+  onHome?: () => void;
 }
 
 export function HomePage({
@@ -26,6 +27,7 @@ export function HomePage({
   onAdmin,
   onRelatorios,
   onLogout,
+  onHome,
 }: HomePageProps) {
   const { denuncias, loading, erro, carregarDenuncias } = useDenuncias({
     userId,
@@ -50,6 +52,7 @@ export function HomePage({
         onAdmin={onAdmin}
         onRelatorios={onRelatorios}
         onLogout={onLogout}
+        onHome={onHome}
       />
 
       <PageContainer>

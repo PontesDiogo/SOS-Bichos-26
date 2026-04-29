@@ -10,12 +10,14 @@ interface NavbarProps {
   onAdmin?: () => void;
   onRelatorios?: () => void;
   onLogout?: () => void;
+  onHome?: () => void;
 }
 
 export function Navbar({
   isAdmin,
   user,
   avatarUrl,
+  onHome,
   onDenunciar,
   onPerfil,
   onLogout,
@@ -26,13 +28,13 @@ export function Navbar({
 
   return (
     <header className="navbar">
-      <div className="navbar__brand">
+      <button type="button" className="navbar__brand navbar__brand-button" onClick={onHome}>
         <span className="navbar__logo">🐾</span>
         <div>
           <strong>SOS Bichos</strong>
           <small>Denúncias e cuidado animal</small>
         </div>
-      </div>
+      </button>
 
       <nav className="navbar__actions">
         {isAdmin && (

@@ -12,14 +12,15 @@ import {
     XAxis,
     YAxis,
 } from "recharts";
+import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { Navbar } from "../components/layout/Navbar";
 import { PageContainer } from "../components/layout/PageContainer";
 import { Footer } from "../components/layout/Footer";
 import { listarTodasDenuncias } from "../services/denunciaService";
 import type { Denuncia, StatusDenuncia, TipoDenuncia } from "../types/denuncia";
-import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import { formatarDataHora } from "../utils/formatters";
 
 interface RelatoriosPageProps {
     userName?: string;
@@ -28,32 +29,15 @@ interface RelatoriosPageProps {
     onAdmin: () => void;
     onPerfil: () => void;
     onLogout: () => void;
+
 }
-function AjustarMapa({ denuncias }: { denuncias: Denuncia[] }) {
-    const map = useMap();
 
-    useEffect(() => {
-        const pontos = denuncias
-            .filter(
-                (denuncia) =>
-                    typeof denuncia.latitude === "number" &&
-                    typeof denuncia.longitude === "number"
-            )
-            .map((denuncia) => [denuncia.latitude!, denuncia.longitude!] as [number, number]);
-
-        if (pontos.length === 0) return;
-
-        if (pontos.length === 1) {
-            map.setView(pontos[0], 14);
-            return;
-        }
-
-        const bounds = L.latLngBounds(pontos);
-        map.fitBounds(bounds, { padding: [40, 40] });
-    }, [denuncias, map]);
-
-    return null;
-}
+type RelatorioAba =
+    | "visao-geral"
+    | "graficos"
+    | "regioes"
+    | "tabela"
+    | "exportacoes";
 
 const STATUS_ORDEM: StatusDenuncia[] = [
     "Pendente",
@@ -100,6 +84,25 @@ export function RelatoriosPage({
     const [loading, setLoading] = useState(true);
     const [erro, setErro] = useState("");
 
+    const [abaAtiva, setAbaAtiva] = useState<RelatorioAba>("visao-geral");
+    const [dataInicial, setDataInicial] = useState("");
+    const [dataFinal, setDataFinal] = useState("");
+    const [filtroStatus, setFiltroStatus] = useState<StatusDenuncia | "Todos">(
+        "Todos"
+    );
+    const [filtroTipo, setFiltroTipo] = useState<TipoDenuncia | "Todos">("Todos");
+    const [filtroBairro, setFiltroBairro] = useState("Todos");
+    const [pesquisaTexto, setPesquisaTexto] = useState("");
+
+    const [filtrosAplicados, setFiltrosAplicados] = useState({
+        dataInicial: "",
+        dataFinal: "",
+        status: "Todos" as StatusDenuncia | "Todos",
+        tipo: "Todos" as TipoDenuncia | "Todos",
+        bairro: "Todos",
+        pesquisa: "",
+    });
+
     useEffect(() => {
         async function carregarRelatorios() {
             try {
@@ -119,30 +122,80 @@ export function RelatoriosPage({
         carregarRelatorios();
     }, []);
 
-    const indicadores = useMemo(() => {
-        const total = denuncias.length;
+    const bairrosDisponiveis = useMemo(() => {
+        return Array.from(
+            new Set(
+                denuncias.map(
+                    (denuncia) => denuncia.bairro?.trim() || "Bairro não informado"
+                )
+            )
+        ).sort();
+    }, [denuncias]);
 
-        const pendentes = denuncias.filter(
+    const denunciasFiltradas = useMemo(() => {
+        return denuncias.filter((denuncia) => {
+            const dataDenuncia = new Date(denuncia.created_at);
+
+            const dentroDataInicial =
+                !filtrosAplicados.dataInicial ||
+                dataDenuncia >= new Date(`${filtrosAplicados.dataInicial}T00:00:00`);
+
+            const dentroDataFinal =
+                !filtrosAplicados.dataFinal ||
+                dataDenuncia <= new Date(`${filtrosAplicados.dataFinal}T23:59:59`);
+
+            const statusOk =
+                filtrosAplicados.status === "Todos" ||
+                denuncia.status === filtrosAplicados.status;
+
+            const tipoOk =
+                filtrosAplicados.tipo === "Todos" || denuncia.tipo === filtrosAplicados.tipo;
+
+            const bairro = denuncia.bairro?.trim() || "Bairro não informado";
+            const bairroOk =
+                filtrosAplicados.bairro === "Todos" || bairro === filtrosAplicados.bairro;
+
+            const termo = filtrosAplicados.pesquisa.trim().toLowerCase();
+            const textoOk =
+                !termo ||
+                denuncia.resumo?.toLowerCase().includes(termo) ||
+                denuncia.descricao?.toLowerCase().includes(termo);
+
+            return (
+                dentroDataInicial &&
+                dentroDataFinal &&
+                statusOk &&
+                tipoOk &&
+                bairroOk &&
+                textoOk
+            );
+        });
+    }, [denuncias, filtrosAplicados]);
+
+    const indicadores = useMemo(() => {
+        const total = denunciasFiltradas.length;
+
+        const pendentes = denunciasFiltradas.filter(
             (denuncia) => denuncia.status === "Pendente"
         ).length;
 
-        const emAnalise = denuncias.filter(
+        const emAnalise = denunciasFiltradas.filter(
             (denuncia) => denuncia.status === "Em análise"
         ).length;
 
-        const emAtendimento = denuncias.filter(
+        const emAtendimento = denunciasFiltradas.filter(
             (denuncia) => denuncia.status === "Em atendimento"
         ).length;
 
-        const resolvidas = denuncias.filter(
+        const resolvidas = denunciasFiltradas.filter(
             (denuncia) => denuncia.status === "Resolvido"
         ).length;
 
-        const canceladas = denuncias.filter(
+        const canceladas = denunciasFiltradas.filter(
             (denuncia) => denuncia.status === "Cancelado"
         ).length;
 
-        const naoResolvidas = denuncias.filter(
+        const naoResolvidas = denunciasFiltradas.filter(
             (denuncia) =>
                 denuncia.status !== "Resolvido" && denuncia.status !== "Cancelado"
         ).length;
@@ -156,29 +209,28 @@ export function RelatoriosPage({
             canceladas,
             naoResolvidas,
         };
-    }, [denuncias]);
+    }, [denunciasFiltradas]);
 
     const dadosPorStatus = useMemo(() => {
         return STATUS_ORDEM.map((status) => ({
             nome: status,
-            total: denuncias.filter((denuncia) => denuncia.status === status).length,
+            total: denunciasFiltradas.filter((denuncia) => denuncia.status === status)
+                .length,
         }));
-    }, [denuncias]);
+    }, [denunciasFiltradas]);
 
     const dadosPorTipo = useMemo(() => {
         return TIPOS_ORDEM.map((tipo) => ({
             nome: tipo,
-            total: denuncias.filter((denuncia) => denuncia.tipo === tipo).length,
+            total: denunciasFiltradas.filter((denuncia) => denuncia.tipo === tipo)
+                .length,
         })).filter((item) => item.total > 0);
-    }, [denuncias]);
-
-
-
+    }, [denunciasFiltradas]);
 
     const rankingPorBairro = useMemo(() => {
         const contador = new Map<string, number>();
 
-        denuncias.forEach((denuncia) => {
+        denunciasFiltradas.forEach((denuncia) => {
             const bairro = denuncia.bairro?.trim() || "Bairro não informado";
             contador.set(bairro, (contador.get(bairro) || 0) + 1);
         });
@@ -187,14 +239,43 @@ export function RelatoriosPage({
             .map(([bairro, total]) => ({ bairro, total }))
             .sort((a, b) => b.total - a.total)
             .slice(0, 8);
-    }, [denuncias]);
+    }, [denunciasFiltradas]);
+
     const denunciasComLocalizacao = useMemo(() => {
-        return denuncias.filter(
+        return denunciasFiltradas.filter(
             (denuncia) =>
                 typeof denuncia.latitude === "number" &&
                 typeof denuncia.longitude === "number"
         );
-    }, [denuncias]);
+    }, [denunciasFiltradas]);
+
+    function aplicarFiltros() {
+        setFiltrosAplicados({
+            dataInicial,
+            dataFinal,
+            status: filtroStatus,
+            tipo: filtroTipo,
+            bairro: filtroBairro,
+            pesquisa: pesquisaTexto,
+        });
+    }
+
+    function limparFiltros() {
+        setDataInicial("");
+        setDataFinal("");
+        setFiltroStatus("Todos");
+        setFiltroTipo("Todos");
+        setFiltroBairro("Todos");
+        setPesquisaTexto("");
+        setFiltrosAplicados({
+            dataInicial: "",
+            dataFinal: "",
+            status: "Todos",
+            tipo: "Todos",
+            bairro: "Todos",
+            pesquisa: "",
+        });
+    }
 
     return (
         <>
@@ -202,6 +283,7 @@ export function RelatoriosPage({
                 userName={userName}
                 avatarUrl={avatarUrl}
                 isAdmin
+                onHome={onHome}
                 onDenunciar={onHome}
                 onAdmin={onAdmin}
                 onRelatorios={() => undefined}
@@ -216,10 +298,160 @@ export function RelatoriosPage({
                     <h1>Visão geral das denúncias</h1>
 
                     <p>
-                        Acompanhe os principais indicadores do sistema, como volume total de
-                        denúncias, ocorrências pendentes, atendimentos em andamento e casos
-                        resolvidos.
+                        Acompanhe os principais indicadores do sistema, filtre os dados por
+                        palavra-chave, período, status, tipo e bairro, e consulte análises
+                        visuais e geográficas das ocorrências.
                     </p>
+                </section>
+
+                <section className="relatorios-toolbar">
+                    <div className="relatorios-tabs">
+                        <button
+                            type="button"
+                            className={abaAtiva === "visao-geral" ? "is-active" : ""}
+                            onClick={() => setAbaAtiva("visao-geral")}
+                        >
+                            Visão geral
+                        </button>
+
+                        <button
+                            type="button"
+                            className={abaAtiva === "graficos" ? "is-active" : ""}
+                            onClick={() => setAbaAtiva("graficos")}
+                        >
+                            Gráficos
+                        </button>
+
+                        <button
+                            type="button"
+                            className={abaAtiva === "regioes" ? "is-active" : ""}
+                            onClick={() => setAbaAtiva("regioes")}
+                        >
+                            Regiões
+                        </button>
+
+                        <button
+                            type="button"
+                            className={abaAtiva === "tabela" ? "is-active" : ""}
+                            onClick={() => setAbaAtiva("tabela")}
+                        >
+                            Tabela
+                        </button>
+
+                        <button
+                            type="button"
+                            className={abaAtiva === "exportacoes" ? "is-active" : ""}
+                            onClick={() => setAbaAtiva("exportacoes")}
+                        >
+                            Exportações
+                        </button>
+                    </div>
+
+                    <div className="relatorios-filtros">
+                        <div className="relatorios-filtro-search">
+                            <label>Pesquisar</label>
+                            <input
+                                type="search"
+                                value={pesquisaTexto}
+                                onChange={(e) => setPesquisaTexto(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                        aplicarFiltros();
+                                    }
+                                }}
+                                placeholder="Buscar por resumo ou descrição"
+                            />
+                        </div>
+
+                        <div>
+                            <label>Data inicial</label>
+                            <input
+                                type="date"
+                                value={dataInicial}
+                                onChange={(e) => setDataInicial(e.target.value)}
+                            />
+                        </div>
+
+                        <div>
+                            <label>Data final</label>
+                            <input
+                                type="date"
+                                value={dataFinal}
+                                onChange={(e) => setDataFinal(e.target.value)}
+                            />
+                        </div>
+
+                        <div>
+                            <label>Status</label>
+                            <select
+                                value={filtroStatus}
+                                onChange={(e) =>
+                                    setFiltroStatus(e.target.value as StatusDenuncia | "Todos")
+                                }
+                            >
+                                <option value="Todos">Todos</option>
+                                {STATUS_ORDEM.map((status) => (
+                                    <option key={status} value={status}>
+                                        {status}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label>Tipo</label>
+                            <select
+                                value={filtroTipo}
+                                onChange={(e) =>
+                                    setFiltroTipo(e.target.value as TipoDenuncia | "Todos")
+                                }
+                            >
+                                <option value="Todos">Todos</option>
+                                {TIPOS_ORDEM.map((tipo) => (
+                                    <option key={tipo} value={tipo}>
+                                        {tipo}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label>Bairro</label>
+                            <select
+                                value={filtroBairro}
+                                onChange={(e) => setFiltroBairro(e.target.value)}
+                            >
+                                <option value="Todos">Todos</option>
+                                {bairrosDisponiveis.map((bairro) => (
+                                    <option key={bairro} value={bairro}>
+                                        {bairro}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="relatorios-toolbar-footer">
+                        <span>{denunciasFiltradas.length} denúncia(s) encontradas</span>
+
+                        <div className="relatorios-filter-actions">
+                            <button
+                                type="button"
+                                className="relatorios-clear-button"
+                                onClick={limparFiltros}
+                            >
+                                Limpar busca
+                            </button>
+
+                            <button
+                                type="button"
+                                className="relatorios-search-button"
+                                onClick={aplicarFiltros}
+                            >
+                                Pesquisar
+                            </button>
+                        </div>
+                    </div>
                 </section>
 
                 {loading && <p>Carregando relatórios...</p>}
@@ -228,70 +460,226 @@ export function RelatoriosPage({
 
                 {!loading && !erro && (
                     <>
-                        <section className="relatorios-grid">
-                            <article className="relatorio-card relatorio-card--total">
-                                <span>Total de denúncias</span>
-                                <strong>{indicadores.total}</strong>
-                                <p>Ocorrências registradas na plataforma.</p>
-                            </article>
+                        {abaAtiva === "visao-geral" && (
+                            <section className="relatorios-section">
+                                <div className="relatorios-section-header">
+                                    <div>
+                                        <span className="section-tag">Visão geral</span>
+                                        <h2>Resumo operacional</h2>
+                                    </div>
 
-                            <article className="relatorio-card">
-                                <span>Pendentes</span>
-                                <strong>{indicadores.pendentes}</strong>
-                                <p>Denúncias aguardando análise inicial.</p>
-                            </article>
+                                    <p>
+                                        Indicadores principais considerando os filtros selecionados.
+                                    </p>
+                                </div>
 
-                            <article className="relatorio-card">
-                                <span>Em análise</span>
-                                <strong>{indicadores.emAnalise}</strong>
-                                <p>Ocorrências sendo avaliadas pela equipe.</p>
-                            </article>
+                                <section className="relatorios-grid">
+                                    <article className="relatorio-card relatorio-card--total">
+                                        <span>Total de denúncias</span>
+                                        <strong>{indicadores.total}</strong>
+                                        <p>Ocorrências registradas na plataforma.</p>
+                                    </article>
 
-                            <article className="relatorio-card">
-                                <span>Em atendimento</span>
-                                <strong>{indicadores.emAtendimento}</strong>
-                                <p>Casos encaminhados para ação ou vistoria.</p>
-                            </article>
+                                    <article className="relatorio-card">
+                                        <span>Pendentes</span>
+                                        <strong>{indicadores.pendentes}</strong>
+                                        <p>Denúncias aguardando análise inicial.</p>
+                                    </article>
 
-                            <article className="relatorio-card">
-                                <span>Não resolvidas</span>
-                                <strong>{indicadores.naoResolvidas}</strong>
-                                <p>Denúncias ainda em aberto no fluxo.</p>
-                            </article>
+                                    <article className="relatorio-card">
+                                        <span>Em análise</span>
+                                        <strong>{indicadores.emAnalise}</strong>
+                                        <p>Ocorrências sendo avaliadas pela equipe.</p>
+                                    </article>
 
-                            <article className="relatorio-card relatorio-card--success">
-                                <span>Resolvidas</span>
-                                <strong>{indicadores.resolvidas}</strong>
-                                <p>Ocorrências finalizadas com atendimento concluído.</p>
-                            </article>
+                                    <article className="relatorio-card">
+                                        <span>Em atendimento</span>
+                                        <strong>{indicadores.emAtendimento}</strong>
+                                        <p>Casos encaminhados para ação ou vistoria.</p>
+                                    </article>
 
-                            <article className="relatorio-card relatorio-card--danger">
-                                <span>Canceladas</span>
-                                <strong>{indicadores.canceladas}</strong>
-                                <p>Denúncias canceladas pelo usuário ou administração.</p>
-                            </article>
-                        </section>
+                                    <article className="relatorio-card">
+                                        <span>Não resolvidas</span>
+                                        <strong>{indicadores.naoResolvidas}</strong>
+                                        <p>Denúncias ainda em aberto no fluxo.</p>
+                                    </article>
 
-                        <section className="relatorios-charts-grid">
-                            <section className="relatorios-ranking-section">
+                                    <article className="relatorio-card relatorio-card--success">
+                                        <span>Resolvidas</span>
+                                        <strong>{indicadores.resolvidas}</strong>
+                                        <p>Ocorrências finalizadas com atendimento concluído.</p>
+                                    </article>
+
+                                    <article className="relatorio-card relatorio-card--danger">
+                                        <span>Canceladas</span>
+                                        <strong>{indicadores.canceladas}</strong>
+                                        <p>Denúncias canceladas pelo usuário ou administração.</p>
+                                    </article>
+                                </section>
+                            </section>
+                        )}
+
+                        {abaAtiva === "graficos" && (
+                            <section className="relatorios-section">
+                                <div className="relatorios-section-header">
+                                    <div>
+                                        <span className="section-tag">Gráficos</span>
+                                        <h2>Análise visual das denúncias</h2>
+                                    </div>
+
+                                    <p>
+                                        Distribuição por status e tipo de ocorrência com base nos
+                                        filtros selecionados.
+                                    </p>
+                                </div>
+
+                                <section className="relatorios-charts-grid">
+                                    <article className="relatorio-chart-card">
+                                        <div className="relatorio-chart-header">
+                                            <div>
+                                                <span className="section-tag">Status</span>
+                                                <h3>Denúncias por status</h3>
+                                            </div>
+                                        </div>
+
+                                        <div className="relatorio-chart">
+                                            <ResponsiveContainer width="100%" height={300}>
+                                                <BarChart data={dadosPorStatus}>
+                                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                                    <XAxis dataKey="nome" tick={{ fontSize: 12 }} />
+                                                    <YAxis allowDecimals={false} />
+                                                    <Tooltip />
+                                                    <Bar
+                                                        dataKey="total"
+                                                        name="Denúncias"
+                                                        radius={[10, 10, 0, 0]}
+                                                    >
+                                                        {dadosPorStatus.map((_, index) => (
+                                                            <Cell
+                                                                key={`status-${index}`}
+                                                                fill={CHART_COLORS[index % CHART_COLORS.length]}
+                                                            />
+                                                        ))}
+                                                    </Bar>
+                                                </BarChart>
+                                            </ResponsiveContainer>
+                                        </div>
+                                    </article>
+
+                                    <article className="relatorio-chart-card">
+                                        <div className="relatorio-chart-header">
+                                            <div>
+                                                <span className="section-tag">Tipo</span>
+                                                <h3>Denúncias por tipo</h3>
+                                            </div>
+                                        </div>
+
+                                        <div className="relatorio-chart">
+                                            {dadosPorTipo.length === 0 ? (
+                                                <p className="empty-chart-message">
+                                                    Ainda não há dados suficientes para gerar este gráfico.
+                                                </p>
+                                            ) : (
+                                                <ResponsiveContainer width="100%" height={300}>
+                                                    <PieChart>
+                                                        <Pie
+                                                            data={dadosPorTipo}
+                                                            dataKey="total"
+                                                            nameKey="nome"
+                                                            outerRadius={105}
+                                                            label
+                                                        >
+                                                            {dadosPorTipo.map((_, index) => (
+                                                                <Cell
+                                                                    key={`tipo-${index}`}
+                                                                    fill={CHART_COLORS[index % CHART_COLORS.length]}
+                                                                />
+                                                            ))}
+                                                        </Pie>
+                                                        <Tooltip />
+                                                        <Legend />
+                                                    </PieChart>
+                                                </ResponsiveContainer>
+                                            )}
+                                        </div>
+                                    </article>
+                                </section>
+                            </section>
+                        )}
+
+                        {abaAtiva === "regioes" && (
+                            <section className="relatorios-section">
+                                <div className="relatorios-section-header">
+                                    <div>
+                                        <span className="section-tag">Regiões</span>
+                                        <h2>Distribuição regional</h2>
+                                    </div>
+
+                                    <p>
+                                        Ranking por bairro e mapa geográfico das ocorrências
+                                        registradas.
+                                    </p>
+                                </div>
+
+                                <section className="relatorios-ranking-section">
+                                    <div className="relatorio-chart-header">
+                                        <div>
+                                            <span className="section-tag">Ranking</span>
+                                            <h3>Bairros com mais denúncias</h3>
+                                        </div>
+                                    </div>
+
+                                    <div className="ranking-list">
+                                        {rankingPorBairro.length === 0 ? (
+                                            <p className="empty-chart-message">
+                                                Ainda não há dados suficientes para gerar o ranking por
+                                                bairro.
+                                            </p>
+                                        ) : (
+                                            rankingPorBairro.map((item, index) => (
+                                                <div key={item.bairro} className="ranking-item">
+                                                    <div className="ranking-item__left">
+                                                        <span className="ranking-position">{index + 1}</span>
+                                                        <div>
+                                                            <strong>{item.bairro}</strong>
+                                                            <small>{item.total} denúncia(s)</small>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="ranking-bar">
+                                                        <span
+                                                            style={{
+                                                                width: `${(item.total / rankingPorBairro[0].total) * 100
+                                                                    }%`,
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </section>
+
                                 <section className="relatorios-map-section">
                                     <div className="relatorio-chart-header">
                                         <div>
                                             <span className="section-tag">Mapa</span>
-                                            <h2>Distribuição das denúncias</h2>
+                                            <h3>Distribuição das denúncias</h3>
                                         </div>
                                     </div>
 
                                     <p className="relatorios-map-description">
-                                        Visualize a distribuição geográfica das denúncias registradas. O mapa é
-                                        iniciado em Itu/SP e se ajusta automaticamente conforme aparecem ocorrências
-                                        em outras regiões.
+                                        Visualize a distribuição geográfica das denúncias
+                                        registradas. O mapa é iniciado em Itu/SP e se ajusta
+                                        automaticamente conforme aparecem ocorrências em outras
+                                        regiões.
                                     </p>
 
                                     <div className="relatorios-map-box">
                                         {denunciasComLocalizacao.length === 0 ? (
                                             <div className="empty-map-message">
-                                                Ainda não há denúncias com localização para exibir no mapa.
+                                                Ainda não há denúncias com localização para exibir no
+                                                mapa.
                                             </div>
                                         ) : (
                                             <MapContainer
@@ -314,13 +702,17 @@ export function RelatoriosPage({
                                                         icon={markerIcon}
                                                     >
                                                         <Popup>
-                                                            <strong>{denuncia.resumo || "Denúncia sem resumo"}</strong>
+                                                            <strong>
+                                                                {denuncia.resumo || "Denúncia sem resumo"}
+                                                            </strong>
                                                             <br />
                                                             {denuncia.tipo}
                                                             <br />
                                                             Status: {denuncia.status}
                                                             <br />
-                                                            {denuncia.bairro || denuncia.endereco || "Local não informado"}
+                                                            {denuncia.bairro ||
+                                                                denuncia.endereco ||
+                                                                "Local não informado"}
                                                         </Popup>
                                                     </Marker>
                                                 ))}
@@ -328,108 +720,91 @@ export function RelatoriosPage({
                                         )}
                                     </div>
                                 </section>
-                                <div className="relatorio-chart-header">
+                            </section>
+                        )}
+
+                        {abaAtiva === "tabela" && (
+                            <section className="relatorios-section">
+                                <div className="relatorios-section-header">
                                     <div>
-                                        <span className="section-tag">Regiões</span>
-                                        <h2>Bairros com mais denúncias</h2>
+                                        <span className="section-tag">Tabela</span>
+                                        <h2>Dados detalhados</h2>
                                     </div>
+
+                                    <p>
+                                        Listagem das denúncias considerando os filtros selecionados.
+                                    </p>
                                 </div>
 
-                                <div className="ranking-list">
-                                    {rankingPorBairro.length === 0 ? (
-                                        <p className="empty-chart-message">
-                                            Ainda não há dados suficientes para gerar o ranking por bairro.
-                                        </p>
-                                    ) : (
-                                        rankingPorBairro.map((item, index) => (
-                                            <div key={item.bairro} className="ranking-item">
-                                                <div className="ranking-item__left">
-                                                    <span className="ranking-position">{index + 1}</span>
-                                                    <div>
-                                                        <strong>{item.bairro}</strong>
-                                                        <small>{item.total} denúncia(s)</small>
-                                                    </div>
-                                                </div>
+                                <div className="relatorios-table-wrap">
+                                    <table className="relatorios-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Resumo</th>
+                                                <th>Tipo</th>
+                                                <th>Status</th>
+                                                <th>Bairro</th>
+                                                <th>Data</th>
+                                            </tr>
+                                        </thead>
 
-                                                <div className="ranking-bar">
-                                                    <span
-                                                        style={{
-                                                            width: `${(item.total / rankingPorBairro[0].total) * 100}%`,
-                                                        }}
-                                                    />
-                                                </div>
-                                            </div>
-                                        ))
-                                    )}
+                                        <tbody>
+                                            {denunciasFiltradas.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan={5}>Nenhuma denúncia encontrada.</td>
+                                                </tr>
+                                            ) : (
+                                                denunciasFiltradas.map((denuncia) => (
+                                                    <tr key={denuncia.id}>
+                                                        <td>{denuncia.resumo || "Denúncia sem resumo"}</td>
+                                                        <td>{denuncia.tipo}</td>
+                                                        <td>{denuncia.status}</td>
+                                                        <td>
+                                                            {denuncia.bairro || "Bairro não informado"}
+                                                        </td>
+                                                        <td>{formatarDataHora(denuncia.created_at)}</td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                        </tbody>
+                                    </table>
                                 </div>
                             </section>
-                            <article className="relatorio-chart-card">
-                                <div className="relatorio-chart-header">
+                        )}
+
+                        {abaAtiva === "exportacoes" && (
+                            <section className="relatorios-section">
+                                <div className="relatorios-section-header">
                                     <div>
-                                        <span className="section-tag">Status</span>
-                                        <h2>Denúncias por status</h2>
+                                        <span className="section-tag">Exportações</span>
+                                        <h2>Gerar arquivos de relatório</h2>
+                                    </div>
+
+                                    <p>
+                                        Exporte os dados filtrados em formatos como PDF, XML e CSV.
+                                    </p>
+                                </div>
+
+                                <div className="exportacoes-card">
+                                    <p>
+                                        Próxima etapa: gerar arquivos exportáveis a partir da tabela
+                                        filtrada.
+                                    </p>
+
+                                    <div className="exportacoes-actions">
+                                        <button type="button" disabled>
+                                            Exportar PDF
+                                        </button>
+                                        <button type="button" disabled>
+                                            Exportar XML
+                                        </button>
+                                        <button type="button" disabled>
+                                            Exportar CSV
+                                        </button>
                                     </div>
                                 </div>
-
-                                <div className="relatorio-chart">
-                                    <ResponsiveContainer width="100%" height={300}>
-                                        <BarChart data={dadosPorStatus}>
-                                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                            <XAxis dataKey="nome" tick={{ fontSize: 12 }} />
-                                            <YAxis allowDecimals={false} />
-                                            <Tooltip />
-                                            <Bar dataKey="total" name="Denúncias" radius={[10, 10, 0, 0]}>
-                                                {dadosPorStatus.map((_, index) => (
-                                                    <Cell
-                                                        key={`status-${index}`}
-                                                        fill={CHART_COLORS[index % CHART_COLORS.length]}
-                                                    />
-                                                ))}
-                                            </Bar>
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </div>
-                            </article>
-
-                            <article className="relatorio-chart-card">
-                                <div className="relatorio-chart-header">
-                                    <div>
-                                        <span className="section-tag">Tipo</span>
-                                        <h2>Denúncias por tipo</h2>
-                                    </div>
-                                </div>
-
-                                <div className="relatorio-chart">
-                                    {dadosPorTipo.length === 0 ? (
-                                        <p className="empty-chart-message">
-                                            Ainda não há dados suficientes para gerar este gráfico.
-                                        </p>
-                                    ) : (
-                                        <ResponsiveContainer width="100%" height={300}>
-                                            <PieChart>
-                                                <Pie
-                                                    data={dadosPorTipo}
-                                                    dataKey="total"
-                                                    nameKey="nome"
-                                                    outerRadius={105}
-                                                    label
-                                                >
-                                                    {dadosPorTipo.map((_, index) => (
-                                                        <Cell
-                                                            key={`tipo-${index}`}
-                                                            fill={CHART_COLORS[index % CHART_COLORS.length]}
-                                                        />
-                                                    ))
-                                                    }
-                                                </Pie>
-                                                <Tooltip />
-                                                <Legend />
-                                            </PieChart>
-                                        </ResponsiveContainer>
-                                    )}
-                                </div>
-                            </article>
-                        </section>
+                            </section>
+                        )}
                     </>
                 )}
             </PageContainer>
@@ -437,4 +812,32 @@ export function RelatoriosPage({
             <Footer />
         </>
     );
+}
+
+function AjustarMapa({ denuncias }: { denuncias: Denuncia[] }) {
+    const map = useMap();
+
+    useEffect(() => {
+        const pontos = denuncias
+            .filter(
+                (denuncia) =>
+                    typeof denuncia.latitude === "number" &&
+                    typeof denuncia.longitude === "number"
+            )
+            .map(
+                (denuncia) => [denuncia.latitude!, denuncia.longitude!] as [number, number]
+            );
+
+        if (pontos.length === 0) return;
+
+        if (pontos.length === 1) {
+            map.setView(pontos[0], 14);
+            return;
+        }
+
+        const bounds = L.latLngBounds(pontos);
+        map.fitBounds(bounds, { padding: [40, 40] });
+    }, [denuncias, map]);
+
+    return null;
 }
