@@ -18,7 +18,6 @@ interface PerfilPageProps {
   onBack: () => void;
   onLogout: () => void;
   onUpdated?: () => void;
-  onHome?: () => void;
 }
 
 export function PerfilPage({
@@ -29,7 +28,6 @@ export function PerfilPage({
   avatarUrl,
   onBack,
   onUpdated,
-  onHome,
 }: PerfilPageProps) {
   const [novoNome, setNovoNome] = useState(nome);
   const [preview, setPreview] = useState<string | null>(avatarUrl || null);
