@@ -2027,3 +2027,55 @@ footer,
 .navbar__brand-button:hover {
   opacity: 0.85;
 }
+.admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 640px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.admin-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #d9c2a8;
+}
+
+.admin-list::-webkit-scrollbar-track {
+  background: #faf7f1;
+}
+.admin-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 18px;
+  background: #faf7f1;
+  border: 1px solid var(--color-border);
+}
+
+.admin-pagination span {
+  color: var(--color-muted);
+  font-weight: 800;
+}
+
+.admin-pagination button {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.admin-pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

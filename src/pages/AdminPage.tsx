@@ -44,6 +44,9 @@ export function AdminPage({
     useState<StatusDenuncia | "Todos">("Todos");
   const [filtroTipo, setFiltroTipo] = useState<TipoDenuncia | "Todos">("Todos");
 
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const itensPorPagina = 6;
+
   const [modalStatusAberto, setModalStatusAberto] = useState(false);
   const [novoStatus, setNovoStatus] = useState<StatusDenuncia>("Pendente");
   const [descricaoFeedback, setDescricaoFeedback] = useState("");
@@ -62,6 +65,16 @@ export function AdminPage({
       return statusOk && tipoOk;
     });
   }, [denuncias, filtroStatus, filtroTipo]);
+
+  const totalPaginas = Math.max(
+    1,
+    Math.ceil(denunciasFiltradas.length / itensPorPagina)
+  );
+
+  const denunciasPaginadas = denunciasFiltradas.slice(
+    (paginaAtual - 1) * itensPorPagina,
+    paginaAtual * itensPorPagina
+  );
 
   async function carregarFeedbacks(denunciaId: string) {
     try {
@@ -160,6 +173,16 @@ export function AdminPage({
     carregarDenunciasAdmin();
   }, []);
 
+  useEffect(() => {
+    setPaginaAtual(1);
+  }, [filtroStatus, filtroTipo]);
+
+  useEffect(() => {
+    if (paginaAtual > totalPaginas) {
+      setPaginaAtual(totalPaginas);
+    }
+  }, [paginaAtual, totalPaginas]);
+
   return (
     <>
       <Navbar
@@ -236,30 +259,61 @@ export function AdminPage({
               <p>Nenhuma denúncia encontrada com os filtros selecionados.</p>
             ) : (
               <section className="admin-panel">
-                <div className="admin-list">
-                  {denunciasFiltradas.map((denuncia) => (
-                    <button
-                      key={denuncia.id}
-                      type="button"
-                      className={`admin-list-item ${denunciaSelecionada?.id === denuncia.id
-                          ? "is-selected"
-                          : ""
+                <div className="admin-list-column">
+                  <div className="admin-list">
+                    {denunciasPaginadas.map((denuncia) => (
+                      <button
+                        key={denuncia.id}
+                        type="button"
+                        className={`admin-list-item ${
+                          denunciaSelecionada?.id === denuncia.id
+                            ? "is-selected"
+                            : ""
                         }`}
-                      onClick={() => {
-                        setDenunciaSelecionada(denuncia);
-                        carregarFeedbacks(denuncia.id);
-                      }}
-                    >
-                      <div>
-                        <strong>{denuncia.resumo || "Denúncia sem resumo"}</strong>
-                        <span>{denuncia.tipo}</span>
-                        <small>{formatarDataHora(denuncia.created_at)}</small>
-                        <small>{denuncia.endereco || "Local não informado"}</small>
-                      </div>
+                        onClick={() => {
+                          setDenunciaSelecionada(denuncia);
+                          carregarFeedbacks(denuncia.id);
+                        }}
+                      >
+                        <div>
+                          <strong>
+                            {denuncia.resumo || "Denúncia sem resumo"}
+                          </strong>
+                          <span>{denuncia.tipo}</span>
+                          <small>{formatarDataHora(denuncia.created_at)}</small>
+                          <small>
+                            {denuncia.endereco || "Local não informado"}
+                          </small>
+                        </div>
 
-                      <span className="status-pill">{denuncia.status}</span>
-                    </button>
-                  ))}
+                        <span className="status-pill">{denuncia.status}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {totalPaginas > 1 && (
+                    <div className="admin-pagination">
+                      <button
+                        type="button"
+                        disabled={paginaAtual === 1}
+                        onClick={() => setPaginaAtual((prev) => prev - 1)}
+                      >
+                        Anterior
+                      </button>
+
+                      <span>
+                        Página {paginaAtual} de {totalPaginas}
+                      </span>
+
+                      <button
+                        type="button"
+                        disabled={paginaAtual === totalPaginas}
+                        onClick={() => setPaginaAtual((prev) => prev + 1)}
+                      >
+                        Próxima
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <article className="admin-detail-card">
@@ -320,7 +374,7 @@ export function AdminPage({
                               {denunciaSelecionada.anonimo
                                 ? "Anônimo"
                                 : denunciaSelecionada.nome_usuario ||
-                                "Não informado"}
+                                  "Não informado"}
                             </span>
                           </div>
 
@@ -342,7 +396,7 @@ export function AdminPage({
                             <strong>Coordenadas</strong>
                             <span>
                               {denunciaSelecionada.latitude &&
-                                denunciaSelecionada.longitude
+                              denunciaSelecionada.longitude
                                 ? `${denunciaSelecionada.latitude}, ${denunciaSelecionada.longitude}`
                                 : "Não informado"}
                             </span>
