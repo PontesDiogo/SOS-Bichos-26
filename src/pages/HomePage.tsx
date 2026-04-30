@@ -64,7 +64,7 @@ export function HomePage({
       onScrollHandled?.();
     }, 100);
   }, [scrollTarget, onScrollHandled]);
-
+  const ultimasDenuncias = denuncias.slice(0, 3);
   return (
     <>
       <Navbar
@@ -83,42 +83,29 @@ export function HomePage({
       <PageContainer>
         <Banner onDenunciar={handleDenunciar} />
         <section id="minhas-denuncias" className="home-section">
-          <span className="section-tag">Sobre o projeto</span>
+          <span className="section-tag">Acompanhamento</span>
 
-          <h2>Uma ponte entre a população e o atendimento responsável</h2>
+          <h2>Últimas denúncias registradas</h2>
 
           <p>
-            O SOS Bichos foi criado para facilitar o registro de denúncias
-            envolvendo animais, permitindo que o cidadão informe o ocorrido,
-            indique a localização e acompanhe o andamento da solicitação.
+            Veja rapidamente suas ocorrências mais recentes. Para consultar o histórico
+            completo, acesse a opção “Minhas denúncias” no menu do perfil.
           </p>
 
-          <div className="info-grid">
-            <article>
-              <h3>Registro simples</h3>
-              <p>
-                O usuário informa um resumo, descrição, endereço ou localização
-                no mapa e pode anexar fotos da ocorrência.
-              </p>
-            </article>
+          <DenunciaList
+            denuncias={ultimasDenuncias}
+            loading={loading}
+            erro={erro}
+            onUpdated={carregarDenuncias}
+          />
 
-            <article>
-              <h3>Acompanhamento</h3>
-              <p>
-                As denúncias possuem status, permitindo que o cidadão acompanhe
-                se a ocorrência está pendente, em análise, em atendimento ou
-                resolvida.
-              </p>
-            </article>
-
-            <article>
-              <h3>Gestão administrativa</h3>
-              <p>
-                O administrador pode visualizar denúncias, aplicar filtros,
-                atualizar status e consultar relatórios.
-              </p>
-            </article>
-          </div>
+          {denuncias.length > 3 && (
+            <div className="home-section-actions">
+              <button type="button" className="secondary-button" onClick={onMinhasDenuncias}>
+                Ver todas minhas denúncias
+              </button>
+            </div>
+          )}
         </section>
 
         <section id="denuncias" className="home-section">

@@ -13,9 +13,16 @@ import "./styles/layout.css";
 import { RelatoriosPage } from "./pages/RelatoriosPage";
 import { Navbar } from "./components/layout/Navbar";
 import { Footer } from "./components/layout/Footer";
+import { MinhasDenunciasPage } from "./pages/MinhasDenunciasPage";
 
 type AuthScreen = "login" | "register" | "recover" | "reset";
-type AppScreen = "home" | "perfil" | "admin" | "relatorios" | "politica";
+type AppScreen =
+  | "home"
+  | "perfil"
+  | "admin"
+  | "relatorios"
+  | "minhas-denuncias"
+  | "politica";
 
 
 
@@ -31,8 +38,8 @@ function App() {
   }
 
   function irParaMinhasDenuncias() {
-    setAppScreen("home");
-    setScrollTarget("minhas-denuncias");
+    setAppScreen("minhas-denuncias");
+    setScrollTarget(null);
   }
 
   useEffect(() => {
@@ -116,6 +123,26 @@ function App() {
     );
   }
 
+  if (appScreen === "minhas-denuncias" && user) {
+    return (
+      <MinhasDenunciasPage
+        userId={user.id}
+        userName={nome}
+        avatarUrl={user.user_metadata?.avatar_url ?? null}
+        isAdmin={isAdmin}
+        onHome={() => setAppScreen("home")}
+        onDenunciar={() => {
+          setAppScreen("home");
+          setScrollTarget("denuncia");
+        }}
+        onPerfil={() => setAppScreen("perfil")}
+        onAdmin={() => setAppScreen("admin")}
+        onRelatorios={() => setAppScreen("relatorios")}
+        onLogout={logout}
+      />
+    );
+  }
+
   if (appScreen === "perfil" && user) {
     return (
       <>
@@ -163,7 +190,7 @@ function App() {
         setScrollTarget(null);
       }}
       onDenunciar={irParaDenuncia}
-      onMinhasDenuncias={irParaMinhasDenuncias}
+      onMinhasDenuncias={() => setAppScreen("minhas-denuncias")}
       onPerfil={() => setAppScreen("perfil")}
       onAdmin={() => setAppScreen("admin")}
       onRelatorios={() => setAppScreen("relatorios")}

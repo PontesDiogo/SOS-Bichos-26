@@ -2271,3 +2271,154 @@ footer,
 .navbar__brand-button:hover {
   opacity: 0.85;
 }
+
+.minhas-denuncias-header {
+  margin-top: 32px;
+}
+
+.minhas-denuncias-header h1 {
+  margin: 8px 0 12px;
+  font-size: clamp(2.3rem, 5vw, 4.2rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+}
+
+.minhas-denuncias-header p {
+  max-width: 780px;
+  color: var(--color-muted);
+  line-height: 1.7;
+}
+
+.minhas-denuncias-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.minhas-denuncias-summary article {
+  padding: 18px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 10px 24px rgba(47, 42, 37, 0.06);
+}
+
+.minhas-denuncias-summary span {
+  display: block;
+  color: var(--color-muted);
+  font-weight: 800;
+}
+
+.minhas-denuncias-summary strong {
+  display: block;
+  margin-top: 10px;
+  font-size: 2.3rem;
+  line-height: 1;
+  color: var(--color-text);
+}
+
+.minhas-denuncias-summary p {
+  margin: 10px 0 0;
+  color: var(--color-muted);
+  line-height: 1.45;
+}
+
+.minhas-denuncias-toolbar {
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr 0.8fr auto;
+  gap: 14px;
+  align-items: end;
+  margin-top: 24px;
+  padding: 18px;
+  border-radius: var(--radius-lg);
+  background: #faf7f1;
+  border: 1px solid var(--color-border);
+}
+
+.minhas-denuncias-toolbar .form-group {
+  margin-top: 0;
+}
+
+.minhas-denuncias-toolbar input,
+.minhas-denuncias-toolbar select {
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--color-border);
+  background: #fffdf9;
+  color: var(--color-text);
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.minhas-denuncias-toolbar__actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.minhas-denuncias-toolbar__actions .primary-button,
+.minhas-denuncias-toolbar__actions .secondary-button {
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+.minhas-denuncias-result-info {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  margin-top: 18px;
+  color: var(--color-muted);
+}
+
+.minhas-denuncias-result-info strong {
+  color: var(--color-primary-dark);
+  font-size: 1.4rem;
+}
+
+.minhas-denuncias-panel {
+  margin-top: 16px;
+  padding-bottom: 56px;
+}
+
+@media (max-width: 1000px) {
+  .minhas-denuncias-summary {
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
+  }
+
+  .minhas-denuncias-toolbar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .minhas-denuncias-toolbar__actions {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 640px) {
+  .minhas-denuncias-summary,
+  .minhas-denuncias-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .minhas-denuncias-toolbar__actions {
+    grid-column: span 1;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .minhas-denuncias-toolbar__actions .primary-button,
+  .minhas-denuncias-toolbar__actions .secondary-button {
+    width: 100%;
+  }
+}
+.home-section-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.home-section-actions .secondary-button {
+  margin-top: 0;
+}
