@@ -23,7 +23,17 @@ function App() {
   const { user, nome, role, isAdmin, loadingAuth, logout } = useAuth();
   const [authScreen, setAuthScreen] = useState<AuthScreen>("login");
   const [appScreen, setAppScreen] = useState<AppScreen>("home");
+  const [scrollTarget, setScrollTarget] = useState<"denuncia" | "minhas-denuncias" | null>(null);
 
+  function irParaDenuncia() {
+    setAppScreen("home");
+    setScrollTarget("denuncia");
+  }
+
+  function irParaMinhasDenuncias() {
+    setAppScreen("home");
+    setScrollTarget("minhas-denuncias");
+  }
 
   useEffect(() => {
     const currentPath = window.location.pathname;
@@ -114,7 +124,8 @@ function App() {
           avatarUrl={user.user_metadata?.avatar_url ?? null}
           isAdmin={isAdmin}
           onHome={() => setAppScreen("home")}
-          onDenunciar={() => setAppScreen("home")}
+          onDenunciar={irParaDenuncia}
+          onMinhasDenuncias={irParaMinhasDenuncias}
           onPerfil={() => setAppScreen("perfil")}
           onAdmin={() => setAppScreen("admin")}
           onRelatorios={() => setAppScreen("relatorios")}
@@ -147,11 +158,18 @@ function App() {
       userName={nome}
       avatarUrl={user.user_metadata?.avatar_url ?? null}
       isAdmin={isAdmin}
-      onHome={() => setAppScreen("home")}
+      onHome={() => {
+        setAppScreen("home");
+        setScrollTarget(null);
+      }}
+      onDenunciar={irParaDenuncia}
+      onMinhasDenuncias={irParaMinhasDenuncias}
       onPerfil={() => setAppScreen("perfil")}
       onAdmin={() => setAppScreen("admin")}
       onRelatorios={() => setAppScreen("relatorios")}
       onLogout={logout}
+      scrollTarget={scrollTarget}
+      onScrollHandled={() => setScrollTarget(null)}
     />
   );
 }

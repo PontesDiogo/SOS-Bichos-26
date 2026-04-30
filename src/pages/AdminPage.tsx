@@ -195,6 +195,7 @@ export function AdminPage({
         onAdmin={() => undefined}
         onRelatorios={onRelatorios}
         onLogout={onLogout}
+        onMinhasDenuncias={onHome}
       />
 
       <PageContainer>

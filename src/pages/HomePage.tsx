@@ -5,6 +5,7 @@ import { PageContainer } from "../components/layout/PageContainer";
 import { DenunciaForm } from "../components/denuncia/DenunciaForm";
 import { DenunciaList } from "../components/denuncia/DenunciaList";
 import { useDenuncias } from "../hooks/useDenuncia";
+import { useEffect } from "react";
 
 interface HomePageProps {
   userId: string;
@@ -16,6 +17,10 @@ interface HomePageProps {
   onRelatorios?: () => void;
   onLogout?: () => void;
   onHome?: () => void;
+  scrollTarget?: "denuncia" | "minhas-denuncias" | null;
+  onScrollHandled?: () => void;
+  onDenunciar?: () => void;
+  onMinhasDenuncias?: () => void;
 }
 
 export function HomePage({
@@ -23,11 +28,15 @@ export function HomePage({
   userName,
   avatarUrl,
   isAdmin,
+  onHome,
+  onDenunciar,
+  onMinhasDenuncias,
   onPerfil,
   onAdmin,
   onRelatorios,
   onLogout,
-  onHome,
+  scrollTarget,
+  onScrollHandled,
 }: HomePageProps) {
   const { denuncias, loading, erro, carregarDenuncias } = useDenuncias({
     userId,
@@ -38,8 +47,23 @@ export function HomePage({
     const section = document.getElementById("denuncias");
     section?.scrollIntoView({ behavior: "smooth" });
   }
+  function handleMinhasDenuncias() {
+    const section = document.getElementById("minhas-denuncias");
+    section?.scrollIntoView({ behavior: "smooth" });
+  }
 
-  
+  useEffect(() => {
+    if (!scrollTarget) return;
+
+    const sectionId =
+      scrollTarget === "denuncia" ? "denuncias" : "minhas-denuncias";
+
+    setTimeout(() => {
+      const section = document.getElementById(sectionId);
+      section?.scrollIntoView({ behavior: "smooth", block: "start" });
+      onScrollHandled?.();
+    }, 100);
+  }, [scrollTarget, onScrollHandled]);
 
   return (
     <>
@@ -47,18 +71,18 @@ export function HomePage({
         userName={userName}
         isAdmin={isAdmin}
         avatarUrl={avatarUrl}
-        onDenunciar={handleDenunciar}
+        onHome={onHome}
+        onDenunciar={onDenunciar || handleDenunciar}
+        onMinhasDenuncias={onMinhasDenuncias || handleMinhasDenuncias}
         onPerfil={onPerfil}
         onAdmin={onAdmin}
         onRelatorios={onRelatorios}
         onLogout={onLogout}
-        onHome={onHome}
       />
 
       <PageContainer>
         <Banner onDenunciar={handleDenunciar} />
-
-        <section id="sobre" className="home-section">
+        <section id="minhas-denuncias" className="home-section">
           <span className="section-tag">Sobre o projeto</span>
 
           <h2>Uma ponte entre a população e o atendimento responsável</h2>
@@ -114,7 +138,7 @@ export function HomePage({
           />
         </section>
 
-        <section className="home-section">
+        <section id="minhas-denuncias" className="home-section">
           <span className="section-tag">Acompanhamento</span>
 
           <h2>Minhas denúncias</h2>

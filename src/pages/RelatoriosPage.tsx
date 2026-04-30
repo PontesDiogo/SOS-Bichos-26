@@ -347,6 +347,7 @@ export function RelatoriosPage({
         onRelatorios={() => undefined}
         onPerfil={onPerfil}
         onLogout={onLogout}
+        onMinhasDenuncias={onHome}
       />
 
       <PageContainer>
