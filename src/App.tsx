@@ -14,8 +14,9 @@ import { RelatoriosPage } from "./pages/RelatoriosPage";
 import { Navbar } from "./components/layout/Navbar";
 import { Footer } from "./components/layout/Footer";
 import { MinhasDenunciasPage } from "./pages/MinhasDenunciasPage";
+import { PublicHomePage } from "./pages/PublicHomePage";
 
-type AuthScreen = "login" | "register" | "recover" | "reset";
+type AuthScreen = "public" | "login" | "register" | "recover" | "reset" | "politica";
 type AppScreen =
   | "home"
   | "perfil"
@@ -28,9 +29,10 @@ type AppScreen =
 
 function App() {
   const { user, nome, role, isAdmin, loadingAuth, logout } = useAuth();
-  const [authScreen, setAuthScreen] = useState<AuthScreen>("login");
+  const [authScreen, setAuthScreen] = useState<AuthScreen>("public");
   const [appScreen, setAppScreen] = useState<AppScreen>("home");
   const [scrollTarget, setScrollTarget] = useState<"denuncia" | "minhas-denuncias" | null>(null);
+
 
   function irParaDenuncia() {
     setAppScreen("home");
@@ -77,37 +79,53 @@ function App() {
   }
 
   if (!user || authScreen === "reset") {
-    if (authScreen === "register") {
+    if (!user || authScreen === "reset" || authScreen === "politica") {
+      if (authScreen === "public") {
+        return (
+          <PublicHomePage
+            onEntrar={() => setAuthScreen("login")}
+            onGoToDenuncia={() => setAuthScreen("login")}
+            onGoToPolitica={() => setAuthScreen("politica")}
+          />
+        );
+      }
+
+      if (authScreen === "politica") {
+        return <PoliticaPrivacidadePage onBack={() => setAuthScreen("public")} />;
+      }
+
+      if (authScreen === "register") {
+        return (
+          <RegisterPage
+            onGoToLogin={() => setAuthScreen("login")}
+            onGoToPolitica={() => setAuthScreen("politica")}
+          />
+        );
+      }
+
+      if (authScreen === "recover") {
+        return <RecuperarSenhaPage onGoToLogin={() => setAuthScreen("login")} />;
+      }
+
+      if (authScreen === "reset") {
+        return (
+          <RedefinirSenhaPage
+            onGoToLogin={async () => {
+              await logout();
+              window.history.replaceState({}, "", "/");
+              setAuthScreen("login");
+            }}
+          />
+        );
+      }
+
       return (
-        <RegisterPage
-          onGoToLogin={() => setAuthScreen("login")}
-          onGoToPolitica={() => setAuthScreen("login")}
+        <LoginPage
+          onGoToRegister={() => setAuthScreen("register")}
+          onGoToRecoverPassword={() => setAuthScreen("recover")}
         />
       );
     }
-
-    if (authScreen === "recover") {
-      return <RecuperarSenhaPage onGoToLogin={() => setAuthScreen("login")} />;
-    }
-
-    if (authScreen === "reset") {
-      return (
-        <RedefinirSenhaPage
-          onGoToLogin={async () => {
-            await logout();
-            window.history.replaceState({}, "", "/");
-            setAuthScreen("login");
-          }}
-        />
-      );
-    }
-
-    return (
-      <LoginPage
-        onGoToRegister={() => setAuthScreen("register")}
-        onGoToRecoverPassword={() => setAuthScreen("recover")}
-      />
-    );
   }
 
   if (appScreen === "admin" && isAdmin && user) {
