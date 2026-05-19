@@ -329,6 +329,93 @@ export function RelatoriosPage({
       };
     });
   }
+  function escaparCsv(valor: unknown) {
+    const texto = String(valor ?? "Não informado");
+    return `"${texto.replace(/"/g, '""')}"`;
+  }
+
+  function formatarValorCsv(valor: unknown, fallback = "Não informado") {
+    if (valor === null || valor === undefined || valor === "") {
+      return fallback;
+    }
+
+    return valor;
+  }
+
+  function montarNomeArquivoCsv() {
+    const dataAtual = new Date().toISOString().slice(0, 10);
+
+    const partesFiltro = [
+      filtrosAplicados.dataInicial && `de-${filtrosAplicados.dataInicial}`,
+      filtrosAplicados.dataFinal && `ate-${filtrosAplicados.dataFinal}`,
+      filtrosAplicados.status !== "Todos" &&
+      `status-${normalizarNomeArquivo(filtrosAplicados.status)}`,
+      filtrosAplicados.tipo !== "Todos" &&
+      `tipo-${normalizarNomeArquivo(filtrosAplicados.tipo)}`,
+      filtrosAplicados.bairro !== "Todos" &&
+      `bairro-${normalizarNomeArquivo(filtrosAplicados.bairro)}`,
+    ].filter(Boolean);
+
+    const sufixo = partesFiltro.length > 0 ? partesFiltro.join("_") : "geral";
+
+    return `relatorio-denuncias-${sufixo}-${dataAtual}.csv`;
+  }
+
+  function normalizarNomeArquivo(valor: string) {
+    return valor
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  function exportarCsv() {
+    const cabecalho = [
+      "Data de criação",
+      "Resumo",
+      "Tipo da denúncia",
+      "Status",
+      "Bairro",
+      "Endereço",
+      "Descrição",
+      "Usuário responsável",
+      "Latitude",
+      "Longitude",
+    ];
+
+    const linhas = denunciasFiltradas.map((denuncia) => [
+      formatarDataHora(denuncia.created_at),
+      formatarValorCsv(denuncia.resumo, "Denúncia sem resumo"),
+      formatarValorCsv(denuncia.tipo),
+      formatarValorCsv(denuncia.status),
+      formatarValorCsv(denuncia.bairro, "Bairro não informado"),
+      formatarValorCsv(denuncia.endereco, "Endereço não informado"),
+      formatarValorCsv(denuncia.descricao, "Sem descrição"),
+      denuncia.anonimo
+        ? "Anônimo"
+        : formatarValorCsv(denuncia.nome_usuario, "Usuário não informado"),
+      formatarValorCsv(denuncia.latitude),
+      formatarValorCsv(denuncia.longitude),
+    ]);
+
+    const conteudoCsv = [cabecalho, ...linhas]
+      .map((linha) => linha.map(escaparCsv).join(";"))
+      .join("\n");
+
+    const blob = new Blob(["\uFEFF" + conteudoCsv], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = montarNomeArquivoCsv();
+    link.click();
+
+    URL.revokeObjectURL(url);
+  }
 
   function renderOrdenacaoIcon(campo: OrdenacaoCampo) {
     if (ordenacao.campo !== campo) return "↕";
@@ -916,19 +1003,27 @@ export function RelatoriosPage({
                 </div>
 
                 <div className="exportacoes-card">
+                  <h3>Exportar dados filtrados</h3>
+
                   <p>
-                    Próxima etapa: gerar arquivos exportáveis a partir da tabela
-                    filtrada.
+                    Os arquivos gerados consideram os filtros aplicados no topo da página,
+                    incluindo período, status, tipo, bairro e palavra-chave.
                   </p>
 
                   <div className="exportacoes-actions">
                     <button type="button" disabled>
-                      Exportar PDF
+                      Exportar PDF em breve
                     </button>
+
                     <button type="button" disabled>
-                      Exportar XML
+                      Exportar XML em breve
                     </button>
-                    <button type="button" disabled>
+
+                    <button
+                      type="button"
+                      onClick={exportarCsv}
+                      disabled={denunciasFiltradas.length === 0}
+                    >
                       Exportar CSV
                     </button>
                   </div>
