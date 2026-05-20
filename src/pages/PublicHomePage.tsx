@@ -7,6 +7,29 @@ interface PublicHomePageProps {
     onGoToDenuncia: () => void;
 }
 
+const tiposOcorrencia = [
+    {
+        icon: "⚠️",
+        title: "Maus-tratos",
+        text: "Casos de violência, negligência, abandono de cuidados ou condições inadequadas.",
+    },
+    {
+        icon: "🐾",
+        title: "Abandono",
+        text: "Animais deixados em ruas, terrenos, praças ou locais sem assistência.",
+    },
+    {
+        icon: "🩹",
+        title: "Animal ferido",
+        text: "Ocorrências envolvendo animais machucados, debilitados ou em situação de risco.",
+    },
+    {
+        icon: "🐀",
+        title: "Infestação",
+        text: "Situações com risco sanitário, zoonoses, pragas ou acúmulo de animais/vetores.",
+    },
+];
+
 export function PublicHomePage({
     onEntrar,
     onGoToPolitica,
@@ -35,9 +58,13 @@ export function PublicHomePage({
                     </div>
                 </button>
 
-                <nav className="public-navbar__links">
+                <nav className="public-navbar__links" aria-label="Navegação principal">
                     <button type="button" onClick={() => scrollToSection("sobre")}>
                         Sobre
+                    </button>
+
+                    <button type="button" onClick={() => scrollToSection("tipos")}>
+                        Ocorrências
                     </button>
 
                     <button type="button" onClick={() => scrollToSection("denuncias")}>
@@ -48,7 +75,11 @@ export function PublicHomePage({
                         Política
                     </button>
 
-                    <button type="button" className="public-navbar__login" onClick={onEntrar}>
+                    <button
+                        type="button"
+                        className="public-navbar__login"
+                        onClick={onEntrar}
+                    >
                         Entrar
                     </button>
                 </nav>
@@ -59,16 +90,20 @@ export function PublicHomePage({
                     <div className="public-hero__content">
                         <span className="section-tag">Projeto acadêmico</span>
 
-                        <h1>Uma ponte entre a população e o cuidado animal</h1>
+                        <h1>Proteja. Denuncie. Acompanhe.</h1>
 
                         <p>
-                            O SOS Bichos é uma plataforma criada para facilitar o registro e
-                            acompanhamento de denúncias envolvendo animais, como maus-tratos,
-                            abandono, animais feridos e situações relacionadas à saúde pública.
+                            O SOS Bichos aproxima a população do cuidado animal, facilitando o
+                            registro de ocorrências como maus-tratos, abandono, animais feridos
+                            e situações relacionadas à saúde pública.
                         </p>
 
                         <div className="public-hero__actions">
-                            <button type="button" className="primary-button" onClick={onGoToDenuncia}>
+                            <button
+                                type="button"
+                                className="primary-button"
+                                onClick={onGoToDenuncia}
+                            >
                                 Fazer denúncia
                             </button>
 
@@ -80,12 +115,29 @@ export function PublicHomePage({
                                 Como funciona
                             </button>
                         </div>
+
+                        <div className="public-hero__mini-stats">
+                            <article>
+                                <strong>📍</strong>
+                                <span>Localização por endereço, CEP ou mapa</span>
+                            </article>
+
+                            <article>
+                                <strong>📸</strong>
+                                <span>Envio de fotos para apoiar a análise</span>
+                            </article>
+
+                            <article>
+                                <strong>🔎</strong>
+                                <span>Acompanhamento por status e feedbacks</span>
+                            </article>
+                        </div>
                     </div>
 
                     <div className="public-hero__visual">
                         <img
                             src={bannerImage}
-                            alt="Animais representando o cuidado e a proteção animal"
+                            alt="Cachorro representando cuidado e proteção animal"
                             className="public-hero__image"
                         />
 
@@ -94,61 +146,55 @@ export function PublicHomePage({
                         <div className="public-hero__floating-card">
                             <strong>🐶 Denunciar também é cuidar.</strong>
                             <span>
-                                Ao registrar uma ocorrência com descrição, localização e imagem, você
-                                ajuda a administração a identificar regiões de risco e agir com mais
-                                eficiência.
+                                Ao registrar uma ocorrência com descrição, localização e imagem,
+                                você ajuda a administração a identificar riscos e organizar o
+                                atendimento.
                             </span>
-                        </div>
-
-                        <div className="public-hero__badges">
-                            <article>
-                                <strong>📍 Localização</strong>
-                                <span>Endereço manual, CEP e mapa</span>
-                            </article>
-
-                            <article>
-                                <strong>📸 Evidências</strong>
-                                <span>Envio de foto e acompanhamento do status</span>
-                            </article>
                         </div>
                     </div>
                 </section>
-                <section id="sobre" className="public-section">
-                    <span className="section-tag">Sobre</span>
 
-                    <h2>Sobre o SOS Bichos</h2>
+                <section id="sobre" className="public-section public-section--split">
+                    <div>
+                        <span className="section-tag">Sobre</span>
+
+                        <h2>Uma plataforma para organizar denúncias envolvendo animais</h2>
+
+                        <p>
+                            O SOS Bichos é um sistema web desenvolvido para tornar o registro,
+                            acompanhamento e gestão de denúncias mais simples, acessível e
+                            transparente.
+                        </p>
+                    </div>
+
+                    <div className="public-highlight-card">
+                        <strong>Objetivo do projeto</strong>
+                        <p>
+                            Facilitar a comunicação entre cidadãos e responsáveis pelo
+                            atendimento, centralizando informações importantes como tipo da
+                            ocorrência, localização, descrição, fotos e status.
+                        </p>
+                    </div>
+                </section>
+
+                <section id="tipos" className="public-section">
+                    <span className="section-tag">Ocorrências</span>
+
+                    <h2>O que pode ser registrado?</h2>
 
                     <p>
-                        O SOS Bichos é um projeto acadêmico desenvolvido para facilitar o registro,
-                        acompanhamento e gestão de denúncias envolvendo animais. A plataforma busca
-                        aproximar a população dos responsáveis pelo atendimento, oferecendo uma forma
-                        mais organizada, transparente e acessível de comunicar ocorrências.
+                        A plataforma foi pensada para apoiar o registro de diferentes tipos
+                        de situações envolvendo animais e saúde pública.
                     </p>
 
-                    <div className="public-info-grid">
-                        <article>
-                            <h3>Participação cidadã</h3>
-                            <p>
-                                Qualquer pessoa pode conhecer o projeto e, ao entrar na plataforma,
-                                registrar uma denúncia com informações importantes sobre a ocorrência.
-                            </p>
-                        </article>
-
-                        <article>
-                            <h3>Organização das denúncias</h3>
-                            <p>
-                                As ocorrências são classificadas por tipo, endereço, status e região,
-                                facilitando a análise e o acompanhamento pela administração.
-                            </p>
-                        </article>
-
-                        <article>
-                            <h3>Transparência no acompanhamento</h3>
-                            <p>
-                                O usuário pode acompanhar suas denúncias, visualizar atualizações e
-                                entender em qual etapa do atendimento a ocorrência se encontra.
-                            </p>
-                        </article>
+                    <div className="public-occurrence-grid">
+                        {tiposOcorrencia.map((tipo) => (
+                            <article key={tipo.title}>
+                                <span>{tipo.icon}</span>
+                                <h3>{tipo.title}</h3>
+                                <p>{tipo.text}</p>
+                            </article>
+                        ))}
                     </div>
                 </section>
 
@@ -162,8 +208,8 @@ export function PublicHomePage({
                             <span>1</span>
                             <h3>Informe a ocorrência</h3>
                             <p>
-                                Descreva o caso, selecione o tipo da denúncia e adicione detalhes
-                                importantes para facilitar a análise.
+                                Descreva o caso, selecione o tipo da denúncia e adicione os
+                                detalhes necessários para facilitar a análise.
                             </p>
                         </article>
 
@@ -178,28 +224,59 @@ export function PublicHomePage({
 
                         <article>
                             <span>3</span>
+                            <h3>Anexe evidências</h3>
+                            <p>
+                                Fotos da ocorrência ajudam a administração a entender melhor a
+                                situação registrada.
+                            </p>
+                        </article>
+
+                        <article>
+                            <span>4</span>
                             <h3>Acompanhe o status</h3>
                             <p>
-                                A denúncia passa por etapas como pendente, em análise, em
-                                atendimento, resolvida ou cancelada.
+                                Após entrar na plataforma, o usuário pode acompanhar atualizações
+                                e feedbacks da administração.
                             </p>
                         </article>
                     </div>
                 </section>
 
-                <section id="denuncias" className="public-section public-denuncia-preview">
+                <section className="public-cta-band">
+                    <div>
+                        <span className="section-tag">Acesso à plataforma</span>
+                        <h2>Para enviar uma denúncia, entre na sua conta</h2>
+                        <p>
+                            O login permite acompanhar suas ocorrências, visualizar feedbacks e
+                            manter um histórico organizado das denúncias registradas.
+                        </p>
+                    </div>
+
+                    <button type="button" className="primary-button" onClick={onEntrar}>
+                        Entrar na plataforma
+                    </button>
+                </section>
+
+                <section
+                    id="denuncias"
+                    className="public-section public-denuncia-preview"
+                >
                     <div>
                         <span className="section-tag">Denúncias</span>
 
-                        <h2>Registre uma ocorrência</h2>
+                        <h2>Registre uma ocorrência com detalhes</h2>
 
                         <p>
-                            Para manter a segurança e permitir acompanhamento, é necessário
-                            entrar ou criar uma conta antes de enviar uma denúncia. Você poderá
-                            informar descrição, localização, foto e acompanhar o andamento.
+                            Ao criar uma denúncia, você poderá informar resumo, descrição,
+                            tipo, endereço, localização no mapa e anexar imagens para apoiar a
+                            análise.
                         </p>
 
-                        <button type="button" className="primary-button" onClick={onGoToDenuncia}>
+                        <button
+                            type="button"
+                            className="primary-button"
+                            onClick={onGoToDenuncia}
+                        >
                             Entrar para registrar denúncia
                         </button>
                     </div>
@@ -225,11 +302,20 @@ export function PublicHomePage({
                         />
 
                         <small>
-                            Faça login para liberar o formulário completo com foto, endereço e mapa.
+                            Faça login para liberar o formulário completo com fotos, endereço
+                            e mapa.
                         </small>
                     </div>
                 </section>
             </main>
+            <button
+                type="button"
+                className="public-scroll-top"
+                onClick={() => scrollToSection("inicio")}
+                aria-label="Voltar ao topo"
+            >
+                ↑
+            </button>
 
             <footer className="public-footer">
                 <div>
@@ -240,6 +326,10 @@ export function PublicHomePage({
                 <nav>
                     <button type="button" onClick={() => scrollToSection("sobre")}>
                         Sobre
+                    </button>
+
+                    <button type="button" onClick={() => scrollToSection("tipos")}>
+                        Ocorrências
                     </button>
 
                     <button type="button" onClick={() => scrollToSection("denuncias")}>
