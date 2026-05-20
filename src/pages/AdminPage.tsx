@@ -3,6 +3,7 @@ import { Navbar } from "../components/layout/Navbar";
 import { PageContainer } from "../components/layout/PageContainer";
 import { Footer } from "../components/layout/Footer";
 import { formatarDataHora } from "../utils/formatters";
+import { getTipoDenunciaIcon } from "../utils/denunciaVisual";
 import {
   listarTodasDenuncias,
   atualizarStatusDenuncia,
@@ -43,7 +44,7 @@ export function AdminPage({
   const [filtroStatus, setFiltroStatus] =
     useState<StatusDenuncia | "Todos">("Todos");
   const [filtroTipo, setFiltroTipo] = useState<TipoDenuncia | "Todos">("Todos");
-
+  const [buscaTexto, setBuscaTexto] = useState("");
   const [paginaAtual, setPaginaAtual] = useState(1);
   const itensPorPagina = 6;
 
@@ -56,15 +57,25 @@ export function AdminPage({
   const [salvandoStatus, setSalvandoStatus] = useState(false);
 
   const denunciasFiltradas = useMemo(() => {
+    const termo = buscaTexto.trim().toLowerCase();
+
     return denuncias.filter((denuncia) => {
       const statusOk =
         filtroStatus === "Todos" || denuncia.status === filtroStatus;
 
       const tipoOk = filtroTipo === "Todos" || denuncia.tipo === filtroTipo;
 
-      return statusOk && tipoOk;
+      const textoOk =
+        !termo ||
+        denuncia.resumo?.toLowerCase().includes(termo) ||
+        denuncia.descricao?.toLowerCase().includes(termo) ||
+        denuncia.endereco?.toLowerCase().includes(termo) ||
+        denuncia.bairro?.toLowerCase().includes(termo) ||
+        denuncia.nome_usuario?.toLowerCase().includes(termo);
+
+      return statusOk && tipoOk && textoOk;
     });
-  }, [denuncias, filtroStatus, filtroTipo]);
+  }, [denuncias, filtroStatus, filtroTipo, buscaTexto]);
 
   const totalPaginas = Math.max(
     1,
@@ -214,7 +225,7 @@ export function AdminPage({
 
   useEffect(() => {
     setPaginaAtual(1);
-  }, [filtroStatus, filtroTipo]);
+  }, [filtroStatus, filtroTipo, buscaTexto]);
 
   useEffect(() => {
     if (paginaAtual > totalPaginas) {
@@ -250,6 +261,15 @@ export function AdminPage({
         </section>
 
         <section className="admin-filters">
+          <div className="form-group admin-search-field">
+            <label className="form-label">Buscar denúncia</label>
+            <input
+              type="search"
+              value={buscaTexto}
+              onChange={(e) => setBuscaTexto(e.target.value)}
+              placeholder="Buscar por resumo, descrição, bairro, endereço ou usuário"
+            />
+          </div>
           <div className="form-group">
             <label className="form-label">Filtrar por status</label>
             <select
@@ -314,10 +334,16 @@ export function AdminPage({
                         }}
                       >
                         <div>
-                          <strong>
-                            {denuncia.resumo || "Denúncia sem resumo"}
-                          </strong>
-                          <span>{denuncia.tipo}</span>
+                          <div className="admin-list-item__title">
+                            <span className="denuncia-type-icon">
+                              {getTipoDenunciaIcon(denuncia.tipo)}
+                            </span>
+
+                            <div>
+                              <strong>{denuncia.resumo || "Denúncia sem resumo"}</strong>
+                              <span>{denuncia.tipo}</span>
+                            </div>
+                          </div>
                           <small>{formatarDataHora(denuncia.created_at)}</small>
                           <small>{denuncia.endereco || "Local não informado"}</small>
 

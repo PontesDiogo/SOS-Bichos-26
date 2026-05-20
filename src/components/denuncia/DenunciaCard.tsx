@@ -4,6 +4,7 @@ import type { DenunciaFeedback } from "../../types/feedback";
 import { cancelarDenuncia } from "../../services/denunciaService";
 import { listarFeedbacksPorDenuncia } from "../../services/feedbackService";
 import { formatarDataHora } from "../../utils/formatters";
+import { getTipoDenunciaIcon } from "../../utils/denunciaVisual";
 
 interface DenunciaCardProps {
   denuncia: Denuncia | null;
@@ -85,9 +86,18 @@ export function DenunciaCard({
 
       <div className="denuncia-card__content">
         <div className="denuncia-card__header">
-          <div>
-            <span className="section-tag">{denuncia.tipo || "Ocorrência"}</span>
-            <h3>{denuncia.resumo || "Denúncia sem resumo"}</h3>
+          <div className="denuncia-card__title-row">
+            <span className="denuncia-type-icon denuncia-type-icon--large">
+              {getTipoDenunciaIcon(denuncia.tipo)}
+            </span>
+
+            <div>
+              <span className="section-tag">
+                {denuncia.tipo || "Ocorrência"}
+              </span>
+
+              <h3>{denuncia.resumo || "Denúncia sem resumo"}</h3>
+            </div>
           </div>
 
           <span

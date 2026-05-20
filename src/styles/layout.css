@@ -560,8 +560,9 @@ body {
 .denuncia-list-item {
   width: 100%;
   display: flex;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
   text-align: left;
   padding: 18px;
   border-radius: var(--radius-md);
@@ -577,6 +578,30 @@ body {
   border-color: var(--color-primary);
   box-shadow: 0 14px 28px rgba(47, 42, 37, 0.1);
 }
+
+.denuncia-list-item__title > div {
+  display: grid;
+  gap: 4px;
+}
+
+.denuncia-list-item__title small {
+  color: var(--color-muted);
+  font-weight: 700;
+}
+
+.denuncia-type-icon {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #faf7f1;
+  border: 1px solid var(--color-border);
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
 
 .denuncia-list-item__main {
   display: flex;
@@ -2954,4 +2979,63 @@ footer,
 .admin-time-alert--urgente {
   background: #fff6f5;
   border-color: #ffb4a8;
+}
+.denuncia-card__title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.denuncia-card__title-row > div {
+  min-width: 0;
+}
+
+.denuncia-type-icon--large {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  font-size: 1.45rem;
+  box-shadow: 0 10px 20px rgba(47, 42, 37, 0.08);
+}
+.admin-list-item__title,
+.admin-detail-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.admin-list-item__title > div,
+.admin-detail-title-row > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.admin-search-field {
+  min-width: 280px;
+}
+
+.admin-filters {
+  grid-template-columns: 1.4fr 0.8fr 0.8fr;
+}
+
+.admin-filters input[type="search"] {
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--color-border);
+  background: #fffdf9;
+  color: var(--color-text);
+  font: inherit;
+  box-sizing: border-box;
+}
+
+@media (max-width: 860px) {
+  .admin-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-search-field {
+    min-width: 0;
+  }
 }

@@ -7,6 +7,7 @@ import { useDenuncias } from "../hooks/useDenuncia";
 import type { StatusDenuncia, TipoDenuncia } from "../types/denuncia";
 import { TIPOS_DENUNCIA } from "../utils/constants";
 
+
 interface MinhasDenunciasPageProps {
     userId: string;
     userName?: string;

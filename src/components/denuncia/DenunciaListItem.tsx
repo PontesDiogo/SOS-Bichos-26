@@ -1,5 +1,6 @@
 import type { Denuncia } from "../../types/denuncia";
 import { formatarData, formatarHora } from "../../utils/formatters";
+import { getTipoDenunciaIcon } from "../../utils/denunciaVisual";
 
 interface DenunciaListItemProps {
   denuncia: Denuncia;
@@ -19,7 +20,16 @@ export function DenunciaListItem({
       onClick={onClick}
     >
       <div className="denuncia-list-item__main">
-        <strong>{denuncia.resumo || "Denúncia sem resumo"}</strong>
+        <div className="denuncia-list-item__title">
+          <span className="denuncia-type-icon">
+            {getTipoDenunciaIcon(denuncia.tipo)}
+          </span>
+
+          <div>
+            <strong>{denuncia.resumo || "Denúncia sem resumo"}</strong>
+            <small>{denuncia.tipo || "Ocorrência"}</small>
+          </div>
+        </div>
 
         <span>
           {formatarData(denuncia.created_at)} às{" "}
@@ -30,7 +40,11 @@ export function DenunciaListItem({
       </div>
 
       <div className="denuncia-list-item__side">
-        <span className={`status-pill status-pill--${normalizeStatus(denuncia.status)}`}>
+        <span
+          className={`status-pill status-pill--${normalizeStatus(
+            denuncia.status
+          )}`}
+        >
           {denuncia.status}
         </span>
 
