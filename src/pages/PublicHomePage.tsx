@@ -113,6 +113,44 @@ export function PublicHomePage({
                         </div>
                     </div>
                 </section>
+                <section id="sobre" className="public-section">
+                    <span className="section-tag">Sobre</span>
+
+                    <h2>Sobre o SOS Bichos</h2>
+
+                    <p>
+                        O SOS Bichos é um projeto acadêmico desenvolvido para facilitar o registro,
+                        acompanhamento e gestão de denúncias envolvendo animais. A plataforma busca
+                        aproximar a população dos responsáveis pelo atendimento, oferecendo uma forma
+                        mais organizada, transparente e acessível de comunicar ocorrências.
+                    </p>
+
+                    <div className="public-info-grid">
+                        <article>
+                            <h3>Participação cidadã</h3>
+                            <p>
+                                Qualquer pessoa pode conhecer o projeto e, ao entrar na plataforma,
+                                registrar uma denúncia com informações importantes sobre a ocorrência.
+                            </p>
+                        </article>
+
+                        <article>
+                            <h3>Organização das denúncias</h3>
+                            <p>
+                                As ocorrências são classificadas por tipo, endereço, status e região,
+                                facilitando a análise e o acompanhamento pela administração.
+                            </p>
+                        </article>
+
+                        <article>
+                            <h3>Transparência no acompanhamento</h3>
+                            <p>
+                                O usuário pode acompanhar suas denúncias, visualizar atualizações e
+                                entender em qual etapa do atendimento a ocorrência se encontra.
+                            </p>
+                        </article>
+                    </div>
+                </section>
 
                 <section id="como-funciona" className="public-section">
                     <span className="section-tag">Como funciona</span>
