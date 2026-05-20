@@ -2884,3 +2884,74 @@ footer,
   opacity: 0.55;
   cursor: not-allowed;
 }
+.admin-list-item--atencao {
+  border-color: #f5c451;
+  background: #fffaf0;
+}
+
+.admin-list-item--urgente {
+  border-color: #ffb4a8;
+  background: #fff6f5;
+}
+
+.admin-open-time {
+  width: fit-content;
+  margin-top: 4px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.admin-open-time--normal {
+  background: #e8f1ff;
+  color: #1d4f91;
+}
+
+.admin-open-time--atencao {
+  background: #fff4d6;
+  color: #8a5a00;
+}
+
+.admin-open-time--urgente {
+  background: #ffe8e6;
+  color: #b42318;
+}
+
+.admin-open-time--encerrada {
+  background: #e8f7ef;
+  color: #027a48;
+}
+
+.admin-time-alert {
+  display: grid;
+  gap: 6px;
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid var(--color-border);
+}
+
+.admin-time-alert strong {
+  color: var(--color-text);
+}
+
+.admin-time-alert span {
+  color: var(--color-muted);
+  line-height: 1.5;
+}
+
+.admin-time-alert--normal {
+  background: #f5f9ff;
+  border-color: #c8ddff;
+}
+
+.admin-time-alert--atencao {
+  background: #fffaf0;
+  border-color: #f5c451;
+}
+
+.admin-time-alert--urgente {
+  background: #fff6f5;
+  border-color: #ffb4a8;
+}

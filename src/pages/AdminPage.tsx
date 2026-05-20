@@ -168,6 +168,45 @@ export function AdminPage({
       setSalvandoStatus(false);
     }
   }
+  function calcularDiasEmAberto(createdAt: string) {
+    const dataCriacao = new Date(createdAt);
+    const agora = new Date();
+
+    const diferencaMs = agora.getTime() - dataCriacao.getTime();
+    const dias = Math.floor(diferencaMs / (1000 * 60 * 60 * 24));
+
+    return Math.max(dias, 0);
+  }
+
+  function denunciaEstaEncerrada(status: StatusDenuncia) {
+    return status === "Resolvido" || status === "Cancelado";
+  }
+
+  function getNivelTempoAberto(denuncia: Denuncia) {
+    if (denunciaEstaEncerrada(denuncia.status)) {
+      return "encerrada";
+    }
+
+    const dias = calcularDiasEmAberto(denuncia.created_at);
+
+    if (dias >= 8) return "urgente";
+    if (dias >= 4) return "atencao";
+
+    return "normal";
+  }
+
+  function getTextoTempoAberto(denuncia: Denuncia) {
+    if (denunciaEstaEncerrada(denuncia.status)) {
+      return "Ocorrência encerrada";
+    }
+
+    const dias = calcularDiasEmAberto(denuncia.created_at);
+
+    if (dias === 0) return "Aberta hoje";
+    if (dias === 1) return "Aberta há 1 dia";
+
+    return `Aberta há ${dias} dias`;
+  }
 
   useEffect(() => {
     carregarDenunciasAdmin();
@@ -266,11 +305,9 @@ export function AdminPage({
                       <button
                         key={denuncia.id}
                         type="button"
-                        className={`admin-list-item ${
-                          denunciaSelecionada?.id === denuncia.id
-                            ? "is-selected"
-                            : ""
-                        }`}
+                        className={`admin-list-item admin-list-item--${getNivelTempoAberto(
+                          denuncia
+                        )} ${denunciaSelecionada?.id === denuncia.id ? "is-selected" : ""}`}
                         onClick={() => {
                           setDenunciaSelecionada(denuncia);
                           carregarFeedbacks(denuncia.id);
@@ -282,8 +319,14 @@ export function AdminPage({
                           </strong>
                           <span>{denuncia.tipo}</span>
                           <small>{formatarDataHora(denuncia.created_at)}</small>
-                          <small>
-                            {denuncia.endereco || "Local não informado"}
+                          <small>{denuncia.endereco || "Local não informado"}</small>
+
+                          <small
+                            className={`admin-open-time admin-open-time--${getNivelTempoAberto(
+                              denuncia
+                            )}`}
+                          >
+                            {getTextoTempoAberto(denuncia)}
                           </small>
                         </div>
 
@@ -331,6 +374,23 @@ export function AdminPage({
 
                       <div className="admin-detail-content">
                         <div className="admin-detail-header">
+                          {!denunciaEstaEncerrada(denunciaSelecionada.status) && (
+                            <div
+                              className={`admin-time-alert admin-time-alert--${getNivelTempoAberto(
+                                denunciaSelecionada
+                              )}`}
+                            >
+                              <strong>{getTextoTempoAberto(denunciaSelecionada)}</strong>
+
+                              <span>
+                                {getNivelTempoAberto(denunciaSelecionada) === "urgente"
+                                  ? "Esta denúncia está aberta há muitos dias e deve receber prioridade na análise."
+                                  : getNivelTempoAberto(denunciaSelecionada) === "atencao"
+                                    ? "Esta denúncia já está aberta há alguns dias. Verifique se há necessidade de atualização."
+                                    : "Denúncia dentro do prazo inicial de acompanhamento."}
+                              </span>
+                            </div>
+                          )}
                           <div>
                             <span className="section-tag">
                               {denunciaSelecionada.tipo}
@@ -375,7 +435,7 @@ export function AdminPage({
                               {denunciaSelecionada.anonimo
                                 ? "Anônimo"
                                 : denunciaSelecionada.nome_usuario ||
-                                  "Não informado"}
+                                "Não informado"}
                             </span>
                           </div>
 
@@ -397,7 +457,7 @@ export function AdminPage({
                             <strong>Coordenadas</strong>
                             <span>
                               {denunciaSelecionada.latitude &&
-                              denunciaSelecionada.longitude
+                                denunciaSelecionada.longitude
                                 ? `${denunciaSelecionada.latitude}, ${denunciaSelecionada.longitude}`
                                 : "Não informado"}
                             </span>
