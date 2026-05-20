@@ -21,6 +21,8 @@ import { Footer } from "../components/layout/Footer";
 import { listarTodasDenuncias } from "../services/denunciaService";
 import type { Denuncia, StatusDenuncia, TipoDenuncia } from "../types/denuncia";
 import { formatarDataHora } from "../utils/formatters";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface RelatoriosPageProps {
   userName?: string;
@@ -371,6 +373,7 @@ export function RelatoriosPage({
   }
 
   function exportarCsv() {
+
     const cabecalho = [
       "Data de criação",
       "Resumo",
@@ -415,6 +418,147 @@ export function RelatoriosPage({
     link.click();
 
     URL.revokeObjectURL(url);
+  }
+
+  function montarDescricaoFiltros() {
+    const filtros = [
+      filtrosAplicados.dataInicial
+        ? `Data inicial: ${filtrosAplicados.dataInicial}`
+        : "Data inicial: não definida",
+
+      filtrosAplicados.dataFinal
+        ? `Data final: ${filtrosAplicados.dataFinal}`
+        : "Data final: não definida",
+
+      `Status: ${filtrosAplicados.status}`,
+      `Tipo: ${filtrosAplicados.tipo}`,
+      `Bairro: ${filtrosAplicados.bairro}`,
+
+      filtrosAplicados.pesquisa
+        ? `Pesquisa: ${filtrosAplicados.pesquisa}`
+        : "Pesquisa: não definida",
+    ];
+
+    return filtros.join(" | ");
+  }
+
+  function exportarPdf() {
+    const documento = new jsPDF({
+      orientation: "landscape",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const dataGeracao = formatarDataHora(new Date().toISOString());
+
+    documento.setFont("helvetica", "bold");
+    documento.setFontSize(18);
+    documento.text("Relatório de Denúncias - SOS Bichos", 14, 16);
+
+    documento.setFont("helvetica", "normal");
+    documento.setFontSize(10);
+    documento.text(`Gerado em: ${dataGeracao}`, 14, 24);
+
+    const descricaoFiltros = montarDescricaoFiltros();
+
+    const linhasFiltro = documento.splitTextToSize(descricaoFiltros, 265);
+
+    documento.setFont("helvetica", "bold");
+    documento.text("Filtros aplicados:", 14, 32);
+
+    documento.setFont("helvetica", "normal");
+    documento.text(linhasFiltro, 14, 38);
+
+    const inicioResumoY = 38 + linhasFiltro.length * 5 + 6;
+
+    documento.setFont("helvetica", "bold");
+    documento.setFontSize(12);
+    documento.text("Resumo", 14, inicioResumoY);
+
+    documento.setFont("helvetica", "normal");
+    documento.setFontSize(10);
+
+    const resumoTexto = [
+      `Total de denúncias: ${indicadores.total}`,
+      `Pendentes: ${indicadores.pendentes}`,
+      `Em análise: ${indicadores.emAnalise}`,
+      `Em atendimento: ${indicadores.emAtendimento}`,
+      `Resolvidas: ${indicadores.resolvidas}`,
+      `Canceladas: ${indicadores.canceladas}`,
+      `Não resolvidas: ${indicadores.naoResolvidas}`,
+    ];
+
+    documento.text(resumoTexto.join(" | "), 14, inicioResumoY + 7);
+
+    const linhasTabela = denunciasFiltradas.map((denuncia) => [
+      formatarDataHora(denuncia.created_at),
+      denuncia.resumo || "Denúncia sem resumo",
+      denuncia.tipo || "Não informado",
+      denuncia.status || "Não informado",
+      denuncia.bairro || "Bairro não informado",
+      denuncia.endereco || "Endereço não informado",
+      denuncia.anonimo ? "Anônimo" : denuncia.nome_usuario || "Não informado",
+    ]);
+
+    autoTable(documento, {
+      startY: inicioResumoY + 14,
+      head: [[
+        "Data",
+        "Resumo",
+        "Tipo",
+        "Status",
+        "Bairro",
+        "Endereço",
+        "Usuário",
+      ]],
+      body: linhasTabela,
+      styles: {
+        font: "helvetica",
+        fontSize: 8,
+        cellPadding: 2.4,
+        overflow: "linebreak",
+        valign: "top",
+      },
+      headStyles: {
+        fillColor: [139, 94, 52],
+        textColor: 255,
+        fontStyle: "bold",
+      },
+      alternateRowStyles: {
+        fillColor: [250, 247, 241],
+      },
+      columnStyles: {
+        0: { cellWidth: 30 },
+        1: { cellWidth: 48 },
+        2: { cellWidth: 28 },
+        3: { cellWidth: 30 },
+        4: { cellWidth: 34 },
+        5: { cellWidth: 70 },
+        6: { cellWidth: 32 },
+      },
+      margin: {
+        left: 14,
+        right: 14,
+      },
+      didDrawPage: (data) => {
+        const pageCount = documento.getNumberOfPages();
+        const pageSize = documento.internal.pageSize;
+        const pageWidth = pageSize.getWidth();
+        const pageHeight = pageSize.getHeight();
+
+        documento.setFontSize(8);
+        documento.setTextColor(120);
+        documento.text(
+          `SOS Bichos - Página ${data.pageNumber} de ${pageCount}`,
+          pageWidth / 2,
+          pageHeight - 8,
+          { align: "center" }
+        );
+      },
+    });
+
+    const dataAtual = new Date().toISOString().slice(0, 10);
+    documento.save(`relatorio-denuncias-${dataAtual}.pdf`);
   }
 
   function renderOrdenacaoIcon(campo: OrdenacaoCampo) {
@@ -1011,8 +1155,12 @@ export function RelatoriosPage({
                   </p>
 
                   <div className="exportacoes-actions">
-                    <button type="button" disabled>
-                      Exportar PDF em breve
+                    <button
+                      type="button"
+                      onClick={exportarPdf}
+                      disabled={denunciasFiltradas.length === 0}
+                    >
+                      Exportar PDF
                     </button>
 
                     <button type="button" disabled>
