@@ -5,6 +5,9 @@ import { cancelarDenuncia } from "../../services/denunciaService";
 import { listarFeedbacksPorDenuncia } from "../../services/feedbackService";
 import { formatarDataHora } from "../../utils/formatters";
 import { getTipoDenunciaIcon } from "../../utils/denunciaVisual";
+import type { DenunciaMidia } from "../../types/denunciaMidia";
+import { listarMidiasPorDenuncia } from "../../services/denunciaMidiaService";
+import { DenunciaMediaCarousel } from "./DenunciaMediaCarousel";
 
 interface DenunciaCardProps {
   denuncia: Denuncia | null;
@@ -19,6 +22,9 @@ export function DenunciaCard({
 }: DenunciaCardProps) {
   const [feedbacks, setFeedbacks] = useState<DenunciaFeedback[]>([]);
   const [loadingFeedbacks, setLoadingFeedbacks] = useState(false);
+  const [midias, setMidias] = useState<DenunciaMidia[]>([]);
+  const [loadingMidias, setLoadingMidias] = useState(false);
+
 
   useEffect(() => {
     async function carregarFeedbacks() {
@@ -43,6 +49,31 @@ export function DenunciaCard({
 
     carregarFeedbacks();
   }, [denuncia?.id]);
+
+  useEffect(() => {
+    async function carregarMidias() {
+      if (!denuncia?.id) {
+        setMidias([]);
+        return;
+      }
+
+      try {
+        setLoadingMidias(true);
+
+        const data = await listarMidiasPorDenuncia(denuncia.id);
+        setMidias(data);
+      } catch (error) {
+        console.error(error);
+        setMidias([]);
+      } finally {
+        setLoadingMidias(false);
+      }
+    }
+
+    carregarMidias();
+  }, [denuncia?.id]);
+
+
 
   if (!denuncia) {
     return (
@@ -78,11 +109,7 @@ export function DenunciaCard({
 
   return (
     <article className="denuncia-card">
-      {denuncia.foto_url && (
-        <div className="denuncia-card__image">
-          <img src={denuncia.foto_url} alt="Foto da ocorrência denunciada" />
-        </div>
-      )}
+
 
       <div className="denuncia-card__content">
         <div className="denuncia-card__header">
@@ -136,6 +163,14 @@ export function DenunciaCard({
             </div>
           )}
         </div>
+        {loadingMidias ? (
+          <p className="denuncia-card__description">Carregando mídias...</p>
+        ) : (
+          <DenunciaMediaCarousel
+            midias={midias}
+            fotoUrlLegada={denuncia.foto_url}
+          />
+        )}
 
         <div className="feedback-box">
           <h3>Histórico da denúncia</h3>

@@ -579,7 +579,7 @@ body {
   box-shadow: 0 14px 28px rgba(47, 42, 37, 0.1);
 }
 
-.denuncia-list-item__title > div {
+.denuncia-list-item__title>div {
   display: grid;
   gap: 4px;
 }
@@ -2806,6 +2806,7 @@ footer,
 }
 
 @media (max-width: 900px) {
+
   .public-hero,
   .public-denuncia-preview {
     grid-template-columns: 1fr;
@@ -2834,6 +2835,7 @@ footer,
 }
 
 @media (max-width: 640px) {
+
   .public-navbar,
   .public-footer {
     flex-direction: column;
@@ -2909,6 +2911,7 @@ footer,
   opacity: 0.55;
   cursor: not-allowed;
 }
+
 .admin-list-item--atencao {
   border-color: #f5c451;
   background: #fffaf0;
@@ -2980,13 +2983,14 @@ footer,
   background: #fff6f5;
   border-color: #ffb4a8;
 }
+
 .denuncia-card__title-row {
   display: flex;
   align-items: flex-start;
   gap: 12px;
 }
 
-.denuncia-card__title-row > div {
+.denuncia-card__title-row>div {
   min-width: 0;
 }
 
@@ -2997,6 +3001,7 @@ footer,
   font-size: 1.45rem;
   box-shadow: 0 10px 20px rgba(47, 42, 37, 0.08);
 }
+
 .admin-list-item__title,
 .admin-detail-title-row {
   display: flex;
@@ -3004,8 +3009,8 @@ footer,
   gap: 12px;
 }
 
-.admin-list-item__title > div,
-.admin-detail-title-row > div {
+.admin-list-item__title>div,
+.admin-detail-title-row>div {
   display: grid;
   gap: 4px;
   min-width: 0;
@@ -3039,6 +3044,7 @@ footer,
     min-width: 0;
   }
 }
+
 .photo-preview--grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(140px, 1fr));
@@ -3076,5 +3082,148 @@ footer,
 @media (max-width: 560px) {
   .photo-preview--grid {
     grid-template-columns: 1fr;
+  }
+}
+
+.denuncia-media {
+  margin-top: 20px;
+  padding: 14px;
+  border-radius: 18px;
+  background: #faf7f1;
+  border: 1px solid var(--color-border);
+}
+
+.denuncia-media__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.denuncia-media__header h3 {
+  margin: 4px 0 0;
+  color: var(--color-text);
+  font-size: 1rem;
+}
+
+.denuncia-media__header small {
+  color: var(--color-muted);
+  font-weight: 800;
+}
+
+.denuncia-media__viewer {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #eadfce;
+  border: 1px solid var(--color-border);
+}
+
+.denuncia-media__item {
+  width: 100%;
+  height: 190px;
+  display: block;
+  object-fit: cover;
+}
+
+.denuncia-media__control {
+  position: absolute;
+  top: 50%;
+  width: 38px;
+  height: 38px;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 253, 249, 0.94);
+  color: var(--color-text);
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(47, 42, 37, 0.16);
+  line-height: 1;
+}
+
+.denuncia-media__control span {
+  display: block;
+  height: 38px;
+  line-height: 34px;
+  font-size: 2rem;
+  font-weight: 900;
+}
+
+.denuncia-media__control:hover {
+  background: white;
+  color: var(--color-primary-dark);
+}
+
+.denuncia-media__control--prev {
+  left: 12px;
+}
+
+.denuncia-media__control--next {
+  right: 12px;
+}
+
+.denuncia-media__thumbs {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.denuncia-media__thumbs button {
+  width: 58px;
+  height: 44px;
+  min-width: 58px;
+  overflow: hidden;
+  padding: 0;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background: var(--color-surface);
+  cursor: pointer;
+}
+
+.denuncia-media__thumbs button.is-active {
+  border-color: var(--color-primary);
+}
+
+.denuncia-media__thumbs img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.denuncia-media__thumbs span {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: var(--color-primary-dark);
+  font-weight: 900;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 640px) {
+  .denuncia-media__header {
+    flex-direction: column;
+  }
+
+  .denuncia-media__item {
+    height: 165px;
+  }
+
+  .denuncia-media__control {
+    width: 34px;
+    height: 34px;
+  }
+
+  .denuncia-media__control span {
+    height: 34px;
+    line-height: 30px;
+    font-size: 1.7rem;
   }
 }
