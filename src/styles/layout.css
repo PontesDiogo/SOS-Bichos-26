@@ -2479,14 +2479,26 @@ footer,
   cursor: pointer;
 }
 
-.public-navbar__brand>span {
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
+.public-navbar__logo {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
   border-radius: 14px;
   background: #faf7f1;
-  font-size: 1.5rem;
+  border: 1px solid var(--color-border);
+}
+
+.public-navbar__logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  padding: 4px;
+  box-sizing: border-box;
 }
 
 .public-navbar__brand strong {
@@ -3392,6 +3404,7 @@ footer,
   color: var(--color-muted);
   font-weight: 700;
 }
+
 .admin-detail-card .denuncia-media {
   margin-top: 0;
 }
@@ -3409,6 +3422,7 @@ footer,
   height: 40px;
   min-width: 52px;
 }
+
 @media (max-width: 980px) {
   .admin-detail-card {
     height: auto;
@@ -3433,4 +3447,53 @@ footer,
   .admin-detail-card .denuncia-media__item {
     height: 150px;
   }
+}
+
+.navbar__logo {
+  width: 58px;
+  height: 58px;
+  min-width: 58px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #fffdf9;
+  border: 1px solid var(--color-border);
+}
+
+.navbar__logo img {
+  width: 115%;
+  height: 115%;
+  object-fit: contain;
+  display: block;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.navbar__primary,
+.public-navbar__login,
+.public-hero__actions .primary-button {
+  font-weight: 900;
+}
+.public-navbar__logo {
+  width: 58px;
+  height: 58px;
+  min-width: 58px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #fffdf9;
+  border: 1px solid var(--color-border);
+}
+
+.public-navbar__logo img {
+  width: 115%;
+  height: 115%;
+  object-fit: contain;
+  display: block;
+  padding: 0;
+  box-sizing: border-box;
 }

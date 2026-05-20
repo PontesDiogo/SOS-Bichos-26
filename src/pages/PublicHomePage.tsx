@@ -1,5 +1,5 @@
 import bannerImage from "../assets/banner-sos-bichos.jpg";
-
+import logoSosBichos from "../assets/logo-sos-bichos.png";
 
 interface PublicHomePageProps {
     onEntrar: () => void;
@@ -25,7 +25,9 @@ export function PublicHomePage({
                     className="public-navbar__brand"
                     onClick={() => scrollToSection("inicio")}
                 >
-                    <span>🐾</span>
+                    <span className="public-navbar__logo">
+                        <img src={logoSosBichos} alt="Logo SOS Bichos" />
+                    </span>
 
                     <div>
                         <strong>SOS Bichos</strong>
