@@ -3234,8 +3234,203 @@ footer,
   gap: 12px;
 }
 
-.admin-detail-title-row > div {
+.admin-detail-title-row>div {
   display: grid;
   gap: 4px;
   min-width: 0;
+}
+
+.admin-detail-card {
+  min-width: 0;
+  height: min(78vh, 820px);
+  max-height: 820px;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 10px 24px rgba(47, 42, 37, 0.06);
+}
+
+.admin-detail-scroll {
+  height: 100%;
+  overflow-y: auto;
+  padding: 22px;
+}
+
+.admin-detail-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-detail-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #d9c2a8;
+}
+
+.admin-detail-scroll::-webkit-scrollbar-track {
+  background: #faf7f1;
+}
+
+.admin-detail-content {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.admin-detail-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  min-width: 0;
+}
+
+.admin-detail-title-row>div {
+  min-width: 0;
+}
+
+.admin-detail-title-row h2 {
+  margin: 8px 0 0;
+  color: var(--color-text);
+  font-size: clamp(1.6rem, 3vw, 2.35rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  word-break: break-word;
+}
+
+.admin-detail-description {
+  margin: 0;
+  color: var(--color-text);
+  line-height: 1.65;
+  font-weight: 600;
+}
+
+.admin-status-control {
+  padding: 16px;
+  border-radius: 18px;
+  background: #faf7f1;
+  border: 1px solid var(--color-border);
+}
+
+.admin-status-control select {
+  width: 100%;
+  margin-top: 8px;
+  padding: 13px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--color-border);
+  background: #fffdf9;
+  color: var(--color-text);
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.admin-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-detail-grid>div {
+  min-width: 0;
+  padding: 16px;
+  border-radius: 18px;
+  background: #faf7f1;
+  border: 1px solid var(--color-border);
+}
+
+.admin-detail-grid strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--color-text);
+}
+
+.admin-detail-grid span {
+  display: block;
+  color: var(--color-muted);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.admin-time-alert {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--color-border);
+}
+
+.admin-time-alert strong {
+  color: var(--color-text);
+}
+
+.admin-time-alert span {
+  color: var(--color-muted);
+  line-height: 1.5;
+}
+
+.admin-time-alert--normal {
+  background: #f5f9ff;
+  border-color: #c8ddff;
+}
+
+.admin-time-alert--atencao {
+  background: #fffaf0;
+  border-color: #f5c451;
+}
+
+.admin-time-alert--urgente {
+  background: #fff6f5;
+  border-color: #ffb4a8;
+}
+
+.admin-muted-text {
+  margin: 0;
+  color: var(--color-muted);
+  font-weight: 700;
+}
+.admin-detail-card .denuncia-media {
+  margin-top: 0;
+}
+
+.admin-detail-card .denuncia-media__item {
+  height: 170px;
+}
+
+.admin-detail-card .denuncia-media__header h3 {
+  font-size: 0.95rem;
+}
+
+.admin-detail-card .denuncia-media__thumbs button {
+  width: 52px;
+  height: 40px;
+  min-width: 52px;
+}
+@media (max-width: 980px) {
+  .admin-detail-card {
+    height: auto;
+    max-height: none;
+  }
+
+  .admin-detail-scroll {
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-detail-header {
+    flex-direction: column;
+  }
+
+  .admin-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-detail-card .denuncia-media__item {
+    height: 150px;
+  }
 }
