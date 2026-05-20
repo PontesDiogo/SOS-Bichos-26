@@ -3,6 +3,7 @@ import type { Endereco } from "../../types/endereco";
 import type { TipoDenuncia } from "../../types/denuncia";
 import { TIPOS_DENUNCIA } from "../../utils/constants";
 import { criarDenuncia } from "../../services/denunciaService";
+import { criarMidiaDenuncia } from "../../services/denunciaMidiaService";
 import { uploadFotoDenuncia } from "../../services/storageService";
 import { PhotoUpload } from "./PhotoUpload";
 import { EnderecoModal } from "../endereco/EnderecoModal";
@@ -32,7 +33,7 @@ export function DenunciaForm({
   const [tipo, setTipo] = useState<TipoDenuncia>("Maus-tratos");
   const [anonimo, setAnonimo] = useState(false);
 
-  const [foto, setFoto] = useState<File | null>(null);
+  const [fotos, setFotos] = useState<File[]>([]);
   const [endereco, setEndereco] = useState<Endereco>(emptyEndereco);
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
@@ -67,13 +68,7 @@ export function DenunciaForm({
         return;
       }
 
-      let fotoUrl: string | null = null;
-
-      if (foto) {
-        fotoUrl = await uploadFotoDenuncia(foto, userId);
-      }
-
-      await criarDenuncia({
+      const denunciaCriada = await criarDenuncia({
         resumo,
         descricao,
         tipo,
@@ -84,17 +79,33 @@ export function DenunciaForm({
         cep: endereco.cep || null,
         latitude,
         longitude,
-        foto_url: fotoUrl,
+        foto_url: null,
         anonimo,
         user_id: userId,
         nome_usuario: anonimo ? "Anônimo" : nomeUsuario,
       });
 
+      for (const [index, foto] of fotos.entries()) {
+        const fotoUrl = await uploadFotoDenuncia(
+          foto,
+          userId,
+          denunciaCriada.id
+        );
+
+        await criarMidiaDenuncia({
+          denuncia_id: denunciaCriada.id,
+          url: fotoUrl,
+          tipo: "imagem",
+          nome_arquivo: foto.name,
+          ordem: index + 1,
+        });
+      }
+
       setResumo("");
       setDescricao("");
       setTipo("Maus-tratos");
       setAnonimo(false);
-      setFoto(null);
+      setFotos([]);
       setEndereco(emptyEndereco);
       setLatitude(null);
       setLongitude(null);
@@ -172,8 +183,8 @@ export function DenunciaForm({
             {enderecoFormatado ||
               (latitude && longitude
                 ? `Localização confirmada no mapa (${latitude.toFixed(
-                  5
-                )}, ${longitude.toFixed(5)})`
+                    5
+                  )}, ${longitude.toFixed(5)})`
                 : "Nenhum endereço informado ainda.")}
           </p>
         </div>
@@ -183,7 +194,7 @@ export function DenunciaForm({
         </button>
       </div>
 
-      <PhotoUpload file={foto} onChange={setFoto} />
+      <PhotoUpload files={fotos} onChange={setFotos} maxFiles={2} />
 
       {erro && <p className="form-error">{erro}</p>}
       {sucesso && <p className="form-success">{sucesso}</p>}

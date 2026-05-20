@@ -1,13 +1,21 @@
 import { supabase } from "../lib/supabaseClient";
 
-export async function uploadFotoDenuncia(file: File, userId: string): Promise<string> {
+export async function uploadFotoDenuncia(
+  file: File,
+  userId: string,
+  denunciaId: string
+): Promise<string> {
   const extensao = file.name.split(".").pop();
-  const fileName = `${userId}/${Date.now()}.${extensao}`;
+  const nomeSeguro = file.name
+    .replace(/\s+/g, "-")
+    .replace(/[^a-zA-Z0-9.-]/g, "");
+
+  const fileName = `${userId}/${denunciaId}/${Date.now()}-${nomeSeguro || `foto.${extensao}`}`;
 
   const { error: uploadError } = await supabase.storage
     .from("denuncias")
     .upload(fileName, file, {
-      upsert: true,
+      upsert: false,
     });
 
   if (uploadError) {
@@ -19,7 +27,11 @@ export async function uploadFotoDenuncia(file: File, userId: string): Promise<st
 
   return data.publicUrl;
 }
-export async function uploadFotoPerfil(file: File, userId: string): Promise<string> {
+
+export async function uploadFotoPerfil(
+  file: File,
+  userId: string
+): Promise<string> {
   const extensao = file.name.split(".").pop();
   const fileName = `${userId}/avatar-${Date.now()}.${extensao}`;
 
