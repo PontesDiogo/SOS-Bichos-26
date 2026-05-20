@@ -3227,3 +3227,15 @@ footer,
     font-size: 1.7rem;
   }
 }
+
+.admin-detail-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.admin-detail-title-row > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}

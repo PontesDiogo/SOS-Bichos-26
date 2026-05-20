@@ -1162,11 +1162,6 @@ export function RelatoriosPage({
                     >
                       Exportar PDF
                     </button>
-
-                    <button type="button" disabled>
-                      Exportar XML em breve
-                    </button>
-
                     <button
                       type="button"
                       onClick={exportarCsv}

@@ -14,6 +14,9 @@ import {
   criarFeedbackDenuncia,
   listarFeedbacksPorDenuncia,
 } from "../services/feedbackService";
+import type { DenunciaMidia } from "../types/denunciaMidia";
+import { listarMidiasPorDenuncia } from "../services/denunciaMidiaService";
+import { DenunciaMediaCarousel } from "../components/denuncia/DenunciaMediaCarousel";
 
 interface AdminPageProps {
   userName?: string;
@@ -37,6 +40,8 @@ export function AdminPage({
     useState<Denuncia | null>(null);
 
   const [feedbacks, setFeedbacks] = useState<DenunciaFeedback[]>([]);
+  const [midias, setMidias] = useState<DenunciaMidia[]>([]);
+  const [loadingMidias, setLoadingMidias] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
@@ -96,6 +101,19 @@ export function AdminPage({
       setFeedbacks([]);
     }
   }
+  async function carregarMidias(denunciaId: string) {
+    try {
+      setLoadingMidias(true);
+
+      const data = await listarMidiasPorDenuncia(denunciaId);
+      setMidias(data);
+    } catch (error) {
+      console.error(error);
+      setMidias([]);
+    } finally {
+      setLoadingMidias(false);
+    }
+  }
 
   async function carregarDenunciasAdmin(denunciaIdParaManter?: string) {
     try {
@@ -114,6 +132,12 @@ export function AdminPage({
       setDenunciaSelecionada(denunciaAtualizada);
 
       if (denunciaAtualizada) {
+        await carregarFeedbacks(denunciaAtualizada.id);
+        await carregarMidias(denunciaAtualizada.id);
+      } else {
+        setFeedbacks([]);
+        setMidias([]);
+      } if (denunciaAtualizada) {
         await carregarFeedbacks(denunciaAtualizada.id);
       } else {
         setFeedbacks([]);
@@ -331,6 +355,7 @@ export function AdminPage({
                         onClick={() => {
                           setDenunciaSelecionada(denuncia);
                           carregarFeedbacks(denuncia.id);
+                          carregarMidias(denuncia.id);
                         }}
                       >
                         <div>
@@ -389,166 +414,180 @@ export function AdminPage({
                 <article className="admin-detail-card">
                   {denunciaSelecionada ? (
                     <>
-                      {denunciaSelecionada.foto_url && (
-                        <div className="admin-detail-image">
-                          <img
-                            src={denunciaSelecionada.foto_url}
-                            alt="Foto da denúncia"
-                          />
-                        </div>
-                      )}
+
 
                       <div className="admin-detail-content">
                         <div className="admin-detail-header">
-                          {!denunciaEstaEncerrada(denunciaSelecionada.status) && (
-                            <div
-                              className={`admin-time-alert admin-time-alert--${getNivelTempoAberto(
-                                denunciaSelecionada
-                              )}`}
-                            >
-                              <strong>{getTextoTempoAberto(denunciaSelecionada)}</strong>
-
-                              <span>
-                                {getNivelTempoAberto(denunciaSelecionada) === "urgente"
-                                  ? "Esta denúncia está aberta há muitos dias e deve receber prioridade na análise."
-                                  : getNivelTempoAberto(denunciaSelecionada) === "atencao"
-                                    ? "Esta denúncia já está aberta há alguns dias. Verifique se há necessidade de atualização."
-                                    : "Denúncia dentro do prazo inicial de acompanhamento."}
-                              </span>
-                            </div>
-                          )}
-                          <div>
-                            <span className="section-tag">
-                              {denunciaSelecionada.tipo}
+                          <div className="admin-detail-title-row">
+                            <span className="denuncia-type-icon denuncia-type-icon--large">
+                              {getTipoDenunciaIcon(denunciaSelecionada.tipo)}
                             </span>
-                            <h2>
-                              {denunciaSelecionada.resumo ||
-                                "Denúncia sem resumo"}
-                            </h2>
+
+                            <div>
+                              <span className="section-tag">{denunciaSelecionada.tipo}</span>
+
+                              <h2>{denunciaSelecionada.resumo || "Denúncia sem resumo"}</h2>
+                            </div>
                           </div>
 
-                          <span className="status-pill">
-                            {denunciaSelecionada.status}
+                          <span className="status-pill">{denunciaSelecionada.status}</span>
+                        </div>
+
+                        {!denunciaEstaEncerrada(denunciaSelecionada.status) && (
+                          <div
+                            className={`admin-time-alert admin-time-alert--${getNivelTempoAberto(
+                              denunciaSelecionada
+                            )}`}
+                          >
+                            <strong>{getTextoTempoAberto(denunciaSelecionada)}</strong>
+
+                            <span>
+                              {getNivelTempoAberto(denunciaSelecionada) === "urgente"
+                                ? "Esta denúncia está aberta há muitos dias e deve receber prioridade na análise."
+                                : getNivelTempoAberto(denunciaSelecionada) === "atencao"
+                                  ? "Esta denúncia já está aberta há alguns dias. Verifique se há necessidade de atualização."
+                                  : "Denúncia dentro do prazo inicial de acompanhamento."}
+                            </span>
+                          </div>
+                        )}
+                        <div>
+                          <span className="section-tag">
+                            {denunciaSelecionada.tipo}
+                          </span>
+                          <h2>
+                            {denunciaSelecionada.resumo ||
+                              "Denúncia sem resumo"}
+                          </h2>
+                        </div>
+
+                        <span className="status-pill">
+                          {denunciaSelecionada.status}
+                        </span>
+                      </div>
+
+                      <p>{denunciaSelecionada.descricao}</p>
+
+                      <div className="admin-status-control">
+                        <label className="form-label">Atualizar status</label>
+
+                        <select
+                          value={denunciaSelecionada.status}
+                          onChange={(e) =>
+                            abrirModalAtualizacaoStatus(
+                              e.target.value as StatusDenuncia
+                            )
+                          }
+                          disabled={salvandoStatus}
+                        >
+                          <option value="Pendente">Pendente</option>
+                          <option value="Em análise">Em análise</option>
+                          <option value="Em atendimento">Em atendimento</option>
+                          <option value="Resolvido">Resolvido</option>
+                          <option value="Cancelado">Cancelado</option>
+                        </select>
+                      </div>
+
+                      <div className="admin-detail-grid">
+                        <div>
+                          <strong>Usuário</strong>
+                          <span>
+                            {denunciaSelecionada.anonimo
+                              ? "Anônimo"
+                              : denunciaSelecionada.nome_usuario ||
+                              "Não informado"}
                           </span>
                         </div>
 
-                        <p>{denunciaSelecionada.descricao}</p>
-
-                        <div className="admin-status-control">
-                          <label className="form-label">Atualizar status</label>
-
-                          <select
-                            value={denunciaSelecionada.status}
-                            onChange={(e) =>
-                              abrirModalAtualizacaoStatus(
-                                e.target.value as StatusDenuncia
-                              )
-                            }
-                            disabled={salvandoStatus}
-                          >
-                            <option value="Pendente">Pendente</option>
-                            <option value="Em análise">Em análise</option>
-                            <option value="Em atendimento">Em atendimento</option>
-                            <option value="Resolvido">Resolvido</option>
-                            <option value="Cancelado">Cancelado</option>
-                          </select>
+                        <div>
+                          <strong>Data</strong>
+                          <span>
+                            {formatarDataHora(denunciaSelecionada.created_at)}
+                          </span>
                         </div>
 
-                        <div className="admin-detail-grid">
-                          <div>
-                            <strong>Usuário</strong>
-                            <span>
-                              {denunciaSelecionada.anonimo
-                                ? "Anônimo"
-                                : denunciaSelecionada.nome_usuario ||
-                                "Não informado"}
-                            </span>
-                          </div>
-
-                          <div>
-                            <strong>Data</strong>
-                            <span>
-                              {formatarDataHora(denunciaSelecionada.created_at)}
-                            </span>
-                          </div>
-
-                          <div>
-                            <strong>Endereço</strong>
-                            <span>
-                              {denunciaSelecionada.endereco || "Não informado"}
-                            </span>
-                          </div>
-
-                          <div>
-                            <strong>Coordenadas</strong>
-                            <span>
-                              {denunciaSelecionada.latitude &&
-                                denunciaSelecionada.longitude
-                                ? `${denunciaSelecionada.latitude}, ${denunciaSelecionada.longitude}`
-                                : "Não informado"}
-                            </span>
-                          </div>
+                        <div>
+                          <strong>Endereço</strong>
+                          <span>
+                            {denunciaSelecionada.endereco || "Não informado"}
+                          </span>
                         </div>
 
-                        <div className="feedback-box">
-                          <h3>Histórico de atualizações</h3>
-
-                          {feedbacks.length === 0 ? (
-                            <p>Nenhum feedback registrado ainda.</p>
-                          ) : (
-                            feedbacks.map((feedback) => (
-                              <div key={feedback.id} className="feedback-item">
-                                <div className="feedback-item__header">
-                                  <strong>{feedback.status_novo}</strong>
-                                  <small>
-                                    {formatarDataHora(feedback.created_at)}
-                                  </small>
-                                </div>
-
-                                <p>{feedback.descricao}</p>
-
-                                {feedback.proxima_acao && (
-                                  <p>
-                                    <strong>Próxima ação:</strong>{" "}
-                                    {feedback.proxima_acao}
-                                  </p>
-                                )}
-
-                                <div className="feedback-internal">
-                                  {feedback.colaborador_nome && (
-                                    <span>
-                                      <strong>Responsável:</strong>{" "}
-                                      {feedback.colaborador_nome}
-                                    </span>
-                                  )}
-
-                                  {feedback.colaborador_contato && (
-                                    <span>
-                                      <strong>Contato:</strong>{" "}
-                                      {feedback.colaborador_contato}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            ))
-                          )}
+                        <div>
+                          <strong>Coordenadas</strong>
+                          <span>
+                            {denunciaSelecionada.latitude &&
+                              denunciaSelecionada.longitude
+                              ? `${denunciaSelecionada.latitude}, ${denunciaSelecionada.longitude}`
+                              : "Não informado"}
+                          </span>
                         </div>
                       </div>
-                    </>
-                  ) : (
-                    <p>Selecione uma denúncia para visualizar os detalhes.</p>
-                  )}
-                </article>
-              </section>
-            )}
-          </>
-        )}
-      </PageContainer>
+                      {loadingMidias ? (
+                        <p>Carregando mídias...</p>
+                      ) : (
+                        <DenunciaMediaCarousel
+                          midias={midias}
+                          fotoUrlLegada={denunciaSelecionada.foto_url}
+                        />
+                      )}
+                      <div className="feedback-box">
+                        <h3>Histórico de atualizações</h3>
 
-      {modalStatusAberto && denunciaSelecionada && (
-        <div className="modal-overlay">
-          <div className="modal-content modal-content--small">
-            <h3>Confirmar atualização</h3>
+                        {feedbacks.length === 0 ? (
+                          <p>Nenhum feedback registrado ainda.</p>
+                        ) : (
+                          feedbacks.map((feedback) => (
+                            <div key={feedback.id} className="feedback-item">
+                              <div className="feedback-item__header">
+                                <strong>{feedback.status_novo}</strong>
+                                <small>
+                                  {formatarDataHora(feedback.created_at)}
+                                </small>
+                              </div>
+
+                              <p>{feedback.descricao}</p>
+
+                              {feedback.proxima_acao && (
+                                <p>
+                                  <strong>Próxima ação:</strong>{" "}
+                                  {feedback.proxima_acao}
+                                </p>
+                              )}
+
+                              <div className="feedback-internal">
+                                {feedback.colaborador_nome && (
+                                  <span>
+                                    <strong>Responsável:</strong>{" "}
+                                    {feedback.colaborador_nome}
+                                  </span>
+                                )}
+
+                                {feedback.colaborador_contato && (
+                                  <span>
+                                    <strong>Contato:</strong>{" "}
+                                    {feedback.colaborador_contato}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          ))
+                        )}
+                    </div>
+                  </>
+                ) : (
+                  <p>Selecione uma denúncia para visualizar os detalhes.</p>
+                )}
+              </article>
+            </section>
+          )}
+        </>
+      )}
+    </PageContainer>
+
+    {modalStatusAberto && denunciaSelecionada && (
+      <div className="modal-overlay">
+        <div className="modal-content modal-content--small">
+          <h3>Confirmar atualização</h3>
 
             <p className="modal-text">
               Você está alterando o status para <strong>{novoStatus}</strong>.
@@ -613,9 +652,10 @@ export function AdminPage({
             </div>
           </div>
         </div>
-      )}
+      )
+}
 
-      <Footer />
+<Footer />
     </>
   );
 }
