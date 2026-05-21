@@ -95,11 +95,11 @@ export function HomePage({
     <>
       <Navbar
         userName={userName}
+        avatarUrl={avatarUrl ?? null}
         isAdmin={isAdmin}
-        avatarUrl={avatarUrl}
         onHome={onHome}
-        onDenunciar={onDenunciar || handleDenunciar}
-        onMinhasDenuncias={onMinhasDenuncias || handleMinhasDenuncias}
+        onDenunciar={onDenunciar}
+        onMinhasDenuncias={onMinhasDenuncias}
         onPerfil={onPerfil}
         onAdmin={onAdmin}
         onRelatorios={onRelatorios}

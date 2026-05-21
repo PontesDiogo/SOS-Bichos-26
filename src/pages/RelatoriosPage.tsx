@@ -31,6 +31,8 @@ interface RelatoriosPageProps {
   onAdmin: () => void;
   onPerfil: () => void;
   onLogout: () => void;
+  onDenunciar?: () => void;
+  onMinhasDenuncias?: () => void;
 }
 
 type RelatorioAba =
@@ -83,6 +85,8 @@ export function RelatoriosPage({
   onAdmin,
   onPerfil,
   onLogout,
+  onDenunciar,
+  onMinhasDenuncias,
 }: RelatoriosPageProps) {
   const [denuncias, setDenuncias] = useState<Denuncia[]>([]);
   const [loading, setLoading] = useState(true);
@@ -573,13 +577,13 @@ export function RelatoriosPage({
         avatarUrl={avatarUrl}
         isAdmin
         onHome={onHome}
-        onDenunciar={onHome}
+        onDenunciar={onDenunciar || onHome}
+        onMinhasDenuncias={onMinhasDenuncias || onHome}
+        onPerfil={onPerfil}
         onAdmin={onAdmin}
         onRelatorios={() => undefined}
-        onPerfil={onPerfil}
         onLogout={onLogout}
-        onMinhasDenuncias={onHome}
-      />
+      />  
 
       <PageContainer>
         <section className="relatorios-header">
