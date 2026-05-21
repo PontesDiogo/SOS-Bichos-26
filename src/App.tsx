@@ -229,7 +229,7 @@ function App() {
     return <PoliticaPrivacidadePage onBack={() => setAppScreen("home")} />;
   }
 
-  return (
+  return renderComPolitica(
     <HomePage
       userId={user.id}
       userName={nome}
@@ -239,6 +239,7 @@ function App() {
         setAppScreen("home");
         setScrollTarget(null);
       }}
+      onPolitica={() => setPoliticaAberta(true)}
       onDenunciar={irParaDenuncia}
       onMinhasDenuncias={() => setAppScreen("minhas-denuncias")}
       onPerfil={() => setAppScreen("perfil")}
