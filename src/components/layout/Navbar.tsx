@@ -16,6 +16,7 @@ interface NavbarProps {
 }
 
 export function Navbar({
+  userName,
   isAdmin,
   user,
   avatarUrl,
@@ -31,6 +32,7 @@ export function Navbar({
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   const fotoPerfil = avatarUrl || user?.user_metadata?.avatar_url || null;
+  const primeiraLetra = userName?.trim()?.charAt(0)?.toUpperCase() || "U";
 
   useEffect(() => {
     function handleClickFora(event: MouseEvent) {
@@ -41,10 +43,18 @@ export function Navbar({
       }
     }
 
+    function handleEsc(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMenuAberto(false);
+      }
+    }
+
     document.addEventListener("mousedown", handleClickFora);
+    document.addEventListener("keydown", handleEsc);
 
     return () => {
       document.removeEventListener("mousedown", handleClickFora);
+      document.removeEventListener("keydown", handleEsc);
     };
   }, []);
 
@@ -59,8 +69,9 @@ export function Navbar({
         type="button"
         className="navbar__brand navbar__brand-button"
         onClick={onHome}
+        title="Ir para o início"
       >
-        <span className="public-navbar__logo">
+        <span className="navbar__logo">
           <img src="/logo-sos-bichos.png" alt="Logo SOS Bichos" />
         </span>
 
@@ -70,7 +81,7 @@ export function Navbar({
         </div>
       </button>
 
-      <nav className="navbar__actions">
+      <nav className="navbar__actions" aria-label="Navegação principal">
         <button
           type="button"
           className="navbar__primary"
@@ -95,33 +106,20 @@ export function Navbar({
                 className="navbar-avatar-img"
               />
             ) : (
-              <div className="navbar-avatar-placeholder">👤</div>
+              <span className="navbar-avatar-placeholder">
+                {primeiraLetra}
+              </span>
             )}
           </button>
 
           {menuAberto && (
             <div className="navbar-dropdown" role="menu">
-              {isAdmin && (
-                <>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    onClick={() => handleMenuAction(onAdmin)}
-                  >
-                    Painel ADM
-                  </button>
+              <div className="navbar-dropdown__header">
+                <strong>{userName || "Usuário"}</strong>
+                <small>{isAdmin ? "Administrador" : "Usuário comum"}</small>
+              </div>
 
-                  <button
-                    type="button"
-                    role="menuitem"
-                    onClick={() => handleMenuAction(onRelatorios)}
-                  >
-                    Relatórios
-                  </button>
-
-                  <div className="navbar-dropdown-divider" />
-                </>
-              )}
+              <div className="navbar-dropdown-divider" />
 
               <button
                 type="button"
@@ -138,6 +136,28 @@ export function Navbar({
               >
                 Minhas denúncias
               </button>
+
+              {isAdmin && (
+                <>
+                  <div className="navbar-dropdown-divider" />
+
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => handleMenuAction(onAdmin)}
+                  >
+                    Painel ADM
+                  </button>
+
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => handleMenuAction(onRelatorios)}
+                  >
+                    Relatórios
+                  </button>
+                </>
+              )}
 
               <div className="navbar-dropdown-divider" />
 
