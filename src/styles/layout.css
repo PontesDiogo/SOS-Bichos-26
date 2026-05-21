@@ -4063,3 +4063,184 @@ footer,
     display: grid;
   }
 }
+
+.policy-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 28px 18px;
+  background: rgba(47, 42, 37, 0.52);
+  backdrop-filter: blur(8px);
+}
+
+.policy-modal-content {
+  position: relative;
+  width: min(920px, 100%);
+  max-height: calc(100vh - 56px);
+  overflow: hidden;
+  border-radius: 30px;
+  background: var(--color-surface);
+  box-shadow: 0 24px 70px rgba(47, 42, 37, 0.32);
+}
+
+.policy-modal-scroll {
+  max-height: calc(100vh - 56px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--color-surface);
+}
+
+.policy-modal-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+
+.policy-modal-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 24px 0;
+}
+
+.policy-modal-scroll::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: #d9c2a8;
+  background-clip: content-box;
+}
+
+.policy-modal-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 20;
+  width: 46px;
+  height: 46px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: #fffdf9;
+  color: var(--color-text);
+  font-size: 1.55rem;
+  line-height: 1;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(47, 42, 37, 0.14);
+  transition: 0.2s ease;
+}
+
+.policy-modal-close:hover {
+  transform: translateY(-1px);
+  background: #faf7f1;
+  color: var(--color-primary-dark);
+  border-color: var(--color-primary);
+}
+
+/* Página dentro do modal */
+.policy-page--modal {
+  width: 100%;
+  max-width: 100%;
+  min-height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-sizing: border-box;
+}
+
+/* Card/conteúdo interno da política */
+.policy-page--modal .policy-card,
+.policy-page--modal .privacy-card,
+.policy-page--modal .politica-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: auto !important;
+  margin: 0 !important;
+  padding: clamp(34px, 5vw, 58px) !important;
+  padding-right: clamp(72px, 8vw, 96px) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: var(--color-surface) !important;
+  box-sizing: border-box !important;
+  overflow-wrap: anywhere;
+}
+
+/* Evita o título entrar embaixo do botão X */
+.policy-page--modal h1 {
+  max-width: 100%;
+  padding-right: 64px;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+}
+
+.policy-page--modal p,
+.policy-page--modal h2,
+.policy-page--modal h3,
+.policy-page--modal li {
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+}
+
+/* Botão interno, caso exista */
+.policy-back-button {
+  margin-top: 28px;
+  padding: 13px 20px;
+  border: none;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(47, 42, 37, 0.12);
+}
+
+.policy-back-button:hover {
+  background: var(--color-primary-dark);
+}
+
+@media (max-width: 640px) {
+  .policy-modal-overlay {
+    padding: 14px;
+    align-items: flex-start;
+  }
+
+  .policy-modal-content {
+    max-height: calc(100vh - 28px);
+    border-radius: 24px;
+  }
+
+  .policy-modal-scroll {
+    max-height: calc(100vh - 28px);
+  }
+
+  .policy-modal-scroll::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .policy-modal-scroll::-webkit-scrollbar-track {
+    margin: 18px 0;
+  }
+
+  .policy-modal-close {
+    top: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+    font-size: 1.35rem;
+  }
+
+  .policy-page--modal .policy-card,
+  .policy-page--modal .privacy-card,
+  .policy-page--modal .politica-card {
+    padding: 30px 22px !important;
+    padding-right: 34px !important;
+  }
+
+  .policy-page--modal h1 {
+    padding-right: 48px;
+    font-size: clamp(2.4rem, 12vw, 3.4rem);
+  }
+}

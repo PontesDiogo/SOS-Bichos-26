@@ -1,13 +1,15 @@
 interface PoliticaPrivacidadePageProps {
   onBack: () => void;
+  isModal?: boolean;
 }
 
 export function PoliticaPrivacidadePage({
   onBack,
+  isModal = false,
 }: PoliticaPrivacidadePageProps) {
   return (
-    <main className="simple-page">
-      <section className="simple-card">
+    <main className={isModal ? "policy-page policy-page--modal" : "policy-page"}>
+      <section className="policy-card">
         <span className="section-tag">SOS Bichos</span>
 
         <h1>Política de Privacidade</h1>
@@ -50,8 +52,12 @@ export function PoliticaPrivacidadePage({
           para autenticação, banco de dados e armazenamento de imagens.
         </p>
 
-        <button type="button" className="primary-button" onClick={onBack}>
-          Voltar
+        <button
+          type="button"
+          className="policy-back-button"
+          onClick={onBack}
+        >
+          {isModal ? "Fechar" : "Voltar"}
         </button>
       </section>
     </main>

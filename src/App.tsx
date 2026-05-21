@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
@@ -16,7 +17,7 @@ import { Footer } from "./components/layout/Footer";
 import { MinhasDenunciasPage } from "./pages/MinhasDenunciasPage";
 import { PublicHomePage } from "./pages/PublicHomePage";
 
-type AuthScreen = "public" | "login" | "register" | "recover" | "reset" | "politica";
+type AuthScreen = "public" | "login" | "register" | "recover" | "reset";
 type AppScreen =
   | "home"
   | "perfil"
@@ -32,6 +33,7 @@ function App() {
   const [authScreen, setAuthScreen] = useState<AuthScreen>("public");
   const [appScreen, setAppScreen] = useState<AppScreen>("home");
   const [scrollTarget, setScrollTarget] = useState<"denuncia" | "minhas-denuncias" | null>(null);
+  const [politicaAberta, setPoliticaAberta] = useState(false);
 
 
   function irParaDenuncia() {
@@ -51,6 +53,37 @@ function App() {
       setAuthScreen("reset");
     }
   }, []);
+
+
+  function renderComPolitica(conteudo: ReactNode) {
+    return (
+      <>
+        {conteudo}
+
+        {politicaAberta && (
+          <div className="policy-modal-overlay">
+            <div className="policy-modal-content">
+              <button
+                type="button"
+                className="policy-modal-close"
+                onClick={() => setPoliticaAberta(false)}
+                aria-label="Fechar política de privacidade"
+              >
+                ×
+              </button>
+
+              <div className="policy-modal-scroll">
+                <PoliticaPrivacidadePage
+                  onBack={() => setPoliticaAberta(false)}
+                  isModal
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
 
   if (loadingAuth) {
     return (
@@ -79,26 +112,25 @@ function App() {
   }
 
   if (!user || authScreen === "reset") {
-    if (!user || authScreen === "reset" || authScreen === "politica") {
+    if (!user || authScreen === "reset") {
       if (authScreen === "public") {
-        return (
+        return renderComPolitica(
           <PublicHomePage
             onEntrar={() => setAuthScreen("login")}
             onGoToDenuncia={() => setAuthScreen("login")}
-            onGoToPolitica={() => setAuthScreen("politica")}
+            onGoToPolitica={() => setPoliticaAberta(true)}
           />
         );
       }
 
-      if (authScreen === "politica") {
-        return <PoliticaPrivacidadePage onBack={() => setAuthScreen("public")} />;
-      }
+
 
       if (authScreen === "register") {
-        return (
+        return renderComPolitica(
           <RegisterPage
             onGoToLogin={() => setAuthScreen("login")}
-            onGoToPolitica={() => setAuthScreen("politica")}
+            onGoToPolitica={() => setPoliticaAberta(true)}
+
           />
         );
       }
