@@ -24,7 +24,6 @@ export function PerfilPage({
   userId,
   nome,
   email,
-  role,
   avatarUrl,
   onBack,
   onUpdated,
@@ -222,13 +221,7 @@ export function PerfilPage({
             <input value={email || ""} disabled />
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Tipo de perfil</label>
-            <input
-              value={role === "admin" ? "Administrador" : "Usuário"}
-              disabled
-            />
-          </div>
+          
 
           <button type="submit" className="primary-button" disabled={loading}>
             {loading ? "Salvando..." : "Salvar perfil"}
