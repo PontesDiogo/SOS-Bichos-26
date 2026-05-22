@@ -1,87 +1,94 @@
 interface FooterProps {
   isAdmin?: boolean;
   onHome?: () => void;
-  onMinhasDenuncias?: () => void;
   onDenunciar?: () => void;
+  onMinhasDenuncias?: () => void;
+  onPolitica?: () => void;
   onAdmin?: () => void;
   onRelatorios?: () => void;
-  onPolitica?: () => void;
 }
 
 export function Footer({
   isAdmin = false,
   onHome,
-  onMinhasDenuncias,
   onDenunciar,
+  onMinhasDenuncias,
+  onPolitica,
   onAdmin,
   onRelatorios,
-  onPolitica,
 }: FooterProps) {
   return (
     <footer className="footer">
-      <div className="footer__brand">
-        <strong>SOS Bichos</strong>
-
-        <p>
-          Projeto acadêmico voltado ao registro, acompanhamento e gestão de
-          denúncias envolvendo animais.
-        </p>
-
-        <small>
-          Plataforma desenvolvida para fins educacionais, com foco em cuidado
-          animal, organização das ocorrências e transparência no acompanhamento.
-        </small>
-      </div>
-
-      <div className="footer__group">
-        <h3>Navegação</h3>
-
-        <div className="footer__links">
-          {onHome && (
-            <button type="button" onClick={onHome}>
-              Início
-            </button>
-          )}
-
-          {onDenunciar && (
-            <button type="button" onClick={onDenunciar}>
-              Fazer denúncia
-            </button>
-          )}
-
-          {onMinhasDenuncias && (
-            <button type="button" onClick={onMinhasDenuncias}>
-              Minhas denúncias
-            </button>
-          )}
-
-          {onPolitica && (
-            <button type="button" onClick={onPolitica}>
-              Política de privacidade
-            </button>
-          )}
+      <div className="footer__content">
+        <div className="footer__brand">
+          <img
+            src="/logo-sos-bichos-icon.png"
+            alt="Logo SOS Bichos"
+            className="footer__logo"
+          />
         </div>
-      </div>
 
-      {isAdmin && (
-        <div className="footer__group">
-          <h3>Administração</h3>
+        <div className="footer__about">
+          <p>
+            Projeto acadêmico voltado ao registro, acompanhamento e gestão de
+            denúncias envolvendo animais.
+          </p>
 
-          <div className="footer__links">
-            {onAdmin && (
-              <button type="button" onClick={onAdmin}>
-                Painel ADM
+          <small>
+            Plataforma desenvolvida para fins educacionais, com foco em cuidado
+            animal, organização das ocorrências e transparência no
+            acompanhamento.
+          </small>
+        </div>
+
+        <div className="footer__nav-group">
+          <div className="footer__nav">
+            <strong>Navegação</strong>
+
+            {onHome && (
+              <button type="button" onClick={onHome}>
+                Início
               </button>
             )}
 
-            {onRelatorios && (
-              <button type="button" onClick={onRelatorios}>
-                Relatórios
+            {onDenunciar && (
+              <button type="button" onClick={onDenunciar}>
+                Fazer denúncia
+              </button>
+            )}
+
+            {onMinhasDenuncias && (
+              <button type="button" onClick={onMinhasDenuncias}>
+                Minhas denúncias
+              </button>
+            )}
+
+            {onPolitica && (
+              <button type="button" onClick={onPolitica}>
+                Política de privacidade
               </button>
             )}
           </div>
+
+          {isAdmin && (
+            <div className="footer__nav">
+              <strong>Administração</strong>
+
+              {onAdmin && (
+                <button type="button" onClick={onAdmin}>
+                  Painel ADM
+                </button>
+              )}
+
+              {onRelatorios && (
+                <button type="button" onClick={onRelatorios}>
+                  Relatórios
+                </button>
+              )}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </footer>
   );
 }

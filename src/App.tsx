@@ -12,7 +12,7 @@ import { AdminPage } from "./pages/AdminPage";
 import "./index.css";
 import "./styles/layout.css";
 import { RelatoriosPage } from "./pages/RelatoriosPage";
-import { Navbar } from "./components/layout/Navbar";
+
 import { Footer } from "./components/layout/Footer";
 import { MinhasDenunciasPage } from "./pages/MinhasDenunciasPage";
 import { PublicHomePage } from "./pages/PublicHomePage";
@@ -196,17 +196,17 @@ function App() {
   if (appScreen === "perfil" && user) {
     return (
       <>
-        <Navbar
-          userName={nome}
-          avatarUrl={user.user_metadata?.avatar_url ?? null}
+        <Footer
           isAdmin={isAdmin}
           onHome={() => setAppScreen("home")}
-          onDenunciar={irParaDenuncia}
+          onDenunciar={() => {
+            setAppScreen("home");
+            setScrollTarget("denuncia");
+          }}
           onMinhasDenuncias={irParaMinhasDenuncias}
-          onPerfil={() => setAppScreen("perfil")}
+          onPolitica={() => setAppScreen("politica")}
           onAdmin={() => setAppScreen("admin")}
           onRelatorios={() => setAppScreen("relatorios")}
-          onLogout={logout}
         />
 
         <PerfilPage
@@ -241,7 +241,7 @@ function App() {
       }}
       onPolitica={() => setPoliticaAberta(true)}
       onDenunciar={irParaDenuncia}
-      onMinhasDenuncias={() => setAppScreen("minhas-denuncias")}
+      onMinhasDenuncias={irParaMinhasDenuncias}
       onPerfil={() => setAppScreen("perfil")}
       onAdmin={() => setAppScreen("admin")}
       onRelatorios={() => setAppScreen("relatorios")}

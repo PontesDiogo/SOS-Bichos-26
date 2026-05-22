@@ -6,6 +6,7 @@ import { DenunciaForm } from "../components/denuncia/DenunciaForm";
 import { DenunciaList } from "../components/denuncia/DenunciaList";
 import { HomeNewsCarousel } from "../components/home/HomeNewsCaroussel";
 import { useDenuncias } from "../hooks/useDenuncia";
+import bannerImage from "../assets/banner-sos-bichos.jpg";
 
 interface HomePageProps {
   userId: string;
@@ -107,8 +108,9 @@ export function HomePage({
       />
 
       <PageContainer>
+
         <section className="logged-home-hero">
-          <div>
+          <div className="logged-home-hero__content">
             <span className="section-tag">Área do usuário</span>
 
             <h1>Olá, {userName || "usuário"} 👋</h1>
@@ -138,13 +140,20 @@ export function HomePage({
             </div>
           </div>
 
-          <aside className="logged-home-hero__card">
-            <strong>Denunciar também é cuidar.</strong>
+          <aside className="logged-home-hero__visual">
+            <img
+              src={bannerImage}
+              alt="Cachorro representando cuidado e proteção animal"
+            />
 
-            <p>
-              Quanto mais completa for a ocorrência, com descrição, endereço e
-              imagens, melhor será a análise pela administração.
-            </p>
+            <div className="logged-home-hero__floating">
+              <strong>🐶 Denunciar também é cuidar.</strong>
+
+              <span>
+                Quanto mais completa for a ocorrência, melhor será a análise pela
+                administração.
+              </span>
+            </div>
           </aside>
         </section>
 
@@ -241,14 +250,7 @@ export function HomePage({
         </section>
 
         <section id="denuncias" className="home-section">
-          <span className="section-tag">Nova denúncia</span>
 
-          <h2>Registrar ocorrência</h2>
-
-          <p>
-            Preencha as informações principais da denúncia. Se possível, inclua
-            localização e imagens para facilitar a análise.
-          </p>
 
           <DenunciaForm
             userId={userId}

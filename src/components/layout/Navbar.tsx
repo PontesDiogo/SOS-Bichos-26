@@ -70,8 +70,9 @@ export function Navbar({
         className="navbar__brand navbar__brand-button"
         onClick={onHome}
         title="Ir para o início"
+        
       >
-        <span className="navbar__logo">
+        <span className="navbar__logo" >
           <img src="/logo-sos-bichos.png" alt="Logo SOS Bichos" />
         </span>
 
