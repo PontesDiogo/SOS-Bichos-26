@@ -1,3 +1,5 @@
+import logoCompleta from "../../assets/logo-sos-bichos.png";
+
 interface FooterProps {
   isAdmin?: boolean;
   onHome?: () => void;
@@ -19,16 +21,12 @@ export function Footer({
 }: FooterProps) {
   return (
     <footer className="footer">
-      <div className="footer__content">
-        <div className="footer__brand">
-          <img
-            src="/logo-sos-bichos-icon.png"
-            alt="Logo SOS Bichos"
-            className="footer__logo"
-          />
+      <div className="footer__brand">
+        <div className="footer__logo">
+          <img src={logoCompleta} alt="Logo SOS Bichos" />
         </div>
 
-        <div className="footer__about">
+        <div className="footer__brand-text">
           <p>
             Projeto acadêmico voltado ao registro, acompanhamento e gestão de
             denúncias envolvendo animais.
@@ -36,10 +34,10 @@ export function Footer({
 
           <small>
             Plataforma desenvolvida para fins educacionais, com foco em cuidado
-            animal, organização das ocorrências e transparência no
-            acompanhamento.
+            animal, organização das ocorrências e transparência no acompanhamento.
           </small>
         </div>
+      </div>
 
         <div className="footer__nav-group">
           <div className="footer__nav">
@@ -88,7 +86,7 @@ export function Footer({
             </div>
           )}
         </div>
-      </div>
+      
     </footer>
   );
-}
+}     

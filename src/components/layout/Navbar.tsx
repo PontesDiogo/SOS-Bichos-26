@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
+import logoIcon from "../../assets/images/logo-sos-bichos-icon.png";
 
 interface NavbarProps {
   userName?: string;
@@ -72,9 +73,9 @@ export function Navbar({
         title="Ir para o início"
         
       >
-        <span className="navbar__logo" >
-          <img src="/logo-sos-bichos.png" alt="Logo SOS Bichos" />
-        </span>
+        <span className="navbar__logo">
+          <img src={logoIcon} alt="Logo SOS Bichos" />
+        </span>   
 
         <div>
           <strong>SOS Bichos</strong>

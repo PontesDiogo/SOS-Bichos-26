@@ -1,29 +1,38 @@
 import { useState } from "react";
 
+import bannerDenunciaCompleta from "../../assets/images/carousel/denuncia-completa.png";
+import bannerFotosAjudam from "../../assets/images/carousel/fotos-ajudam.png";
+import bannerAcompanheStatus from "../../assets/images/carousel/acompanhe-status.png";
+import bannerDenunciarCuidar from "../../assets/images/carousel/denunciar-e-cuidar.png";
+
 const noticias = [
   {
     tag: "Orientação",
-    title: "Como registrar uma denúncia completa",
-    text: "Inclua uma descrição clara, informe o endereço ou marque no mapa e, se possível, adicione fotos da ocorrência.",
-    icon: "📝",
+    title: "Registre uma denúncia completa",
+    text: "Informe o que aconteceu, adicione localização e anexe fotos para ajudar na análise.",
+    image: bannerDenunciaCompleta,
+    alt: "Banner orientando o registro completo de uma denúncia",
   },
   {
     tag: "Importante",
-    title: "Fotos ajudam na análise",
-    text: "As imagens auxiliam a equipe responsável a entender melhor a situação e priorizar atendimentos quando necessário.",
-    icon: "📸",
+    title: "Fotos ajudam no atendimento",
+    text: "Imagens da ocorrência facilitam a identificação do problema e apoiam a tomada de decisão.",
+    image: bannerFotosAjudam,
+    alt: "Banner explicando que fotos ajudam na análise da denúncia",
   },
   {
     tag: "Acompanhamento",
-    title: "Entenda os status da denúncia",
-    text: "Sua denúncia pode passar por etapas como pendente, em análise, em atendimento, resolvida ou cancelada.",
-    icon: "🔎",
+    title: "Acompanhe cada etapa",
+    text: "Veja atualizações, feedbacks e o status da sua denúncia diretamente pela plataforma.",
+    image: bannerAcompanheStatus,
+    alt: "Banner mostrando o acompanhamento de status da denúncia",
   },
   {
     tag: "Cuidado animal",
-    title: "Denunciar também é proteger",
-    text: "O registro organizado das ocorrências ajuda a identificar áreas de risco e melhorar o cuidado com os animais.",
-    icon: "🐾",
+    title: "Denunciar também é cuidar",
+    text: "Cada registro ajuda a mapear riscos, orientar ações e fortalecer o cuidado animal.",
+    image: bannerDenunciarCuidar,
+    alt: "Banner institucional sobre cuidado animal e denúncias",
   },
 ];
 
@@ -44,19 +53,19 @@ export function HomeNewsCarousel() {
     );
   }
 
-
   return (
     <section className="home-news-carousel">
       <div className="home-news-carousel__content">
-        <span className="section-tag">{noticiaAtual.tag}</span>
+        <div className="home-news-carousel__text">
+          <span className="section-tag">{noticiaAtual.tag}</span>
 
-        <div className="home-news-carousel__body">
-          <span className="home-news-carousel__icon">{noticiaAtual.icon}</span>
+          <h2>{noticiaAtual.title}</h2>
 
-          <div>
-            <h2>{noticiaAtual.title}</h2>
-            <p>{noticiaAtual.text}</p>
-          </div>
+          <p>{noticiaAtual.text}</p>
+        </div>
+
+        <div className="home-news-carousel__image">
+          <img src={noticiaAtual.image} alt={noticiaAtual.alt} />
         </div>
       </div>
 
@@ -66,7 +75,7 @@ export function HomeNewsCarousel() {
           onClick={irParaAnterior}
           aria-label="Notícia anterior"
         >
-          ‹
+          <span>‹</span>
         </button>
 
         <div className="home-news-carousel__dots">
@@ -86,10 +95,9 @@ export function HomeNewsCarousel() {
           onClick={irParaProxima}
           aria-label="Próxima notícia"
         >
-          ›
+          <span>›</span>
         </button>
       </div>
     </section>
   );
-
 }

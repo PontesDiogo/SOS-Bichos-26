@@ -105,7 +105,11 @@ function App() {
         onHome={() => setAppScreen("home")}
         onAdmin={() => setAppScreen("admin")}
         onPerfil={() => setAppScreen("perfil")}
-
+        onDenunciar={() => {
+          setAppScreen("home");
+          setScrollTarget("denuncia");
+        }}
+        onMinhasDenuncias={() => setAppScreen("minhas-denuncias")}
         onLogout={logout}
       />
     );
@@ -168,6 +172,8 @@ function App() {
         onHome={() => setAppScreen("home")}
         onPerfil={() => setAppScreen("perfil")}
         onRelatorios={() => setAppScreen("relatorios")}
+        onMinhasDenuncias={() => setAppScreen("minhas-denuncias")}
+        onAdmin={() => setAppScreen("admin")}
         onLogout={logout}
       />
     );
