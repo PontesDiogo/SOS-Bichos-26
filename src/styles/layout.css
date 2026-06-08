@@ -5212,7 +5212,7 @@ body,
     --color-text: #2f2a25;
     --color-muted: #6f665c;
 
-    --color-primary: #6f9f7b;
+    --color-primary: #6f9f7b; 
     --color-primary-dark: #4f7d5b;
 
     --color-secondary: #9b6632;
@@ -5509,15 +5509,6 @@ body,
       box-shadow: none;
     }
 
-  }
-
-
-
-  :root {
-    --color-primary: #6f9f7b;
-    --color-primary-dark: #4f7d5b;
-    --color-secondary: #9b6632;
-    --color-secondary-dark: #6f431f;
   }
 
   .primary-button,
