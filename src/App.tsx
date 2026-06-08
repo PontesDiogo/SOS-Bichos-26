@@ -202,19 +202,6 @@ function App() {
   if (appScreen === "perfil" && user) {
     return (
       <>
-        <Footer
-          isAdmin={isAdmin}
-          onHome={() => setAppScreen("home")}
-          onDenunciar={() => {
-            setAppScreen("home");
-            setScrollTarget("denuncia");
-          }}
-          onMinhasDenuncias={irParaMinhasDenuncias}
-          onPolitica={() => setAppScreen("politica")}
-          onAdmin={() => setAppScreen("admin")}
-          onRelatorios={() => setAppScreen("relatorios")}
-        />
-
         <PerfilPage
           userId={user.id}
           nome={nome}
