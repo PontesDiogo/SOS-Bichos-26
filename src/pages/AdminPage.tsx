@@ -27,6 +27,8 @@ interface AdminPageProps {
   onRelatorios: () => void;
   onMinhasDenuncias: () => void;
   onAdmin: () => void;
+  onDenunciar: () => void;
+  onPolitica: () => void;
 }
 
 export function AdminPage({
@@ -272,7 +274,7 @@ export function AdminPage({
         onAdmin={() => undefined}
         onRelatorios={onRelatorios}
         onLogout={onLogout}
-      />  
+      />
 
       <PageContainer>
         <section className="admin-header">
@@ -639,7 +641,11 @@ export function AdminPage({
       )
       }
 
-      <Footer />
+      <Footer
+        isAdmin
+        onHome={onHome}
+        onRelatorios={onRelatorios}
+      />
     </>
   );
 }

@@ -570,6 +570,7 @@ export function RelatoriosPage({
     return ordenacao.direcao === "asc" ? "↑" : "↓";
   }
 
+
   return (
     <>
       <Navbar
@@ -583,7 +584,7 @@ export function RelatoriosPage({
         onAdmin={onAdmin}
         onRelatorios={() => undefined}
         onLogout={onLogout}
-      />  
+      />
 
       <PageContainer>
         <section className="relatorios-header">
@@ -1181,7 +1182,13 @@ export function RelatoriosPage({
         )}
       </PageContainer>
 
-      <Footer />
+      <Footer
+        isAdmin
+        onHome={onHome}
+        onDenunciar={onDenunciar}
+        onMinhasDenuncias={onMinhasDenuncias}
+        onAdmin={onAdmin}
+      />
     </>
   );
 }

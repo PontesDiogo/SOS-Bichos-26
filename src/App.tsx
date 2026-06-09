@@ -175,6 +175,11 @@ function App() {
         onMinhasDenuncias={() => setAppScreen("minhas-denuncias")}
         onAdmin={() => setAppScreen("admin")}
         onLogout={logout}
+        onDenunciar={() => {
+          setAppScreen("home");
+          setScrollTarget("denuncia");
+        }}
+        onPolitica={() => setPoliticaAberta(true)}
       />
     );
   }
