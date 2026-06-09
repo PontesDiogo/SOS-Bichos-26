@@ -341,6 +341,7 @@ export function PublicHomePage({
                     </button>
                 </nav>
             </footer>
+           
         </>
     );
 }

@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import { ScrollToTopButton } from "../common/ScrollToTopButton";
+
 interface FooterProps {
   isAdmin?: boolean;
   onHome?: () => void;
@@ -8,6 +11,7 @@ interface FooterProps {
   onRelatorios?: () => void;
 }
 
+
 export function Footer({
   isAdmin = false,
   onHome,
@@ -17,6 +21,7 @@ export function Footer({
   onAdmin,
   onRelatorios,
 }: FooterProps) {
+
   return (
     <footer className="footer">
       <div className="footer__content">
@@ -91,6 +96,8 @@ export function Footer({
           )}
         </div>
       </div>
+    <ScrollToTopButton />
     </footer>
+    
   );
 }
