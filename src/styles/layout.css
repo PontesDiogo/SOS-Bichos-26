@@ -5777,3 +5777,53 @@ body,
   display: block;
   object-fit: contain;
 }
+@media (max-width: 768px) {
+  .footer {
+    padding: 32px 20px;
+  }
+
+  .footer__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    text-align: center;
+    grid-template-columns: 1fr;
+    
+  }
+
+  .footer__brand {
+    align-items: center;
+    justify-content: center;
+  }
+
+  .footer__logo {
+    width: 72px;
+    height: 72px;
+  }
+
+  .footer__about {
+    max-width: 100%;
+  }
+
+  .footer__about p,
+  .footer__about small {
+    text-align: center;
+  }
+
+  .footer__nav-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    align-items: center;
+  }
+
+  .footer__nav {
+    align-items: center;
+  }
+
+  .footer__nav button {
+    text-align: center;
+  }
+}
