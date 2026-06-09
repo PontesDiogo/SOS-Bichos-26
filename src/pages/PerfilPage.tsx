@@ -221,7 +221,7 @@ export function PerfilPage({
             <input value={email || ""} disabled />
           </div>
 
-          
+
 
           <button type="submit" className="primary-button" disabled={loading}>
             {loading ? "Salvando..." : "Salvar perfil"}
@@ -250,15 +250,18 @@ export function PerfilPage({
               placeholder="Repita a nova senha"
             />
           </div>
+          <div className="form-group">
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={handleAtualizarSenha}
+              disabled={loading}
+            >
+              Atualizar senha
+            </button>
+          </div>
 
-          <button
-            type="button"
-            className="secondary-button"
-            onClick={handleAtualizarSenha}
-            disabled={loading}
-          >
-            Atualizar senha
-          </button>
+
         </div>
 
         {erro && <p className="form-error">{erro}</p>}
