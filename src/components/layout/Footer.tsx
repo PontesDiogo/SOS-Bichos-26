@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { ScrollToTopButton } from "../common/ScrollToTopButton";
 
 interface FooterProps {
