@@ -8,6 +8,7 @@ import {
 import { uploadFotoPerfil } from "../services/storageService";
 import { validarImagem, validarSenhaForte } from "../utils/validators";
 import { EyeIcon, EyeOffIcon } from "../components/common/Icons/EyeIcon";
+import { Footer } from "../components/layout/Footer";
 
 interface PerfilPageProps {
   userId: string;
@@ -18,6 +19,14 @@ interface PerfilPageProps {
   onBack: () => void;
   onLogout: () => void;
   onUpdated?: () => void;
+
+  onHome?: () => void;
+  onDenunciar?: () => void;
+  onMinhasDenuncias?: () => void;
+  onAdmin?: () => void;
+  onRelatorios?: () => void;
+  onPolitica?: () => void;
+  isAdmin?: boolean;
 }
 
 export function PerfilPage({
@@ -27,6 +36,12 @@ export function PerfilPage({
   avatarUrl,
   onBack,
   onUpdated,
+  onHome,
+  onAdmin,
+  onRelatorios,
+  onPolitica,
+  onMinhasDenuncias,
+  onDenunciar,
 }: PerfilPageProps) {
   const [novoNome, setNovoNome] = useState(nome);
   const [preview, setPreview] = useState<string | null>(avatarUrl || null);
@@ -400,6 +415,16 @@ export function PerfilPage({
           </div>
         </div>
       )}
+      <Footer
+        currentPage="home"
+        onHome={onHome}
+        onDenunciar={onDenunciar}
+        onMinhasDenuncias={onMinhasDenuncias}
+        onAdmin={onAdmin}
+        onRelatorios={onRelatorios}
+        onPolitica={onPolitica}
+      />
     </main>
+
   );
 }

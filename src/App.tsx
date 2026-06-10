@@ -13,7 +13,6 @@ import "./index.css";
 import "./styles/layout.css";
 import { RelatoriosPage } from "./pages/RelatoriosPage";
 
-import { Footer } from "./components/layout/Footer";
 import { MinhasDenunciasPage } from "./pages/MinhasDenunciasPage";
 import { PublicHomePage } from "./pages/PublicHomePage";
 
@@ -216,7 +215,7 @@ function App() {
           onUpdated={() => window.location.reload()}
         />
 
-        <Footer />
+        
       </>
     );
   }
