@@ -5922,3 +5922,56 @@ body,
   display: block;
   margin-bottom: .3rem;
 }
+.sla-cards-grid,
+.ranking-grid,
+.extremos-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(220px, 1fr)
+  );
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.sla-card,
+.ranking-card,
+.extremo-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,.08);
+  border: 1px solid #e5e7eb;
+}
+
+.sla-card h4,
+.ranking-card h4,
+.extremo-card h4 {
+  margin-bottom: .75rem;
+}
+
+.sla-card strong,
+.ranking-card strong {
+  display: block;
+  font-size: 1.6rem;
+  margin-bottom: .5rem;
+}
+
+.sla-bom {
+  color: #16a34a;
+}
+
+.sla-alerta {
+  color: #f59e0b;
+}
+
+.sla-critico {
+  color: #dc2626;
+}
+
+.ranking-posicao {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #6c9f4a;
+  margin-bottom: .5rem;
+}

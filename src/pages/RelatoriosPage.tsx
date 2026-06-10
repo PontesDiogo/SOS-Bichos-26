@@ -1355,60 +1355,57 @@ export function RelatoriosPage({
                 <section className="relatorio-section">
                   <h3>Tempo médio de resolução por tipo</h3>
 
+                  <div className="sla-cards-grid">
+                    {slaPorTipo.map((item) => (
+                      <article
+                        key={item.tipo}
+                        className="sla-card"
+                      >
+                        <h4>{item.tipo}</h4>
+
+                        <strong
+                          className={
+                            item.media > 5
+                              ? "sla-critico"
+                              : item.media > 3
+                                ? "sla-alerta"
+                                : "sla-bom"
+                          }
+                        >
+                          {item.media.toFixed(1)} dias
+                        </strong>
+
+                        <span>
+                          {item.quantidade} ocorrência(s)
+                          resolvida(s)
+                        </span>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="relatorio-section">
+                  <h3>Ranking de resolução</h3>
+
                   <table className="relatorio-table">
                     <thead>
                       <tr>
+                        <th>Posição</th>
                         <th>Tipo</th>
-                        <th>Quantidade</th>
-                        <th>Média</th>
+                        <th>Tempo Médio</th>
                       </tr>
                     </thead>
 
                     <tbody>
-                      {slaPorTipo.map((item) => (
+                      {rankingTempoResolucao.map((item, index) => (
                         <tr key={item.tipo}>
+                          <td>#{index + 1}</td>
                           <td>{item.tipo}</td>
-                          <td>{item.quantidade}</td>
-                          <td
-                            style={{
-                              fontWeight: 700,
-                              color:
-                                item.media > 5
-                                  ? "#c0392b"
-                                  : item.media > 3
-                                    ? "#f39c12"
-                                    : "#27ae60",
-                            }}
-                          >
-                            {item.media.toFixed(1)} dias
-                          </td>
+                          <td>{item.media.toFixed(1)} dias</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
-                  <section className="relatorio-section">
-                    <h3>Ranking de resolução</h3>
-
-                    <table className="relatorio-table">
-                      <thead>
-                        <tr>
-                          <th>Posição</th>
-                          <th>Tipo</th>
-                          <th>Tempo Médio</th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        {rankingTempoResolucao.map((item, index) => (
-                          <tr key={item.tipo}>
-                            <td>#{index + 1}</td>
-                            <td>{item.tipo}</td>
-                            <td>{item.media.toFixed(1)} dias</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </section>
                 </section>
 
                 <section className="relatorio-section">
@@ -1510,8 +1507,9 @@ export function RelatoriosPage({
               </section>
             )}
           </>
-        )}
-      </PageContainer>
+        )
+        }
+      </PageContainer >
 
       <Footer
         currentPage="relatorios"
