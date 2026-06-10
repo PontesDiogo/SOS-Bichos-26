@@ -5868,3 +5868,30 @@ body,
     bottom: 16px;
   }
 }
+
+.relatorio-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.relatorio-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  box-shadow: var(--shadow-soft);
+}
+
+.relatorio-card span {
+  display: block;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.relatorio-card strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 2rem;
+}

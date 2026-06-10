@@ -44,6 +44,8 @@ type RelatorioAba =
   | "tempo-resolucao"
   | "exportacoes";
 
+
+
 type OrdenacaoCampo = "resumo" | "tipo" | "status" | "bairro" | "created_at";
 type OrdenacaoDirecao = "asc" | "desc";
 
@@ -148,6 +150,117 @@ export function RelatoriosPage({
         )
       )
     ).sort();
+  }, [denuncias]);
+
+  const indicadoresOperacionais = useMemo(() => {
+    const resolvidas = denuncias.filter(
+      (d) => d.status === "Resolvido" && d.resolved_at
+    );
+
+    const tempoMedioResolucao =
+      resolvidas.length > 0
+        ? resolvidas.reduce((acc, denuncia) => {
+          const inicio = new Date(denuncia.created_at).getTime();
+          const fim = new Date(denuncia.resolved_at!).getTime();
+
+          return acc + (fim - inicio);
+        }, 0) /
+        resolvidas.length /
+        (1000 * 60 * 60 * 24)
+        : 0;
+
+    const taxaResolucao =
+      denuncias.length > 0
+        ? (resolvidas.length / denuncias.length) * 100
+        : 0;
+
+    return {
+      total: denuncias.length,
+      resolvidas: resolvidas.length,
+      tempoMedioResolucao,
+      taxaResolucao,
+    };
+  }, [denuncias]);
+
+  const slaPorTipo = useMemo(() => {
+    return TIPOS_ORDEM.map((tipo) => {
+      const registros = denuncias.filter(
+        (d) =>
+          d.tipo === tipo &&
+          d.status === "Resolvido" &&
+          d.resolved_at
+      );
+
+      const media =
+        registros.length > 0
+          ? registros.reduce((acc, denuncia) => {
+            const inicio = new Date(
+              denuncia.created_at
+            ).getTime();
+
+            const fim = new Date(
+              denuncia.resolved_at!
+            ).getTime();
+
+            return acc + (fim - inicio);
+          }, 0) /
+          registros.length /
+          (1000 * 60 * 60 * 24)
+          : 0;
+
+      return {
+        tipo,
+        quantidade: registros.length,
+        media,
+      };
+    });
+  }, [denuncias]);
+
+  const extremosPorTipo = useMemo(() => {
+    return TIPOS_ORDEM
+      .map((tipo) => {
+        const resolvidas = denuncias
+          .filter(
+            (d) =>
+              d.tipo === tipo &&
+              d.status === "Resolvido" &&
+              d.resolved_at
+          )
+          .map((d) => ({
+            ...d,
+            dias:
+              (new Date(d.resolved_at!).getTime() -
+                new Date(d.created_at).getTime()) /
+              (1000 * 60 * 60 * 24),
+          }));
+
+        if (!resolvidas.length) {
+          return null;
+        }
+
+        const maisRapida = [...resolvidas].sort(
+          (a, b) => a.dias - b.dias
+        )[0];
+
+        const maisLenta = [...resolvidas].sort(
+          (a, b) => b.dias - a.dias
+        )[0];
+
+        return {
+          tipo,
+          maisRapida,
+          maisLenta,
+        };
+      })
+      .filter(
+        (
+          item
+        ): item is {
+          tipo: TipoDenuncia;
+          maisRapida: Denuncia & { dias: number };
+          maisLenta: Denuncia & { dias: number };
+        } => item !== null
+      );
   }, [denuncias]);
 
   const denunciasFiltradas = useMemo(() => {
@@ -321,6 +434,8 @@ export function RelatoriosPage({
         typeof denuncia.longitude === "number"
     );
   }, [denunciasFiltradas]);
+
+
 
   const bairroMaisRecorrente = rankingPorBairro[0]?.bairro || "Sem dados";
   const tipoMaisRecorrente = dadosPorTipo.length
@@ -1178,20 +1293,106 @@ export function RelatoriosPage({
                 </div>
               </section>
             )}
-            {abaAtiva === "tempo-resolucao" && (
-              <section className="report-card">
-                <h3>Tempo Médio de Resolução por Tipo</h3>
 
-                <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={tempoMedioGrafico}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="tipo" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="dias" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </section>
+            {abaAtiva === "tempo-resolucao" && (
+              <>
+                <section className="relatorio-cards">
+
+                  <article className="relatorio-card">
+                    <span>Total de denúncias</span>
+                    <strong>{indicadoresOperacionais.total}</strong>
+                  </article>
+
+                  <article className="relatorio-card">
+                    <span>Resolvidas</span>
+                    <strong>{indicadoresOperacionais.resolvidas}</strong>
+                  </article>
+
+                  <article className="relatorio-card">
+                    <span>Tempo médio de resolução</span>
+                    <strong>
+                      {indicadoresOperacionais.tempoMedioResolucao.toFixed(1)} dias
+                    </strong>
+                  </article>
+
+                  <article className="relatorio-card">
+                    <span>Taxa de resolução</span>
+                    <strong>
+                      {indicadoresOperacionais.taxaResolucao.toFixed(0)}%
+                    </strong>
+                  </article>
+
+                </section>
+
+                <section className="relatorio-section">
+                  <h3>Tempo médio de resolução por tipo</h3>
+
+                  <table className="relatorio-table">
+                    <thead>
+                      <tr>
+                        <th>Tipo</th>
+                        <th>Quantidade</th>
+                        <th>Média</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {slaPorTipo.map((item) => (
+                        <tr key={item.tipo}>
+                          <td>{item.tipo}</td>
+                          <td>{item.quantidade}</td>
+                          <td>{item.media.toFixed(1)} dias</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </section>
+
+                <section className="relatorio-section">
+                  <h3>Casos extremos por tipo</h3>
+
+                  {extremosPorTipo.map((item) => {
+                    if (!item) return null;
+
+                    return (
+                      <article
+                        key={item.tipo}
+                        className="extremo-card"
+                      >
+                        <h4>{item.tipo}</h4>
+
+                        <p>
+                          🚀 Mais rápida:{" "}
+                          {item.maisRapida.resumo}
+                          {" "}
+                          ({item.maisRapida.dias.toFixed(1)} dias)
+                        </p>
+
+                        <p>
+                          🐢 Mais lenta:{" "}
+                          {item.maisLenta.resumo}
+                          {" "}
+                          ({item.maisLenta.dias.toFixed(1)} dias)
+                        </p>
+                      </article>
+                    );
+                  })}
+                </section>
+
+                <section className="report-card">
+                  <h3>Tempo Médio de Resolução por Tipo</h3>
+
+                  <ResponsiveContainer width="100%" height={400}>
+                    <BarChart data={tempoMedioGrafico}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="tipo" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="dias" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </section>
+              </>
             )}
 
             {abaAtiva === "exportacoes" && (
