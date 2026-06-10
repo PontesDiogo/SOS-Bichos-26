@@ -224,7 +224,14 @@ export function MinhasDenunciasPage({
                 </section>
             </PageContainer>
 
-            <Footer />
+            <Footer
+                currentPage="minhas-denuncias"
+                isAdmin={isAdmin}
+                onHome={onHome}
+                onDenunciar={onDenunciar}
+                onAdmin={onAdmin}
+                onRelatorios={onRelatorios}
+            />
         </>
     );
 }

@@ -33,6 +33,7 @@ interface RelatoriosPageProps {
   onLogout: () => void;
   onDenunciar?: () => void;
   onMinhasDenuncias?: () => void;
+  
 }
 
 type RelatorioAba =
@@ -1183,6 +1184,7 @@ export function RelatoriosPage({
       </PageContainer>
 
       <Footer
+        currentPage="relatorios"
         isAdmin
         onHome={onHome}
         onDenunciar={onDenunciar}

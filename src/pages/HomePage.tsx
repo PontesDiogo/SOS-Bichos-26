@@ -259,8 +259,8 @@ export function HomePage({
           />
         </section>
       </PageContainer>
-
       <Footer
+        currentPage="home"
         isAdmin={isAdmin}
         onHome={onHome}
         onDenunciar={handleDenunciar}
@@ -269,7 +269,7 @@ export function HomePage({
         onRelatorios={onRelatorios}
         onPolitica={onPolitica}
       />
-      
+
     </>
   );
 }

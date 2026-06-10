@@ -26,9 +26,8 @@ interface AdminPageProps {
   onLogout: () => void;
   onRelatorios: () => void;
   onMinhasDenuncias: () => void;
-  onAdmin: () => void;
   onDenunciar: () => void;
-  onPolitica: () => void;
+  
 }
 
 export function AdminPage({
@@ -38,6 +37,8 @@ export function AdminPage({
   onPerfil,
   onLogout,
   onRelatorios,
+  onMinhasDenuncias,
+  onDenunciar,
 }: AdminPageProps) {
   const [denuncias, setDenuncias] = useState<Denuncia[]>([]);
   const [denunciaSelecionada, setDenunciaSelecionada] =
@@ -642,8 +643,11 @@ export function AdminPage({
       }
 
       <Footer
+        currentPage="admin"
         isAdmin
         onHome={onHome}
+        onDenunciar={onDenunciar}
+        onMinhasDenuncias={onMinhasDenuncias}
         onRelatorios={onRelatorios}
       />
     </>

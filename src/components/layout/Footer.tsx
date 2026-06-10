@@ -8,11 +8,14 @@ interface FooterProps {
   onPolitica?: () => void;
   onAdmin?: () => void;
   onRelatorios?: () => void;
+  currentPage?: "home" | "denunciar" | "minhas-denuncias" | "politica" | "admin" | "relatorios";
 }
 
 
 export function Footer({
   isAdmin = false,
+  currentPage = "home",
+
   onHome,
   onDenunciar,
   onMinhasDenuncias,
@@ -51,7 +54,7 @@ export function Footer({
           <div className="footer__nav">
             <strong>Navegação</strong>
 
-            {onHome && (
+            {currentPage !== "home" && onHome && (
               <button type="button" onClick={onHome}>
                 Início
               </button>
@@ -63,7 +66,7 @@ export function Footer({
               </button>
             )}
 
-            {onMinhasDenuncias && (
+            {currentPage !== "minhas-denuncias" && onMinhasDenuncias && (
               <button type="button" onClick={onMinhasDenuncias}>
                 Minhas denúncias
               </button>
@@ -75,28 +78,33 @@ export function Footer({
               </button>
             )}
           </div>
-
           {isAdmin && (
             <div className="footer__nav footer__nav--admin">
               <strong>Administração</strong>
 
-              {onAdmin && (
-                <button type="button" onClick={onAdmin}>
-                  Painel ADM
-                </button>
-              )}
+              {isAdmin && (
+                <div className="footer__nav footer__nav--admin">
+                  <strong>Administração</strong>
 
-              {onRelatorios && (
-                <button type="button" onClick={onRelatorios}>
-                  Relatórios
-                </button>
+                  {currentPage !== "admin" && onAdmin && (
+                    <button type="button" onClick={onAdmin}>
+                      Painel ADM
+                    </button>
+                  )}
+
+                  {currentPage !== "relatorios" && onRelatorios && (
+                    <button type="button" onClick={onRelatorios}>
+                      Relatórios
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           )}
         </div>
       </div>
-    <ScrollToTopButton />
+      <ScrollToTopButton />
     </footer>
-    
+
   );
 }
