@@ -1387,25 +1387,27 @@ export function RelatoriosPage({
                 <section className="relatorio-section">
                   <h3>Ranking de resolução</h3>
 
-                  <table className="relatorio-table">
-                    <thead>
-                      <tr>
-                        <th>Posição</th>
-                        <th>Tipo</th>
-                        <th>Tempo Médio</th>
-                      </tr>
-                    </thead>
+                  <div className="ranking-grid">
+                    {rankingTempoResolucao.map((item, index) => (
+                      <article
+                        key={item.tipo}
+                        className="ranking-card"
+                      >
+                        <div className="ranking-posicao">
+                          {index === 0 && "🥇"}
+                          {index === 1 && "🥈"}
+                          {index === 2 && "🥉"}
+                          {index > 2 && `#${index + 1}`}
+                        </div>
 
-                    <tbody>
-                      {rankingTempoResolucao.map((item, index) => (
-                        <tr key={item.tipo}>
-                          <td>#{index + 1}</td>
-                          <td>{item.tipo}</td>
-                          <td>{item.media.toFixed(1)} dias</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                        <h4>{item.tipo}</h4>
+
+                        <strong>
+                          {item.media.toFixed(1)} dias
+                        </strong>
+                      </article>
+                    ))}
+                  </div>
                 </section>
 
                 <section className="relatorio-section">
@@ -1421,7 +1423,6 @@ export function RelatoriosPage({
                           key={item.tipo}
                           className="extremo-card"
                         >
-                          <h4>{item.tipo}</h4>
 
                           <div className="extremo-item">
                             <h4>{item.tipo}</h4>
