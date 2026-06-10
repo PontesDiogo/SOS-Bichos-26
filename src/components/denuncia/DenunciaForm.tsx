@@ -32,6 +32,7 @@ export function DenunciaForm({
   const [descricao, setDescricao] = useState("");
   const [tipo, setTipo] = useState<TipoDenuncia>("Maus-tratos");
   const [anonimo, setAnonimo] = useState(false);
+  const [telefoneContato, setTelefoneContato] = useState("");
 
   const [fotos, setFotos] = useState<File[]>([]);
   const [endereco, setEndereco] = useState<Endereco>(emptyEndereco);
@@ -164,6 +165,17 @@ export function DenunciaForm({
           rows={5}
         />
       </div>
+      <div className="form-group">
+        <label className="form-label">
+          Telefone para contato (opcional)
+        </label>
+
+        <input
+          type="tel"
+          value={telefoneContato}
+          onChange={(e) => setTelefoneContato(e.target.value)}
+        />
+      </div>
 
       <div className="form-group">
         <label className="checkbox-field">
@@ -183,8 +195,8 @@ export function DenunciaForm({
             {enderecoFormatado ||
               (latitude && longitude
                 ? `Localização confirmada no mapa (${latitude.toFixed(
-                    5
-                  )}, ${longitude.toFixed(5)})`
+                  5
+                )}, ${longitude.toFixed(5)})`
                 : "Nenhum endereço informado ainda.")}
           </p>
         </div>

@@ -33,7 +33,7 @@ interface RelatoriosPageProps {
   onLogout: () => void;
   onDenunciar?: () => void;
   onMinhasDenuncias?: () => void;
-  
+
 }
 
 type RelatorioAba =
@@ -41,6 +41,7 @@ type RelatorioAba =
   | "graficos"
   | "regioes"
   | "tabela"
+  | "tempo-resolucao"
   | "exportacoes";
 
 type OrdenacaoCampo = "resumo" | "tipo" | "status" | "bairro" | "created_at";
@@ -188,6 +189,39 @@ export function RelatoriosPage({
       );
     });
   }, [denuncias, filtrosAplicados]);
+
+  const denunciasResolvidas = denuncias.filter(
+    (d) => d.status === "Resolvido" && d.resolved_at
+  );
+  const temposPorTipo = useMemo(() => {
+    const grupos: Record<string, number[]> = {};
+
+    denunciasResolvidas.forEach((d) => {
+      if (!d.resolved_at) return;
+
+      const horas =
+        (new Date(d.resolved_at).getTime() -
+          new Date(d.created_at).getTime()) /
+        (1000 * 60 * 60);
+
+      if (!grupos[d.tipo]) {
+        grupos[d.tipo] = [];
+      }
+
+      grupos[d.tipo].push(horas);
+    });
+
+    return Object.entries(grupos).map(([tipo, tempos]) => ({
+      tipo,
+      mediaHoras:
+        tempos.reduce((a, b) => a + b, 0) / tempos.length,
+    }));
+  }, [denunciasResolvidas]);
+
+  const tempoMedioGrafico = temposPorTipo.map((item) => ({
+    tipo: item.tipo,
+    dias: Number((item.mediaHoras / 24).toFixed(1)),
+  }));
 
   const denunciasOrdenadas = useMemo(() => {
     return [...denunciasFiltradas].sort((a, b) => {
@@ -632,6 +666,12 @@ export function RelatoriosPage({
               onClick={() => setAbaAtiva("tabela")}
             >
               Tabela
+            </button>
+
+            <button
+              onClick={() => setAbaAtiva("tempo-resolucao")}
+            >
+              Tempo de Resolução
             </button>
 
             <button
@@ -1136,6 +1176,21 @@ export function RelatoriosPage({
                     </tbody>
                   </table>
                 </div>
+              </section>
+            )}
+            {abaAtiva === "tempo-resolucao" && (
+              <section className="report-card">
+                <h3>Tempo Médio de Resolução por Tipo</h3>
+
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={tempoMedioGrafico}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="tipo" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="dias" />
+                  </BarChart>
+                </ResponsiveContainer>
               </section>
             )}
 
