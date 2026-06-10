@@ -262,6 +262,20 @@ export function RelatoriosPage({
         } => item !== null
       );
   }, [denuncias]);
+  const rankingTempoResolucao = useMemo(() => {
+    return [...slaPorTipo]
+      .filter((item) => item.quantidade > 0)
+      .sort((a, b) => b.media - a.media);
+  }, [slaPorTipo]);
+  const tipoMaisRapido =
+    rankingTempoResolucao.length > 0
+      ? rankingTempoResolucao[rankingTempoResolucao.length - 1]
+      : null;
+
+  const tipoMaisLento =
+    rankingTempoResolucao.length > 0
+      ? rankingTempoResolucao[0]
+      : null;
 
   const denunciasFiltradas = useMemo(() => {
     return denuncias.filter((denuncia) => {
@@ -1321,8 +1335,22 @@ export function RelatoriosPage({
                       {indicadoresOperacionais.taxaResolucao.toFixed(0)}%
                     </strong>
                   </article>
+                  <article className="relatorio-card">
+                    <span>Tipo mais rápido</span>
+                    <strong>
+                      {tipoMaisRapido?.tipo ?? "-"}
+                    </strong>
+                  </article>
+
+                  <article className="relatorio-card">
+                    <span>Tipo mais demorado</span>
+                    <strong>
+                      {tipoMaisLento?.tipo ?? "-"}
+                    </strong>
+                  </article>
 
                 </section>
+
 
                 <section className="relatorio-section">
                   <h3>Tempo médio de resolução por tipo</h3>
@@ -1341,42 +1369,88 @@ export function RelatoriosPage({
                         <tr key={item.tipo}>
                           <td>{item.tipo}</td>
                           <td>{item.quantidade}</td>
-                          <td>{item.media.toFixed(1)} dias</td>
+                          <td
+                            style={{
+                              fontWeight: 700,
+                              color:
+                                item.media > 5
+                                  ? "#c0392b"
+                                  : item.media > 3
+                                    ? "#f39c12"
+                                    : "#27ae60",
+                            }}
+                          >
+                            {item.media.toFixed(1)} dias
+                          </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
+                  <section className="relatorio-section">
+                    <h3>Ranking de resolução</h3>
+
+                    <table className="relatorio-table">
+                      <thead>
+                        <tr>
+                          <th>Posição</th>
+                          <th>Tipo</th>
+                          <th>Tempo Médio</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {rankingTempoResolucao.map((item, index) => (
+                          <tr key={item.tipo}>
+                            <td>#{index + 1}</td>
+                            <td>{item.tipo}</td>
+                            <td>{item.media.toFixed(1)} dias</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </section>
                 </section>
 
                 <section className="relatorio-section">
                   <h3>Casos extremos por tipo</h3>
 
-                  {extremosPorTipo.map((item) => {
-                    if (!item) return null;
+                  <div className="extremos-grid">
 
-                    return (
-                      <article
-                        key={item.tipo}
-                        className="extremo-card"
-                      >
-                        <h4>{item.tipo}</h4>
+                    {extremosPorTipo.map((item) => {
+                      if (!item) return null;
 
-                        <p>
-                          🚀 Mais rápida:{" "}
-                          {item.maisRapida.resumo}
-                          {" "}
-                          ({item.maisRapida.dias.toFixed(1)} dias)
-                        </p>
+                      return (
+                        <article
+                          key={item.tipo}
+                          className="extremo-card"
+                        >
+                          <h4>{item.tipo}</h4>
 
-                        <p>
-                          🐢 Mais lenta:{" "}
-                          {item.maisLenta.resumo}
-                          {" "}
-                          ({item.maisLenta.dias.toFixed(1)} dias)
-                        </p>
-                      </article>
-                    );
-                  })}
+                          <div className="extremo-item">
+                            <h4>{item.tipo}</h4>
+
+                            <p>
+                              🚀 Mais rápida:{" "}
+                              {item.maisRapida.resumo}
+                              {" "}
+                              ({item.maisRapida.dias.toFixed(1)} dias)
+                            </p>
+
+                            <p>
+                              🐢 Mais lenta:{" "}
+                              {item.maisLenta.resumo}
+                              {" "}
+                              ({item.maisLenta.dias.toFixed(1)} dias)
+                            </p>
+                          </div>
+
+                          <div className="extremo-item">
+
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
                 </section>
 
                 <section className="report-card">
